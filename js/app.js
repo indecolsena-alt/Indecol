@@ -374,10 +374,10 @@ function renderAnalisisGeneral(){
   departmentPinnedKey?`Análisis de ${area}`:"Análisis de Colombia";
  document.getElementById("analysisIntro").textContent=
   departmentPinnedKey
-   ?`Consulta los registros de ${area} entre ${startYear} y ${endYear}. Todos los indicadores y gráficos, incluido el mapa y la comparación departamental, usan esta selección.`
-   :"Compara categorías, delitos y años. Selecciona un departamento en el mapa para aplicar el rango de años y el territorio a todos los gráficos.";
+   ?`Explora el panorama de ${area} entre ${startYear} y ${endYear}. Compara categorías, consulta los delitos con más registros y revisa su evolución anual para el territorio seleccionado.`
+   :`Explora el panorama de Colombia entre ${startYear} y ${endYear}. Compara categorías, identifica los delitos con más registros y observa su evolución anual. Selecciona un departamento en el mapa para enfocar los resultados en ese territorio.`;
  document.getElementById("analysisScopeNote").textContent=
-  `Las tarjetas y los gráficos muestran los registros de ${area} entre ${startYear} y ${endYear}. El cambio anual compara los dos últimos años completos del rango. Son registros, no tasas ni mediciones de personas o incidentes únicos.`;
+  `Las tarjetas resumen el alcance de la consulta, la categoría y el delito con más registros, y la variación anual. Más abajo encontrarás un mapa interactivo, una comparación entre departamentos y gráficos para explorar la distribución por categoría, delito y año.`;
  const crimeRank=DELITOS_DATA.map(crime=>({...crime,filteredRecords:registrosDelitoEnArea(crime,range)}))
   .sort((a,b)=>b.filteredRecords-a.filteredRecords);
  const categoryRank=CATALOGO.categories.map(category=>({
@@ -425,12 +425,8 @@ function renderAnalisisGeneral(){
   `Presenta los diez delitos con más filas reportadas en ${area} durante ${startYear}–${endYear}, junto con su proporción del total. El amarillo destaca los tres primeros. No es una comparación de tasas ni de personas únicas.`;
  document.getElementById("analysisYearsDescription").textContent=
   `Compara los registros de ${area} para cada año entre ${startYear} y ${endYear}. Los tres años con más registros se resaltan en amarillo.`;
- const sourceModified=CATALOGO.sourceMetadata?.modifiedAt;
- const duplicateCount=Number(CATALOGO.sourceMetadata?.duplicateRecordsIncluded||0);
  document.getElementById("analysisDataQuality").textContent=
-  `Se incluyen todas las filas reportadas, también las ${fmtData(duplicateCount)} marcadas como duplicadas; no se eliminan automáticamente. `+
-  `${sourceModified?`Fecha de modificación del archivo fuente: ${sourceModified}. `:""}`+
-  `Los conteos son filas y no equivalen a incidentes únicos.`;
+  `Usa los selectores de años para elegir el periodo y el mapa para enfocar la consulta en un departamento. También puedes comparar dos territorios y descargar el resumen en CSV. Al cambiar una selección, las tarjetas y los gráficos se actualizan para mostrar la nueva vista.`;
  const categoriesFiltered=categoryRank.filter(item=>item.filteredRecords>0);
  const crimesFiltered=crimeRank.filter(item=>item.filteredRecords>0);
  const yearlyFiltered=annualFiltered.map(([year,records])=>({label:String(year),value:records}));
