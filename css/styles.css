@@ -708,8 +708,9 @@ html.nos{overflow:hidden}
 .zone-summary span{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--mute)}
 .zone-summary strong{font-size:clamp(16px,2vw,22px);line-height:1.25;overflow-wrap:anywhere}
 .zone-summary small{font-size:11px;color:var(--mute)}
-.zone-charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:stretch}
+.zone-charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
 .zone-subpanel{min-width:0;padding:18px;background:#fff9;border:1px solid #203D5620;border-radius:14px}
+.zone-subpanel:nth-child(n+3){grid-column:1/-1}
 .zone-subpanel h4{font-size:16px}
 .zone-subpanel>p{font-size:12px;color:var(--mute);margin:6px 0 12px}
 .zone-advice{border-left:4px solid var(--oro);background:#E6BF8B22;padding:14px 16px;border-radius:0 12px 12px 0}

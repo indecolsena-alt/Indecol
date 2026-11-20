@@ -697,8 +697,7 @@ function renderZona(){
    ${graficaLineas([{name:"Registros",values:yearlyFiltered.map(item=>item.value)}],yearlyFiltered.map(item=>item.label),`Evolución anual en ${where}`)}
  </section></div>
  ${topCrime?`<div class="zone-advice"><b>Una recomendación relacionada</b><p>${htmlSeguro(consejoPrevencion(topCrime.name))}</p></div>`:"<p class=\"data-empty\">No hay registros para esta combinación de filtros.</p>"}`;
- result.querySelectorAll("[data-count-value]").forEach(animarNumero);
- result.querySelectorAll(".data-row>i>b").forEach(bar=>requestAnimationFrame(()=>bar.classList.add("data-bar-revealed")));
+ result.querySelectorAll(".zone-summary,.zone-subpanel").forEach(revelarAnalisis);
 }
 zoneRegion.addEventListener("change",()=>{
  zoneDepartment.value=TODAS_ZONAS;
