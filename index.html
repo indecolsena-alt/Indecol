@@ -92,10 +92,10 @@
 </section>
 <section class="pg" id="analisis">
   <div class="blk analysis-page">
-    <span class="data-eyebrow">Lectura nacional · SIEDCO 2020–2026</span>
-    <h2>Análisis de Colombia</h2>
-    <p>Esta sección reúne una lectura nacional de los registros disponibles: compara la participación de las categorías, identifica los delitos con mayor volumen y muestra cómo varía el conteo entre años. El mapa permite seleccionar un departamento y consultar sus delitos más registrados.</p>
-    <p class="data-note">Las tarjetas KPI resumen la totalidad de registros SIEDCO recibidos para 2020–2026. Los porcentajes representan la proporción sobre el total de filas reportadas y el cambio anual compara los dos últimos años completos disponibles. Son registros, no tasas de criminalidad ni mediciones de personas o incidentes únicos.</p>
+    <span class="data-eyebrow" id="analysisEyebrow">Lectura territorial · SIEDCO 2020–2026</span>
+    <h2 id="analysisScopeTitle">Análisis de Colombia</h2>
+    <p id="analysisIntro">Esta sección reúne una lectura de los registros disponibles: compara categorías, delitos y años. Al seleccionar un departamento en el mapa, el rango de años y el territorio se aplican a todos los gráficos.</p>
+    <p class="data-note" id="analysisScopeNote">Las tarjetas y los gráficos muestran los registros del periodo y territorio seleccionados. El cambio anual compara los dos últimos años completos disponibles. Son registros, no tasas de criminalidad ni mediciones de personas o incidentes únicos.</p>
     <p class="data-note" id="analysisDataQuality"></p>
     <div class="analysis-controls" aria-label="Filtros del análisis nacional">
       <label for="analysisYearFrom">Desde
@@ -113,7 +113,7 @@
       <div class="map-heading">
         <div>
           <h3>Explora los departamentos</h3>
-          <p id="analysisMapDescription">Pasa el cursor por un departamento o selecciónalo con clic para consultar sus diez delitos con más registros y la participación de cada uno en las filas reportadas en esa zona. Son conteos, no tasas ajustadas por población.</p>
+          <p id="analysisMapDescription">Selecciona un departamento para filtrar los gráficos y consultar sus delitos más registrados en el rango elegido. Son conteos, no tasas ajustadas por población.</p>
         </div>
         <div class="map-selection" id="departmentSelection" aria-live="polite">Selecciona un departamento en el mapa.</div>
       </div>
@@ -121,7 +121,7 @@
         <div class="map-legend" role="img" aria-label="Escala de registros: menos a más">
           <span>Menos registros</span><i></i><span>Más registros</span>
         </div>
-        <label class="department-access" for="departmentPicker">Seleccionar departamento por lista
+        <label class="department-access" for="departmentPicker">Filtrar el análisis por departamento
           <select id="departmentPicker"></select>
         </label>
       </div>
@@ -160,10 +160,16 @@
   <div class="blk analysis-page zone-page">
     <span class="data-eyebrow">Exploración territorial</span>
     <h2>Tu zona</h2>
-    <p>Consulta cómo se distribuyen los registros de la base en una región, un municipio o un departamento. Elige uno o varios filtros para ver cuántas filas coinciden, qué categoría reúne más registros y cómo se comparan los 34 delitos del catálogo.</p>
-    <p class="data-note">Las regiones se leen de la clasificación consignada en SIEDCO. Cuando aparece “SIN REGION”, el catálogo intenta recuperarla mediante un código DANE válido; los casos sin código territorial reconocible permanecen en “Sin región asignada”. Las tarjetas resumen el total filtrado, la categoría con mayor participación y el delito con más registros. Combina filtros o deja cada selector en “Todos”.</p>
+    <p>Explora y compara los registros por periodo, región, departamento y municipio. Todos los indicadores y gráficos de esta sección se actualizan con los filtros seleccionados.</p>
+    <p class="data-note">Las regiones siguen la clasificación consignada en SIEDCO. El rango de años se aplica a los conteos y gráficos; los datos son filas reportadas, no tasas ni necesariamente personas o incidentes únicos.</p>
     <section class="data-panel zone-panel">
       <div class="zone-controls">
+        <label for="zoneYearFrom">Año desde
+          <select id="zoneYearFrom"></select>
+        </label>
+        <label for="zoneYearTo">Año hasta
+          <select id="zoneYearTo"></select>
+        </label>
         <label for="zoneRegion">Región
           <select id="zoneRegion"></select>
         </label>
@@ -174,32 +180,9 @@
           <select id="zoneMunicipality"></select>
         </label>
       </div>
+      <p class="data-note" id="zoneFilterSummary" aria-live="polite"></p>
       <div id="zoneResult" aria-live="polite"><p class="data-empty">Selecciona una región, municipio o departamento para consultar los datos.</p></div>
       <p class="data-note">La participación territorial corresponde a registros SIEDCO. No se ajusta por población ni implica que los datos midan todos los hechos ocurridos.</p>
-    </section>
-    <section class="data-panel zone-video" aria-labelledby="zoneVideoTitle">
-      <h3 id="zoneVideoTitle">Explora Indecol</h3>
-      <p>En 10 segundos, explora los registros SIEDCO, compara delitos y categorías, y consulta el mapa por departamento.</p>
-      <div class="zone-video-player">
-        <video id="zoneVideo" controls preload="none" playsinline aria-label="Video introductorio de Indecol">
-          <source src="assets/videos/Indecol_video_intro_and_logo_68130978.mp4" type="video/mp4">
-          Tu navegador no puede reproducir este video.
-        </video>
-        <div class="zone-video-info" id="zoneVideoInfo" role="note">
-          <span class="zone-video-eyebrow">GUÍA RÁPIDA · EXPLORACIÓN TERRITORIAL</span>
-          <h4>¿Qué puedes consultar en tu zona?</h4>
-          <p>Combina región, departamento y municipio para comparar los registros reportados, las categorías y los delitos más frecuentes.</p>
-          <div class="zone-video-facts">
-            <div><strong id="zoneInfoRecords">—</strong><span>registros</span></div>
-            <div><strong id="zoneInfoCategories">—</strong><span>categorías</span></div>
-            <div><strong id="zoneInfoPeriod">—</strong><span>periodo</span></div>
-          </div>
-          <small>Cada cifra es una fila reportada; no necesariamente una persona o un hecho único.</small>
-        </div>
-        <div class="zone-video-end-card" id="zoneVideoEndCard" role="img" aria-label="Logotipo original de Indecol" hidden>
-          <img src="assets/images/logo-principal.png" alt="">
-        </div>
-      </div>
     </section>
   </div>
 </section>
