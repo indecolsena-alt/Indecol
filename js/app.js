@@ -321,6 +321,21 @@ function rangoPorSelectores(fromId,toId){
   ?{startYear:fromYear,endYear:toYear}
   :{startYear:toYear,endYear:fromYear};
 }
+function conectarRangoAnual(fromId,toId,onChange){
+ const fromSelect=document.getElementById(fromId);
+ const toSelect=document.getElementById(toId);
+ const actualizar=()=>{
+  const fromYear=Number(fromSelect.value);
+  const toYear=Number(toSelect.value);
+  if(fromYear>toYear){
+   fromSelect.value=String(toYear);
+   toSelect.value=String(fromYear);
+  }
+  onChange();
+ };
+ fromSelect.addEventListener("change",actualizar);
+ toSelect.addEventListener("change",actualizar);
+}
 function rangoAnalisisActual(){
  return rangoPorSelectores("analysisYearFrom","analysisYearTo");
 }
@@ -695,11 +710,8 @@ zoneDepartment.addEventListener("change",()=>{
  renderZoneOptions();
 });
 zoneMunicipality.addEventListener("change",renderZona);
-zoneYearFrom.addEventListener("change",renderZona);
-zoneYearTo.addEventListener("change",renderZona);
-["analysisYearFrom","analysisYearTo"].forEach(id=>
- document.getElementById(id).addEventListener("change",actualizarAnalisisCompleto)
-);
+conectarRangoAnual("zoneYearFrom","zoneYearTo",renderZona);
+conectarRangoAnual("analysisYearFrom","analysisYearTo",actualizarAnalisisCompleto);
 document.getElementById("exportAnalysisCsv").addEventListener("click",()=>{
  const escapeCsv=value=>`"${String(value??"").replace(/"/g,'""')}"`;
  const contents="\uFEFF"+filasExportacionAnalisis.map(row=>row.map(escapeCsv).join(",")).join("\r\n");
