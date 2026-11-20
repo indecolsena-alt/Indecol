@@ -80,7 +80,7 @@ img.fl{font-size:0;width:var(--w);height:auto;filter:drop-shadow(0 16px 14px #00
 @keyframes drive{from{transform:translateX(70vw)}}
 .blk{max-width:1100px;margin:0 auto;padding:70px 20px 0}
 .blk>h2{font-size:clamp(28px,4vw,42px);color:var(--bl);font-weight:800;margin-bottom:8px}
-.blk>p{color:var(--mute);line-height:1.6;max-width:850px;margin-bottom:26px;text-align:justify;hyphens:auto}
+.blk>p{color:var(--mute);line-height:1.6;max-width:1000px;margin-bottom:26px;text-align:justify;hyphens:auto}
 .gr{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;align-items:stretch}
 .gr>div{background:var(--soft);border-radius:22px;padding:26px}
 .gr h3{color:var(--or);font-size:17px;font-weight:600;margin-bottom:10px}.gr p{color:var(--ink);line-height:1.6;font-size:15px}
@@ -691,7 +691,7 @@ html.nos{overflow:hidden}
 .today-stat span{font-size:14px;font-weight:600;margin-top:8px}
 .today-stat small{font-size:11px;line-height:1.5;color:#F0E2CFaa;margin-top:12px}
 .analysis-page{padding-top:130px;padding-bottom:90px}
-.analysis-page>p{max-width:850px}
+.analysis-page>p{max-width:1000px}
 .analysis-findings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:1fr;gap:12px;margin:24px 0}
 .analysis-controls{display:flex;align-items:end;flex-wrap:wrap;gap:12px;margin:20px 0}
 .analysis-controls label,.department-access,.department-compare-controls label{display:grid;gap:6px;color:var(--mute);font-size:12px;font-weight:600}
