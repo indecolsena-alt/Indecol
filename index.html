@@ -113,7 +113,7 @@
       <div class="map-heading">
         <div>
           <h3>Explora los departamentos</h3>
-          <p>Pasa el cursor por un departamento o selecciónalo con clic para consultar sus diez delitos con más registros y la participación de cada uno en las filas reportadas en esa zona. Son conteos, no tasas ajustadas por población.</p>
+          <p id="analysisMapDescription">Pasa el cursor por un departamento o selecciónalo con clic para consultar sus diez delitos con más registros y la participación de cada uno en las filas reportadas en esa zona. Son conteos, no tasas ajustadas por población.</p>
         </div>
         <div class="map-selection" id="departmentSelection" aria-live="polite">Selecciona un departamento en el mapa.</div>
       </div>
@@ -141,17 +141,17 @@
     </section>
     <section class="data-panel data-animate">
       <h3>¿Cómo se distribuyen los registros?</h3>
-      <p>Compara las nueve categorías de SIEDCO por número de registros y por su participación en el total nacional del periodo 2020–2026. Así se identifica qué categorías concentran más filas reportadas; el amarillo resalta las tres de mayor conteo.</p>
+      <p id="analysisCategoriesDescription">Compara las nueve categorías de SIEDCO por número de registros y por su participación en el total nacional del periodo seleccionado. Así se identifica qué categorías concentran más filas reportadas; el amarillo resalta las tres de mayor conteo.</p>
       <div id="analysisCategories"></div>
     </section>
     <section class="data-panel data-animate">
       <h3>Delitos con más registros</h3>
-      <p>Presenta los diez delitos con más filas reportadas en SIEDCO durante 2020–2026, junto con su proporción del total. Permite distinguir cuáles aparecen con mayor frecuencia en la base; el amarillo destaca los tres primeros. No es una comparación de tasas ni de personas únicas.</p>
+      <p id="analysisCrimesDescription">Presenta los diez delitos con más filas reportadas en SIEDCO durante el periodo seleccionado, junto con su proporción del total. Permite distinguir cuáles aparecen con mayor frecuencia en la base; el amarillo destaca los tres primeros. No es una comparación de tasas ni de personas únicas.</p>
       <div id="analysisCrimes"></div>
     </section>
     <section class="data-panel data-animate">
       <h3>Evolución anual de los registros</h3>
-      <p>Compara el total de filas reportadas para cada año del periodo 2020–2026 y muestra su participación en el total. Los tres años con más registros se resaltan en amarillo.</p>
+      <p id="analysisYearsDescription">Compara el total de filas reportadas para cada año del periodo seleccionado y muestra su participación en el total. Los tres años con más registros se resaltan en amarillo.</p>
       <div id="analysisYears"></div>
     </section>
   </div>
@@ -185,6 +185,17 @@
           <source src="assets/videos/Indecol_video_intro_and_logo_68130978.mp4" type="video/mp4">
           Tu navegador no puede reproducir este video.
         </video>
+        <div class="zone-video-info" id="zoneVideoInfo" role="note">
+          <span class="zone-video-eyebrow">GUÍA RÁPIDA · EXPLORACIÓN TERRITORIAL</span>
+          <h4>¿Qué puedes consultar en tu zona?</h4>
+          <p>Combina región, departamento y municipio para comparar los registros reportados, las categorías y los delitos más frecuentes.</p>
+          <div class="zone-video-facts">
+            <div><strong id="zoneInfoRecords">—</strong><span>registros</span></div>
+            <div><strong id="zoneInfoCategories">—</strong><span>categorías</span></div>
+            <div><strong id="zoneInfoPeriod">—</strong><span>periodo</span></div>
+          </div>
+          <small>Cada cifra es una fila reportada; no necesariamente una persona o un hecho único.</small>
+        </div>
         <div class="zone-video-end-card" id="zoneVideoEndCard" role="img" aria-label="Logotipo original de Indecol" hidden>
           <img src="assets/images/logo-principal.png" alt="">
         </div>

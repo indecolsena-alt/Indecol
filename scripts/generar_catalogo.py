@@ -247,6 +247,10 @@ def summarize_crime(
                 "name": name,
                 "region": bucket["region"],
                 **finish_bucket(bucket),
+                "years": [
+                    {"year": year, "records": yearly["records"]}
+                    for year, yearly in sorted(bucket.get("years", {}).items())
+                ],
             }
             for (department, name), bucket in sorted(municipalities.items())
         ],
@@ -389,6 +393,9 @@ def build_catalog() -> dict[str, Any]:
                 if quantity_value is not None:
                     location["quantity"] += quantity_value
                     location["quantityByUnit"][unit] += quantity_value
+                if year is not None:
+                    location_year = location.setdefault("years", defaultdict(value_bucket))[year]
+                    location_year["records"] += 1
 
     categories = []
     all_years: set[int] = set()

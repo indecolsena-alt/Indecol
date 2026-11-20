@@ -824,6 +824,16 @@ html.nos{overflow:hidden}
 .zone-video{margin-top:20px}
 .zone-video-player{position:relative;width:min(100%,960px);aspect-ratio:16/9;margin:18px auto 0}
 .zone-video-player video{display:block;width:100%;height:100%;border-radius:16px;background:var(--azul);object-fit:contain}
+.zone-video-info{position:absolute;z-index:1;inset:0 0 46px;display:flex;flex-direction:column;justify-content:center;overflow:hidden;padding:clamp(14px,3vw,28px);border-radius:16px 16px 0 0;background:linear-gradient(115deg,#102a40f2,#07111ceb);color:var(--crema);pointer-events:none}
+.zone-video-info[hidden]{display:none}
+.zone-video-eyebrow{font-size:clamp(8px,1vw,10px);font-weight:800;letter-spacing:.13em;color:var(--oro)}
+.zone-video-info h4{margin:7px 0 0;font-size:clamp(15px,2.1vw,23px);line-height:1.2}
+.zone-video-info p{max-width:64ch;margin:6px 0 10px;color:#F0E2CFd4;font-size:clamp(10px,1.25vw,13px);line-height:1.45}
+.zone-video-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.zone-video-facts>div{display:flex;flex-direction:column;gap:3px;padding:8px 10px;border:1px solid #F0E2CF30;border-radius:10px;background:#F0E2CF0b}
+.zone-video-facts strong{font-size:clamp(12px,1.5vw,17px);font-variant-numeric:tabular-nums}
+.zone-video-facts span,.zone-video-info>small{font-size:clamp(8px,1vw,10px);line-height:1.4;color:#F0E2CFc4}
+.zone-video-info>small{margin-top:8px}
 .zone-video-end-card{position:absolute;inset:0 0 46px;display:grid;place-items:center;overflow:hidden;border-radius:16px 16px 0 0;background:radial-gradient(circle at 50% 45%,#152d40 0,#081624 46%,#030912 100%);pointer-events:none}
 .zone-video-end-card[hidden]{display:none}
 .zone-video-end-card img{display:block;width:min(82%,834px);max-height:85%;object-fit:contain}
@@ -837,6 +847,12 @@ html.nos{overflow:hidden}
  .department-map svg{height:min(72vh,560px);min-height:340px}
 }
 @media(max-width:600px){
+ .zone-video-info{inset:0 0 40px;padding:10px}
+ .zone-video-info h4{margin-top:4px}
+ .zone-video-info p{margin:4px 0 7px}
+ .zone-video-facts{gap:5px}
+ .zone-video-facts>div{padding:6px}
+ .zone-video-info>small{margin-top:5px}
  .zone-video-end-card{inset:0 0 40px}
 }
 @media(max-width:420px){

@@ -312,6 +312,18 @@ CATALOGO.categories.forEach(category=>category.years.forEach(item=>{
 }));
 const porcentaje=(valor,total)=>total?`${(valor/total*100).toFixed(1).replace(".",",")}%`:"0%";
 let filasExportacionAnalisis=[];
+function rangoAnalisisActual(){
+ const firstYear=CATALOGO.years[0],lastYear=CATALOGO.years.at(-1);
+ const fromYear=Number(document.getElementById("analysisYearFrom")?.value||firstYear);
+ const toYear=Number(document.getElementById("analysisYearTo")?.value||lastYear);
+ return fromYear<=toYear
+  ?{startYear:fromYear,endYear:toYear}
+  :{startYear:toYear,endYear:fromYear};
+}
+function registrosEnRango(years,range=rangoAnalisisActual()){
+ return (years||[]).reduce((sum,item)=>
+  item.year>=range.startYear&&item.year<=range.endYear?sum+item.records:sum,0);
+}
 function renderAnalisisGeneral(){
  const firstYear=CATALOGO.years[0],lastYear=CATALOGO.years.at(-1);
  const fromSelect=document.getElementById("analysisYearFrom");
@@ -319,11 +331,9 @@ function renderAnalisisGeneral(){
  const options=CATALOGO.years.map(year=>`<option value="${year}">${year}${anioParcial(year)?" · parcial":""}</option>`).join("");
  if(fromSelect&&!fromSelect.options.length){fromSelect.innerHTML=options;fromSelect.value=String(firstYear)}
  if(toSelect&&!toSelect.options.length){toSelect.innerHTML=options;toSelect.value=String(lastYear)}
- const fromYear=Number(fromSelect?.value||firstYear);
- const toYear=Number(toSelect?.value||lastYear);
- const [startYear,endYear]=fromYear<=toYear?[fromYear,toYear]:[toYear,fromYear];
+ const {startYear,endYear}=rangoAnalisisActual();
  const inRange=year=>year>=startYear&&year<=endYear;
- const recordsInRange=years=>years.filter(item=>inRange(item.year)).reduce((sum,item)=>sum+item.records,0);
+ const recordsInRange=years=>registrosEnRango(years,{startYear,endYear});
  const crimeRank=DELITOS_DATA.map(crime=>({...crime,filteredRecords:recordsInRange(crime.years)}))
   .sort((a,b)=>b.filteredRecords-a.filteredRecords);
  const categoryRank=CATALOGO.categories.map(category=>({
@@ -356,6 +366,14 @@ function renderAnalisisGeneral(){
   :`No hay registros en el periodo ${startYear}–${endYear}.`;
  document.getElementById("analysisFilterSummary").textContent=
   `Mostrando ${startYear}–${endYear}; la comparación anual usa solo años completos.`;
+ document.getElementById("analysisMapDescription").textContent=
+  `Los colores y los conteos del mapa corresponden a ${startYear}–${endYear}. Pasa el cursor por un departamento o selecciónalo para consultar sus diez delitos con más registros. Son conteos, no tasas ajustadas por población.`;
+ document.getElementById("analysisCategoriesDescription").textContent=
+  `Compara las nueve categorías de SIEDCO por número de registros y por su participación en el total nacional de ${startYear}–${endYear}. El amarillo resalta las tres categorías con más registros.`;
+ document.getElementById("analysisCrimesDescription").textContent=
+  `Presenta los diez delitos con más filas reportadas en SIEDCO durante ${startYear}–${endYear}, junto con su proporción del total. El amarillo destaca los tres primeros. No es una comparación de tasas ni de personas únicas.`;
+ document.getElementById("analysisYearsDescription").textContent=
+  `Compara el total de filas reportadas para cada año entre ${startYear} y ${endYear}. Los tres años con más registros se resaltan en amarillo.`;
  const sourceModified=CATALOGO.sourceMetadata?.modifiedAt;
  const duplicateCount=Number(CATALOGO.sourceMetadata?.duplicateRecordsIncluded||0);
  document.getElementById("analysisDataQuality").textContent=
@@ -594,7 +612,12 @@ zoneDepartment.addEventListener("change",()=>{
 });
 zoneMunicipality.addEventListener("change",renderZona);
 const zoneVideo=document.getElementById("zoneVideo");
+const zoneVideoInfo=document.getElementById("zoneVideoInfo");
 const zoneVideoEndCard=document.getElementById("zoneVideoEndCard");
+document.getElementById("zoneInfoRecords").textContent=fmtData(CATALOGO.totalRecords);
+document.getElementById("zoneInfoCategories").textContent=fmtData(CATALOGO.categoryCount);
+document.getElementById("zoneInfoPeriod").textContent=
+ `${CATALOGO.years[0]}–${CATALOGO.years.at(-1)}`;
 if(zoneVideo&&zoneVideoEndCard){
  const syncZoneVideoEndCard=()=>{
   const endTime=Number.isFinite(zoneVideo.duration)?zoneVideo.duration-2:8;
@@ -602,8 +625,15 @@ if(zoneVideo&&zoneVideoEndCard){
  };
  ["loadedmetadata","timeupdate","seeked","play"].forEach(event=>zoneVideo.addEventListener(event,syncZoneVideoEndCard));
 }
+if(zoneVideo&&zoneVideoInfo){
+ zoneVideo.addEventListener("play",()=>{zoneVideoInfo.hidden=true});
+}
 ["analysisYearFrom","analysisYearTo"].forEach(id=>
- document.getElementById(id).addEventListener("change",renderAnalisisGeneral)
+ document.getElementById(id).addEventListener("change",()=>{
+  renderAnalisisGeneral();
+  renderDepartmentMap();
+  renderDepartmentComparison();
+ })
 );
 document.getElementById("exportAnalysisCsv").addEventListener("click",()=>{
  const escapeCsv=value=>`"${String(value??"").replace(/"/g,'""')}"`;
@@ -622,7 +652,9 @@ function registrosDepartamento(selectedKey){
  let total=0;
  DELITOS_DATA.forEach(crime=>{
   const records=(crime.municipalityData||[]).reduce((sum,item)=>
-   departmentKey(item.department)===selectedKey?sum+item.records:sum,0);
+   departmentKey(item.department)===selectedKey
+    ?sum+registrosEnRango(item.years)
+    :sum,0);
   if(records){
    total+=records;
    crimes.push({name:crime.name,records});
@@ -672,11 +704,16 @@ function setHoveredDepartment(key){
  });
  renderDepartmentDetails(visibleKey);
 }
-const departmentTotals=new Map(mapaDepartamentos.departments.map(item=>[
+let departmentTotals=new Map(mapaDepartamentos.departments.map(item=>[
  item.key,registrosDepartamento(item.key).total
 ]));
-const totalTerritorialRecords=[...departmentTotals.values()].reduce((sum,value)=>sum+value,0);
-const largestDepartment=Math.max(1,...departmentTotals.values());
+let totalTerritorialRecords=[...departmentTotals.values()].reduce((sum,value)=>sum+value,0);
+let largestDepartment=Math.max(1,...departmentTotals.values());
+function departmentColor(total){
+ const intensity=Math.sqrt(total/largestDepartment);
+ const colorMix=Math.round(238-intensity*118);
+ return `rgb(${colorMix}, ${Math.round(colorMix*.96)}, ${Math.round(colorMix*.88)})`;
+}
 const departmentOptions=[...mapaDepartamentos.departments]
  .sort((a,b)=>a.name.localeCompare(b.name,"es"));
 const departmentOptionMarkup=departmentOptions.map(item=>
@@ -697,12 +734,26 @@ document.getElementById("departmentPicker").addEventListener("change",event=>{
 });
 const svgPaths=mapaDepartamentos.departments.map(item=>{
  const total=departmentTotals.get(item.key)||0;
- const intensity=Math.sqrt(total/largestDepartment);
- const colorMix=Math.round(238-intensity*118);
- const fill=`rgb(${colorMix}, ${Math.round(colorMix*.96)}, ${Math.round(colorMix*.88)})`;
+ const fill=departmentColor(total);
  return `<path class="department-shape" data-department="${htmlSeguro(item.key)}" d="${item.path}" fill="${fill}" tabindex="0" role="button" aria-pressed="false" aria-label="${htmlSeguro(item.name)}: ${fmtData(total)} registros tabulados"><title>${htmlSeguro(item.name)} · ${fmtData(total)} registros</title></path>`;
 }).join("");
 departmentMap.innerHTML=`<svg viewBox="${htmlSeguro(mapaDepartamentos.viewBox)}" role="group" aria-label="Mapa interactivo de los departamentos de Colombia">${svgPaths}</svg>`;
+function renderDepartmentMap(){
+ const {startYear,endYear}=rangoAnalisisActual();
+ departmentTotals=new Map(mapaDepartamentos.departments.map(item=>[
+  item.key,registrosDepartamento(item.key).total
+ ]));
+ totalTerritorialRecords=[...departmentTotals.values()].reduce((sum,value)=>sum+value,0);
+ largestDepartment=Math.max(1,...departmentTotals.values());
+ departmentMap.querySelectorAll("[data-department]").forEach(path=>{
+  const total=departmentTotals.get(path.dataset.department)||0;
+  const name=mapaDepartamentos.departments.find(item=>item.key===path.dataset.department)?.name||path.dataset.department;
+  path.setAttribute("fill",departmentColor(total));
+  path.setAttribute("aria-label",`${name}: ${fmtData(total)} registros entre ${startYear} y ${endYear}`);
+  path.querySelector("title").textContent=`${name} · ${fmtData(total)} registros`;
+ });
+ setHoveredDepartment(departmentPinnedKey);
+}
 function renderDepartmentComparison(){
  const first=document.getElementById("departmentCompareA").value;
  const second=document.getElementById("departmentCompareB").value;
@@ -720,14 +771,16 @@ function renderDepartmentComparison(){
   .map(name=>({name,first:firstCrimes.get(name)||0,second:secondCrimes.get(name)||0}))
   .sort((a,b)=>Math.max(b.first,b.second)-Math.max(a.first,a.second)||a.name.localeCompare(b.name,"es"))
   .slice(0,10);
- result.innerHTML=`<p>Compara conteos SIEDCO, no tasas ajustadas por población. Se muestran los delitos con mayor volumen en cualquiera de los dos departamentos.</p>
+ const {startYear,endYear}=rangoAnalisisActual();
+ result.innerHTML=`<p>Compara conteos SIEDCO de ${startYear}–${endYear}, no tasas ajustadas por población. Se muestran los delitos con mayor volumen en cualquiera de los dos departamentos.</p>
  <div class="department-compare-totals"><strong>${htmlSeguro(firstName)}: ${fmtData(firstData.total)}</strong><strong>${htmlSeguro(secondName)}: ${fmtData(secondData.total)}</strong></div>
- <div class="department-compare-table-wrap"><table><caption>Diez delitos con mayor conteo combinado</caption>
+ <div class="department-compare-table-wrap"><table><caption>Diez delitos con mayor conteo combinado · ${startYear}–${endYear}</caption>
  <thead><tr><th scope="col">Delito</th><th scope="col">${htmlSeguro(firstName)}</th><th scope="col">${htmlSeguro(secondName)}</th></tr></thead>
  <tbody>${rows.map(item=>`<tr><th scope="row">${htmlSeguro(item.name)}</th><td>${fmtData(item.first)}</td><td>${fmtData(item.second)}</td></tr>`).join("")}</tbody>
  </table></div>`;
 }
 renderDepartmentComparison();
+renderDepartmentMap();
 departmentMap.addEventListener("pointerover",event=>{
  const path=event.target.closest("[data-department]");
  if(path&&!departmentPinnedKey)setHoveredDepartment(path.dataset.department);
