@@ -61,6 +61,36 @@ function graficaDatos(items,valueOf,labelOf,horizontal=false){
   </div>`;
  }).join("")}</div>`;
 }
+function graficaAnillo(items,valueOf,labelOf,title){
+ const entries=items.map(item=>({item,value:Number(valueOf(item))}))
+  .filter(entry=>Number.isFinite(entry.value)&&entry.value>0);
+ const total=entries.reduce((sum,entry)=>sum+entry.value,0);
+ if(!total)return '<p class="data-empty">No hay datos válidos para este gráfico.</p>';
+ const colors=["#203D56","#9C7230","#57758C","#C88E3A","#6E597B","#4F7A68","#B2604C","#817A4B","#45677D"];
+ const circumference=2*Math.PI*68;
+ let offset=0;
+ const segments=entries.map((entry,index)=>{
+  const length=circumference*entry.value/total;
+  const color=colors[index%colors.length];
+  const segment=`<circle class="data-donut-segment" cx="110" cy="110" r="68" stroke="${color}" stroke-dasharray="${length.toFixed(2)} ${(circumference-length).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" transform="rotate(-90 110 110)"><title>${htmlSeguro(labelOf(entry.item))}: ${fmtData(entry.value)} (${(entry.value/total*100).toFixed(1).replace(".",",")}%)</title></circle>`;
+  offset+=length;
+  return segment;
+ }).join("");
+ const legend=entries.map((entry,index)=>{
+  const color=colors[index%colors.length];
+  const share=`${(entry.value/total*100).toFixed(1).replace(".",",")}%`;
+  return `<li><i aria-hidden="true" style="--donut-color:${color}"></i><span class="data-donut-label">${htmlSeguro(labelOf(entry.item))}</span><strong>${share}<small>${fmtData(entry.value)} registros</small></strong></li>`;
+ }).join("");
+ return `<div class="data-donut-layout">
+  <svg class="data-donut" viewBox="0 0 220 220" role="img" aria-label="${htmlSeguro(title)}">
+   <circle class="data-donut-track" cx="110" cy="110" r="68"/>
+   ${segments}
+   <text class="data-donut-total" x="110" y="106" text-anchor="middle">${fmtData(total)}</text>
+   <text class="data-donut-caption" x="110" y="127" text-anchor="middle">registros</text>
+  </svg>
+  <ul class="data-donut-legend">${legend}</ul>
+ </div>`;
+}
 function graficaLineas(series,labels,title){
  const visibles=series.filter(item=>item.values.some(value=>value>0));
  if(!labels.length||!visibles.length)return '<p class="data-empty">No hay datos válidos para este gráfico.</p>';
@@ -83,7 +113,7 @@ function graficaLineas(series,labels,title){
   return `<g class="data-line-series" data-graph-line style="--line-color:${color}"><path class="data-line-path" pathLength="1" d="${points}"/>${circles}${dataLabels}</g>`;
  }).join("");
  const legend=visibles.length>1?`<g class="data-line-legend">${visibles.map((item,index)=>`<g transform="translate(${left+index*220},${height-16})"><circle r="4" cy="-4" style="fill:${index%2?"var(--oro-d)":"var(--azul)"}"/><text x="10">${htmlSeguro(item.name)}</text></g>`).join("")}</g>`:"";
- return `<div class="data-line-wrap"><svg class="data-line-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="${htmlSeguro(title)}">${grids}<line class="data-line-axis" x1="${left}" y1="${bottom}" x2="${right}" y2="${bottom}"/>${groups}${xLabels}${legend}</svg><p class="data-line-hint">Desliza horizontalmente para ver todos los meses.</p></div>`;
+ return `<div class="data-line-wrap"><svg class="data-line-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="${htmlSeguro(title)}">${grids}<line class="data-line-axis" x1="${left}" y1="${bottom}" x2="${right}" y2="${bottom}"/>${groups}${xLabels}${legend}</svg><p class="data-line-hint">Desliza horizontalmente para ver todos los datos.</p></div>`;
 }
 const movimientoReducido=matchMedia("(prefers-reduced-motion: reduce)");
 const animacionesNumero=new WeakMap();
@@ -217,10 +247,10 @@ function paginaDelito(categoryId,crimeId,selectedYear){
  const category=crime.category;
  activarCategoria(category.id,crime.id);
  const year=crime.years.find(item=>item.year===Number(selectedYear))||crime.years.at(-1);
- const annualBars=crime.years.map(item=>({
-  label:etiquetaAnual(item.year),
-  value:item.records
- }));
+ const annualSeries=[{
+  name:"Registros",
+  values:crime.years.map(item=>item.records)
+ }];
  const monthItems=year?.months||[];
  const monthlySeries=[{
   name:"Registros",
@@ -246,7 +276,7 @@ function paginaDelito(categoryId,crimeId,selectedYear){
    <section class="data-panel data-animate">
    <h3>Registros por año</h3>
    <p>Conteo de filas registradas para este delito por año; los años incompletos se indican como parciales.</p>
-   ${graficaDatos(annualBars,item=>item.value,item=>item.label)}
+   ${graficaLineas(annualSeries,crime.years.map(item=>String(item.year)),"Evolución anual de registros")}
   </section>
   <section class="data-panel data-animate">
    <div class="data-panel-heading"><div><h3>Registros por mes</h3><p>Filas de este delito durante el año seleccionado; amarillo destaca los tres meses con más registros.</p></div>
@@ -342,11 +372,11 @@ function renderAnalisisGeneral(){
   :"";
  const yearlyPanel=document.getElementById("analysisYears");
  yearlyPanel.closest(".data-panel")?.classList.remove("data-revealed");
- document.getElementById("analysisCategories").innerHTML=graficaDatos(
+ document.getElementById("analysisCategories").innerHTML=graficaAnillo(
   categoriesFiltered,
   item=>item.filteredRecords,
-  item=>`${item.name} · ${porcentaje(item.filteredRecords,filteredTotal)}`,
-  true
+  item=>item.name,
+  "Participación de las categorías en el periodo seleccionado"
  );
  document.getElementById("analysisCrimes").innerHTML=graficaDatos(
   crimesFiltered.slice(0,10),
@@ -354,10 +384,10 @@ function renderAnalisisGeneral(){
   item=>`${item.name} · ${porcentaje(item.filteredRecords,filteredTotal)}`,
   true
  );
- yearlyPanel.innerHTML=graficaDatos(
-  yearlyFiltered,
-  item=>item.value,
-  item=>`${etiquetaAnual(Number(item.label))} · ${porcentaje(item.value,yearlyTotal)}`
+ yearlyPanel.innerHTML=graficaLineas(
+  [{name:"Registros",values:yearlyFiltered.map(item=>item.value)}],
+  yearlyFiltered.map(item=>item.label),
+  "Evolución anual de registros en Colombia"
  );
  const yearNote=document.createElement("p");
  yearNote.className="data-note";
@@ -511,6 +541,16 @@ function renderZona(){
  const topCrime=localCrimes.find(item=>item.records>0);
  const topCategory=[...categoryTotals.entries()].sort((a,b)=>b[1]-a[1])[0];
  const category=CATEGORIA_POR_ID.get(topCategory?.[0]);
+ const zoneCategories=[...categoryTotals.entries()]
+  .map(([id,records])=>({name:CATEGORIA_POR_ID.get(id)?.name||id,records}))
+  .sort((a,b)=>b.records-a.records);
+ const localMunicipalities=[...zonaMunicipios.entries()]
+  .filter(([key,item])=>(selectedRegion===TODAS_ZONAS||item.region===selectedRegion)
+   &&(selectedDepartment===TODAS_ZONAS||departmentKey(item.department)===selectedDepartment)
+   &&(selectedMunicipality===TODAS_ZONAS||key===selectedMunicipality))
+  .sort((a,b)=>b[1].records-a[1].records||a[1].name.localeCompare(b[1].name,"es"))
+  .slice(0,10)
+  .map(([,item])=>({label:`${item.name} · ${item.department}`,records:item.records}));
  const municipality=zonaMunicipios.get(selectedMunicipality);
  const department=zonaDepartamentos.get(selectedDepartment);
  const whereParts=[];
@@ -527,9 +567,18 @@ function renderZona(){
    <div><span>Categoría con mayor volumen</span><strong>${htmlSeguro(category?.name||"Sin registros")}</strong><small>${porcentaje(topCategory?.[1]||0,total)} del total seleccionado</small></div>
    <div><span>Delito con más registros</span><strong>${htmlSeguro(topCrime?.name||"Sin registros")}</strong><small>${porcentaje(topCrime?.records||0,total)} del total seleccionado</small></div>
  </div>
- <section class="zone-subpanel"><h4>Todos los delitos en ${htmlSeguro(where)}</h4><p>Se muestran los ${fmtData(localCrimes.length)} delitos del catálogo; cada barra indica sus filas registradas dentro de los filtros seleccionados y las tres cantidades mayores se resaltan en amarillo.</p>
-   ${graficaDatos(localCrimes,item=>item.records,item=>item.name,true)}
+ <div class="zone-charts">
+ <div class="zone-chart-column">
+ <section class="zone-subpanel"><h4>Participación por categoría</h4><p>Proporción de los registros de cada categoría dentro de ${htmlSeguro(where)}.</p>
+   ${graficaAnillo(zoneCategories,item=>item.records,item=>item.name,`Participación por categoría en ${where}`)}
  </section>
+ <section class="zone-subpanel"><h4>Municipios con más registros</h4><p>Hasta diez municipios con más filas reportadas dentro de los filtros seleccionados. Son conteos, no tasas ajustadas por población.</p>
+   ${graficaDatos(localMunicipalities,item=>item.records,item=>item.label,true)}
+ </section>
+ </div>
+ <section class="zone-subpanel"><h4>Delitos con más registros</h4><p>Se muestran los ${fmtData(localCrimes.length)} delitos del catálogo; cada barra indica sus filas registradas dentro de los filtros seleccionados y las tres cantidades mayores se resaltan en amarillo.</p>
+   ${graficaDatos(localCrimes,item=>item.records,item=>item.name,true)}
+ </section></div>
  ${topCrime?`<div class="zone-advice"><b>Una recomendación relacionada</b><p>${htmlSeguro(consejoPrevencion(topCrime.name))}</p></div>`:"<p class=\"data-empty\">No hay registros para esta combinación de filtros.</p>"}`;
  result.querySelectorAll("[data-count-value]").forEach(animarNumero);
  result.querySelectorAll(".data-row>i>b").forEach(bar=>requestAnimationFrame(()=>bar.classList.add("data-bar-revealed")));
@@ -653,7 +702,7 @@ const svgPaths=mapaDepartamentos.departments.map(item=>{
  const fill=`rgb(${colorMix}, ${Math.round(colorMix*.96)}, ${Math.round(colorMix*.88)})`;
  return `<path class="department-shape" data-department="${htmlSeguro(item.key)}" d="${item.path}" fill="${fill}" tabindex="0" role="button" aria-pressed="false" aria-label="${htmlSeguro(item.name)}: ${fmtData(total)} registros tabulados"><title>${htmlSeguro(item.name)} · ${fmtData(total)} registros</title></path>`;
 }).join("");
-departmentMap.innerHTML=`<svg viewBox="${htmlSeguro(mapaDepartamentos.viewBox)}" role="group" aria-label="Mapa interactivo de los departamentos de Colombia">${svgPaths}</svg><div class="map-legend"><span>Menos registros</span><i></i><span>Más registros</span></div>`;
+departmentMap.innerHTML=`<svg viewBox="${htmlSeguro(mapaDepartamentos.viewBox)}" role="group" aria-label="Mapa interactivo de los departamentos de Colombia">${svgPaths}</svg>`;
 function renderDepartmentComparison(){
  const first=document.getElementById("departmentCompareA").value;
  const second=document.getElementById("departmentCompareB").value;
@@ -828,7 +877,7 @@ const CATEGORY_CAROUSEL={
   label:"Delitos contra la vida e integridad",src:"assets/images/portada-03.jpg",position:"52% 50%",alt:"Una persona enfrenta un robo junto a su vehículo"
  },
  "delitos-informaticos-y-propiedad-intelectual":{
-  label:"Delitos informáticos y propiedad intelectual",src:"assets/images/categoria-digital.svg",position:"50% 50%",alt:"Teléfono protegido por un escudo digital"
+  label:"Delitos informáticos y propiedad intelectual",src:"assets/images/categoria-digital.jpg",position:"68% 50%",alt:"Persona frente a pantallas con elementos de seguridad digital y derechos de autor"
  },
  "gestion-y-funcion-publica":{
   label:"Gestión y función pública",src:"assets/images/portada-01.jpg",position:"52% 35%",alt:"Estatua de la justicia frente a un edificio"
@@ -840,7 +889,7 @@ const CATEGORY_CAROUSEL={
   label:"Modalidades de hurtos",src:"assets/images/portada-04.jpg",position:"50% 38%",alt:"Robo de pertenencias personales"
  },
  "proteccion-ambiental-y-animal":{
-  label:"Protección ambiental y animal",src:"assets/images/categoria-ambiental.svg",position:"50% 50%",alt:"Bosque, río y fauna silvestre"
+  label:"Protección ambiental y animal",src:"assets/images/categoria-ambiental.jpg",position:"50% 50%",alt:"Voluntarios protegen el bosque y ayudan a la fauna silvestre"
  },
  "vehiculos-y-transito":{
   label:"Vehículos y tránsito",src:"assets/images/portada-07.jpg",position:"52% 50%",alt:"Patio con motocicletas recuperadas"

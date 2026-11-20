@@ -117,13 +117,18 @@
         </div>
         <div class="map-selection" id="departmentSelection" aria-live="polite">Selecciona un departamento en el mapa.</div>
       </div>
+      <div class="map-tools">
+        <div class="map-legend" role="img" aria-label="Escala de registros: menos a más">
+          <span>Menos registros</span><i></i><span>Más registros</span>
+        </div>
+        <label class="department-access" for="departmentPicker">Seleccionar departamento por lista
+          <select id="departmentPicker"></select>
+        </label>
+      </div>
       <div class="department-map-layout">
         <div id="departmentMap" class="department-map" role="group" aria-label="Mapa interactivo de Colombia"></div>
         <div id="departmentCrimes" class="department-crimes"><p class="data-empty">Mueve el cursor sobre un departamento para explorar sus datos.</p></div>
       </div>
-      <label class="department-access" for="departmentPicker">Seleccionar departamento por lista
-        <select id="departmentPicker"></select>
-      </label>
       <section class="department-compare" aria-labelledby="departmentCompareTitle">
         <h4 id="departmentCompareTitle">Comparar dos departamentos</h4>
         <div class="department-compare-controls">
