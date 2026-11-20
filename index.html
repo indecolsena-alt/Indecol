@@ -92,9 +92,17 @@
 </section>
 <section class="pg" id="analisis">
   <div class="blk analysis-page">
-    <span class="data-eyebrow" id="analysisEyebrow">Lectura territorial · SIEDCO 2020–2026</span>
-    <h2 id="analysisScopeTitle">Análisis de Colombia</h2>
-    <p id="analysisIntro">Esta sección reúne una lectura de los registros disponibles: compara categorías, delitos y años. Al seleccionar un departamento en el mapa, el rango de años y el territorio se aplican a todos los gráficos.</p>
+    <div class="section-lead">
+      <div class="section-lead-copy">
+        <span class="data-eyebrow" id="analysisEyebrow">Lectura territorial · SIEDCO 2020–2026</span>
+        <h2 id="analysisScopeTitle">Análisis de Colombia</h2>
+        <p id="analysisIntro">Esta sección reúne una lectura de los registros disponibles: compara categorías, delitos y años. Al seleccionar un departamento en el mapa, el rango de años y el territorio se aplican a todos los gráficos.</p>
+      </div>
+      <figure class="section-lead-visual">
+        <img src="assets/images/portada-01.jpg" alt="Estatua de la justicia sosteniendo una balanza" loading="lazy">
+        <figcaption>Imagen ilustrativa; no representa registros del SIEDCO.</figcaption>
+      </figure>
+    </div>
     <p class="data-note" id="analysisScopeNote">Las tarjetas y los gráficos muestran los registros del periodo y territorio seleccionados. El cambio anual compara los dos últimos años completos disponibles. Son registros, no tasas de criminalidad ni mediciones de personas o incidentes únicos.</p>
     <p class="data-note" id="analysisDataQuality"></p>
     <div class="analysis-controls" aria-label="Filtros del análisis nacional">
@@ -158,10 +166,18 @@
 </section>
 <section class="pg" id="tu-zona">
   <div class="blk analysis-page zone-page">
-    <span class="data-eyebrow">Exploración territorial</span>
-    <h2>Tu zona</h2>
-    <p>Explora y compara los registros por periodo, región, departamento y municipio. Todos los indicadores y gráficos de esta sección se actualizan con los filtros seleccionados.</p>
-    <p class="data-note">Las regiones siguen la clasificación consignada en SIEDCO. El rango de años se aplica a los conteos y gráficos; los datos son filas reportadas, no tasas ni necesariamente personas o incidentes únicos.</p>
+    <div class="section-lead">
+      <div class="section-lead-copy">
+        <span class="data-eyebrow">Exploración territorial</span>
+        <h2>Tu zona</h2>
+        <p>Explora y compara los registros por periodo, región, departamento y municipio. Todos los indicadores y gráficos de esta sección se actualizan con los filtros seleccionados.</p>
+        <p class="data-note">Las regiones siguen la clasificación consignada en SIEDCO. El rango de años se aplica a los conteos y gráficos; los datos son filas reportadas, no tasas ni necesariamente personas o incidentes únicos.</p>
+      </div>
+      <figure class="section-lead-visual section-lead-map">
+        <svg id="zoneMapPreview" role="img" aria-label="Mapa de Colombia dividido por departamentos"></svg>
+        <figcaption>Explora los datos por departamento y municipio.</figcaption>
+      </figure>
+    </div>
     <section class="data-panel zone-panel">
       <div class="zone-controls">
         <label for="zoneYearFrom">Año desde
@@ -278,7 +294,20 @@
 </section>
 
 <template id="siteFooterTemplate">
-  <footer class="site-footer"><strong>Indecol</strong> · Indicadores delictivos en Colombia<br>Fuente: registros SIEDCO de 2020–2026, organizados desde <code>DataBase/hecho.csv</code>. Cada fila es un registro reportado y no equivale necesariamente a una persona o incidente único. El Informe R es un análisis independiente de comparendos de tránsito en Barranquilla (2010). Para regenerar el catálogo y el mapa, ejecuta <code>python scripts/generar_catalogo.py</code>.</footer>
+  <footer class="site-footer">
+    <span class="site-footer-brand"><strong>Indecol</strong> · Indicadores delictivos en Colombia</span>
+    <div class="site-footer-socials" role="group" aria-label="Redes sociales y repositorio">
+      <span class="footer-social" role="img" aria-label="Instagram, cuenta pendiente" title="Instagram: cuenta pendiente">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1"></circle></svg>
+      </span>
+      <span class="footer-social" role="img" aria-label="TikTok, cuenta pendiente" title="TikTok: cuenta pendiente">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h3c.4 2.1 1.7 3.6 4 4v3a8.4 8.4 0 0 1-4-1.2v6.1a6 6 0 1 1-6-6c.4 0 .8 0 1.2.1v3.2a2.8 2.8 0 1 0 1.8 2.7V3z"></path></svg>
+      </span>
+      <a class="footer-social" href="https://github.com/indecolsena-alt/Indecol" target="_blank" rel="noopener noreferrer" aria-label="Repositorio de Indecol en GitHub" title="GitHub">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.1c-3.3.7-4-1.4-4-1.4-.6-1.4-1.4-1.8-1.4-1.8-1.1-.8.1-.8.1-.8 1.2.1 1.8 1.3 1.8 1.3 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.4-5.5-6a4.7 4.7 0 0 1 1.3-3.3c-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2a4.7 4.7 0 0 1 1.3 3.3c0 4.7-2.8 5.7-5.5 6 .4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"></path></svg>
+      </a>
+    </div>
+  </footer>
 </template>
 
 <script src="assets/data/catalogo.js"></script>

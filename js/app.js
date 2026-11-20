@@ -212,10 +212,13 @@ function paginaCategoria(id){
  const leadingCrime=[...category.crimes].sort((a,b)=>b.records-a.records)[0];
  const leadingShare=category.records?leadingCrime.records/category.records*100:0;
  dvMain.innerHTML=`<article class="data-page">
-  <header class="data-hero data-animate">
-   <span class="data-eyebrow">${htmlSeguro(category.icon)} Categoría</span>
-   <h2>${htmlSeguro(category.name)}</h2>
-   <p>En ${period}, esta categoría reúne ${fmtData(category.records)} registros SIEDCO. ${leadingCrime?`${htmlSeguro(leadingCrime.name)} aporta ${leadingShare.toFixed(1).replace(".",",")}% de ellos;`:""} el gráfico resume sus filas por año y el listado permite abrir el detalle de cada delito. Un registro no equivale necesariamente a un incidente único.</p>
+  <header class="data-hero data-hero-with-image data-animate">
+   <div class="data-hero-copy">
+    <span class="data-eyebrow">${htmlSeguro(category.icon)} Categoría</span>
+    <h2>${htmlSeguro(category.name)}</h2>
+    <p>En ${period}, esta categoría reúne ${fmtData(category.records)} registros SIEDCO. ${leadingCrime?`${htmlSeguro(leadingCrime.name)} aporta ${leadingShare.toFixed(1).replace(".",",")}% de ellos;`:""} el gráfico resume sus filas por año y el listado permite abrir el detalle de cada delito. Un registro no equivale necesariamente a un incidente único.</p>
+   </div>
+   ${visualCategoria(category)}
    <div class="data-stats">
     <div><b data-count-value="${category.records}">0</b><span>Registros tabulados</span></div>
     <div><b data-count-value="${category.crimeCount}">0</b><span>Delitos incluidos</span></div>
@@ -264,13 +267,17 @@ function paginaDelito(categoryId,crimeId,selectedYear){
  const placesDescription="Municipios con mayor cantidad de filas para este delito, con departamento para distinguir nombres repetidos.";
  dvMain.innerHTML=`<article class="data-page">
   <a class="data-back" href="#delitos/${encodeURIComponent(category.id)}">← Análisis de ${htmlSeguro(category.name)}</a>
-  <header class="data-hero data-animate">
-   <span class="data-eyebrow">${htmlSeguro(category.icon)} ${htmlSeguro(category.name)}</span>
-   <h2>${htmlSeguro(crime.name)}</h2>
-   <p>En ${htmlSeguro(periodo(crime.years))}, SIEDCO reúne ${fmtData(crime.records)} registros para este delito. Aquí puedes consultar su evolución anual y mensual y los municipios con más filas; el conteo no equivale necesariamente al número de personas o incidentes únicos.</p>
+  <header class="data-hero data-hero-with-image data-animate">
+   <div class="data-hero-copy">
+    <span class="data-eyebrow">${htmlSeguro(category.icon)} ${htmlSeguro(category.name)}</span>
+    <h2>${htmlSeguro(crime.name)}</h2>
+    <p>En ${htmlSeguro(periodo(crime.years))}, SIEDCO reúne ${fmtData(crime.records)} registros para este delito. Aquí puedes consultar su evolución anual y mensual y los municipios con más filas; el conteo no equivale necesariamente al número de personas o incidentes únicos.</p>
+   </div>
+   ${visualCategoria(category)}
    <div class="data-stats">
     <div><b data-count-value="${crime.records}">0</b><span>Registros tabulados</span></div>
-     <div><b data-count-value="${crime.municipalityCount}">0</b><span>Municipios distintos</span></div>
+    <div><b data-count-value="${crime.municipalityCount}">0</b><span>Municipios distintos</span></div>
+    <div><b data-count-value="${crime.years.length}">0</b><span>Años con registros</span></div>
    </div>
   </header>
    <section class="data-panel data-animate">
@@ -744,6 +751,13 @@ const mapaDepartamentos=window.INDECOL_MAPA;
 if(!mapaDepartamentos?.departments?.length){
  throw new Error("No se pudo cargar assets/data/departamentos.js. Regenera el mapa departamental.");
 }
+const zoneMapPreview=document.getElementById("zoneMapPreview");
+if(zoneMapPreview){
+ zoneMapPreview.setAttribute("viewBox",htmlSeguro(mapaDepartamentos.viewBox));
+ zoneMapPreview.innerHTML=mapaDepartamentos.departments.map(item=>
+  `<path d="${htmlSeguro(item.path)}"></path>`
+ ).join("");
+}
 const departmentMap=document.getElementById("departmentMap");
 const departmentSelection=document.getElementById("departmentSelection");
 const departmentCrimes=document.getElementById("departmentCrimes");
@@ -1033,6 +1047,12 @@ const CATEGORY_CAROUSEL={
   label:"Vehículos y tránsito",src:"assets/images/portada-07.jpg",position:"52% 50%",alt:"Patio con motocicletas recuperadas"
  }
 };
+function visualCategoria(category){
+ const image=CATEGORY_CAROUSEL[category.id];
+ return `<figure class="data-hero-image">
+  <img src="${htmlSeguro(image.src)}" alt="${htmlSeguro(image.alt)}" loading="lazy">
+ </figure>`;
+}
 const heroCarousel=document.getElementById("heroCarousel");
 const categoryLabel=document.getElementById("carouselCategory");
 const pts=document.getElementById("dots");
