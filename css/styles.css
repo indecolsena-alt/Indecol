@@ -3,7 +3,7 @@
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;margin:0}
 html{scroll-behavior:smooth;scroll-padding-top:110px}
-body{font-family:Poppins,system-ui,Arial,sans-serif;background:var(--paper);color:var(--ink);overflow-x:hidden;text-align:justify;text-justify:inter-word;hyphens:auto}
+body{font-family:Poppins,system-ui,Arial,sans-serif;background:var(--paper);color:var(--ink);overflow-x:hidden;hyphens:auto}
 /* barra pill */
 nav{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:min(1100px,94%);z-index:20;background:var(--crema);color:var(--noche);border-radius:60px;padding:10px 12px 10px 24px;display:flex;align-items:center;gap:20px;box-shadow:0 10px 30px #0004;animation:drop .9s cubic-bezier(.2,.9,.3,1.2) both}
 nav b{font-weight:800;font-size:18px;white-space:nowrap}nav b i{font-style:normal;color:var(--azul)}
@@ -19,7 +19,7 @@ nav a{color:inherit;text-decoration:none;font-size:14px;white-space:nowrap}nav a
 .hero>.hc{position:relative;z-index:2;width:min(560px,46%);margin-right:clamp(30px,7vw,110px)}
 .brand{display:inline-block;font-weight:600;font-size:14px;color:var(--oro);background:#E6BF8B1f;border:1px solid #E6BF8B55;padding:6px 16px;border-radius:30px;margin-bottom:22px}
 h1{font-weight:900;font-size:clamp(44px,10vw,120px);line-height:.95;text-transform:uppercase;animation:pop 1s .3s cubic-bezier(.2,1.4,.4,1) both}
-.hero h1{font-size:clamp(42px,6.2vw,92px)}.hero p{font-size:clamp(16px,1.7vw,20px);line-height:1.6;margin:24px 0 32px;max-width:480px;color:#F0E2CFe6}
+.hero h1{font-size:clamp(42px,6.2vw,92px)}.hero p{font-size:clamp(16px,1.5vw,18px);line-height:1.6;margin:24px 0 32px;max-width:100%;color:#F0E2CFe6}
 .hero .cta{display:inline-block;text-decoration:none;background:var(--crema);color:var(--azul);transition:background .2s,color .2s}.hero .cta+.cta{margin-left:8px}.hero .cta:hover{background:var(--oro)}.hero .cta:focus-visible{outline:3px solid var(--oro);outline-offset:3px}
 @keyframes pop{from{transform:scale(.6);opacity:0}}
 .fl{position:absolute;z-index:1;font-size:clamp(50px,9vw,130px);filter:drop-shadow(0 14px 12px #0006);animation:bob 5s ease-in-out infinite}
@@ -152,7 +152,7 @@ nav .links a#mbtn.act{box-shadow:0 0 0 3px #203D5655}
 @media(prefers-reduced-motion:reduce){.poli::before,.poli::after{animation:none;opacity:.5}.ciber h2{animation:none}.ph{animation:none}}
 
 /* Textos y composición justificada */
-p,li,td,th,figcaption,.d,footer .d,.info-card p,.gr p,.crime p,.hero p,.intro p,.blk>p,.r-analysis-card p,.r-conclusion p,.rpubs-content p{text-align:justify;hyphens:auto}
+p,li,td,th,figcaption,.d,footer .d,.info-card p,.gr p,.crime p,.hero p,.intro p,.blk>p,.r-analysis-card p,.r-conclusion p,.rpubs-content p{text-align:justify;text-justify:inter-word;hyphens:auto}
 
 /* ===== minimalismo ===== */
 :root{--line:rgba(15,34,52,.13)}
