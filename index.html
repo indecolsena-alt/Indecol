@@ -205,9 +205,14 @@ try {
       </div>
       <div class="zone-actions">
         <button type="button" class="zone-reset" id="resetZoneFilters">Restablecer filtros</button>
-        <button type="button" class="zone-export" id="exportZoneCsv">Descargar CSV</button>
-        <span class="zone-export-note">El archivo contiene conteos agrupados por región, departamento, municipio, delito y año.</span>
-        <span class="zone-csv-status" id="zoneCsvStatus" role="status" aria-live="polite"></span>
+      </div>
+      <div class="zone-annual-download">
+        <label for="zoneAnnualCsvYear">Descargar datos nacionales por año
+          <select id="zoneAnnualCsvYear"></select>
+        </label>
+        <button type="button" class="zone-export" id="exportAnnualZoneCsv">Descargar CSV del año</button>
+        <span class="zone-annual-note">Incluye todas las regiones, departamentos y municipios, con conteos por categoría y delito. No depende de los filtros anteriores; 2026 contiene datos hasta octubre.</span>
+        <span class="zone-annual-status" id="zoneAnnualCsvStatus" role="status" aria-live="polite"></span>
       </div>
       <p class="data-note" id="zoneFilterSummary" aria-live="polite"></p>
       <div id="zoneResult" aria-live="polite"><p class="data-empty">Selecciona una región, municipio o departamento para consultar los datos.</p></div>

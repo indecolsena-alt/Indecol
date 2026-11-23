@@ -312,7 +312,6 @@ CATALOGO.categories.forEach(category=>category.years.forEach(item=>{
 }));
 const porcentaje=(valor,total)=>total?`${(valor/total*100).toFixed(1).replace(".",",")}%`:"0%";
 let filasExportacionAnalisis=[];
-let filasExportacionZona=[];
 let departmentPinnedKey="";
 function descargarCSV(nombre,filas){
  const escapeCsv=value=>`"${String(value??"").replace(/"/g,'""')}"`;
@@ -589,6 +588,7 @@ const zoneMunicipality=document.getElementById("zoneMunicipality");
 const zoneDepartment=document.getElementById("zoneDepartment");
 const zoneYearFrom=document.getElementById("zoneYearFrom");
 const zoneYearTo=document.getElementById("zoneYearTo");
+const zoneAnnualCsvYear=document.getElementById("zoneAnnualCsvYear");
 function inicializarAniosZona(){
  const firstYear=CATALOGO.years[0],lastYear=CATALOGO.years.at(-1);
  const options=CATALOGO.years.map(year=>
@@ -596,8 +596,10 @@ function inicializarAniosZona(){
  ).join("");
  zoneYearFrom.innerHTML=options;
  zoneYearTo.innerHTML=options;
+ zoneAnnualCsvYear.innerHTML=options;
  zoneYearFrom.value=String(firstYear);
  zoneYearTo.value=String(lastYear);
+ zoneAnnualCsvYear.value=String(lastYear);
 }
 function renderZoneOptions(){
  const selectedRegion=zoneRegion.value||TODAS_ZONAS;
@@ -628,7 +630,6 @@ function renderZona(){
  const selectedDepartment=zoneDepartment.value;
  const selectedMunicipality=zoneMunicipality.value;
  const range=rangoZonaActual();
- filasExportacionZona=[["Región","Departamento","Municipio","Categoría","Delito","Año","Registros"]];
  const localCrimes=[];
  const categoryTotals=new Map();
  let total=0;
@@ -645,16 +646,6 @@ function renderZona(){
     if(matches){
      records+=registrosEnRango(item.years,range);
      acumularAnios(annualRecords,item.years);
-     const regionName=REGIONES_COLOMBIA.find(candidate=>candidate.id===region)?.name
-      ||(region==="sin-region"?"Sin región asignada":region);
-     const municipalityName=String(item.name||"").trim()||"Municipio no especificado";
-     (item.years||[]).forEach(yearItem=>{
-      if(yearItem.year<range.startYear||yearItem.year>range.endYear||!yearItem.records)return;
-      filasExportacionZona.push([
-       regionName,department,municipalityName,crime.category.name,crime.name,
-       yearItem.year,yearItem.records
-      ]);
-     });
     }
    });
    total+=records;
@@ -719,6 +710,24 @@ function renderZona(){
  ${topCrime?`<div class="zone-advice"><b>Una recomendación relacionada</b><p>${htmlSeguro(consejoPrevencion(topCrime.name))}</p></div>`:"<p class=\"data-empty\">No hay registros para esta combinación de filtros.</p>"}`;
  result.querySelectorAll(".zone-summary,.zone-subpanel").forEach(revelarAnalisis);
 }
+function filasCSVAnual(year){
+ const rows=[["Región","Departamento","Municipio","Categoría","Delito","Año","Registros"]];
+ DELITOS_DATA.forEach(crime=>{
+  (crime.municipalityData||[]).forEach(item=>{
+   const yearData=(item.years||[]).find(entry=>Number(entry.year)===year);
+   if(!yearData?.records)return;
+   const department=String(item.department||"").trim()||"Departamento no especificado";
+   const region=item.region||REGION_POR_DEPTO.get(norm(department))||"sin-region";
+   const regionName=REGIONES_COLOMBIA.find(candidate=>candidate.id===region)?.name
+    ||(region==="sin-region"?"Sin región asignada":region);
+   rows.push([
+    regionName,department,String(item.name||"").trim()||"Municipio no especificado",
+    crime.category.name,crime.name,year,yearData.records
+   ]);
+  });
+ });
+ return rows;
+}
 zoneRegion.addEventListener("change",()=>{
  zoneDepartment.value=TODAS_ZONAS;
  zoneMunicipality.value=TODAS_ZONAS;
@@ -740,19 +749,22 @@ document.getElementById("resetZoneFilters").addEventListener("click",()=>{
  zoneRegion.value=TODAS_ZONAS;
  zoneDepartment.value=TODAS_ZONAS;
  zoneMunicipality.value=TODAS_ZONAS;
- document.getElementById("zoneCsvStatus").textContent="";
  renderZoneOptions();
 });
-document.getElementById("exportZoneCsv").addEventListener("click",()=>{
- const status=document.getElementById("zoneCsvStatus");
- const recordRows=filasExportacionZona.length-1;
- status.textContent="";
+const zoneAnnualCsvStatus=document.getElementById("zoneAnnualCsvStatus");
+zoneAnnualCsvYear.addEventListener("change",()=>{zoneAnnualCsvStatus.textContent="";});
+document.getElementById("exportAnnualZoneCsv").addEventListener("click",()=>{
+ const year=Number(zoneAnnualCsvYear.value);
+ const rows=filasCSVAnual(year);
+ const recordRows=rows.length-1;
+ zoneAnnualCsvStatus.textContent="";
  if(!recordRows){
-  status.textContent="No hay registros con los filtros actuales para exportar.";
+  zoneAnnualCsvStatus.textContent=`No hay registros para ${year}.`;
   return;
  }
- descargarCSV("indecol-tu-zona.csv",filasExportacionZona);
- status.textContent=`CSV descargado con ${fmtData(recordRows)} filas agregadas para los filtros seleccionados.`;
+ const recordTotal=rows.slice(1).reduce((sum,row)=>sum+Number(row[6]),0);
+ descargarCSV(`indecol-datos-${year}.csv`,rows);
+ zoneAnnualCsvStatus.textContent=`CSV ${year} descargado: ${fmtData(recordRows)} filas agregadas y ${fmtData(recordTotal)} registros.`;
 });
 renderAnalisisGeneral();
 inicializarAniosZona();
