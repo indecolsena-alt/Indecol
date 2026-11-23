@@ -311,7 +311,6 @@ CATALOGO.categories.forEach(category=>category.years.forEach(item=>{
  totalAnual.set(item.year,(totalAnual.get(item.year)||0)+item.records);
 }));
 const porcentaje=(valor,total)=>total?`${(valor/total*100).toFixed(1).replace(".",",")}%`:"0%";
-let filasExportacionAnalisis=[];
 let departmentPinnedKey="";
 function descargarCSV(nombre,filas){
  const escapeCsv=value=>`"${String(value??"").replace(/"/g,'""')}"`;
@@ -438,11 +437,10 @@ function renderAnalisisGeneral(){
  document.getElementById("analysisYearsDescription").textContent=
   `Cada punto muestra el total de registros reportados en un año: el eje horizontal indica el año y la cifra junto al punto, el conteo. El amarillo destaca los tres años con más filas. Los años parciales no deben compararse como periodos completos.`;
  document.getElementById("analysisDataQuality").textContent=
-  `Elige los años, selecciona un departamento o compara dos territorios. Descarga el resumen filtrado en CSV. Los conteos son registros reportados, no tasas de población.`;
+  `Elige los años, selecciona un departamento o compara dos territorios. Los conteos son registros reportados, no tasas de población.`;
  const categoriesFiltered=categoryRank.filter(item=>item.filteredRecords>0);
  const crimesFiltered=crimeRank.filter(item=>item.filteredRecords>0);
  const yearlyFiltered=annualFiltered.map(([year,records])=>({label:String(year),value:records}));
- const yearlyTotal=yearlyFiltered.reduce((sum,item)=>sum+item.value,0);
  const latestAvailable=CATALOGO.yearCoverage?.at(-1);
  const incompleteYearNote=latestAvailable&&!latestAvailable.complete&&inRange(latestAvailable.year)
   ?` ${latestAvailable.year} es parcial: hay datos de ${latestAvailable.monthsAvailable.length} meses, hasta ${monthsData[latestAvailable.monthsAvailable.at(-1)-1]||"el último mes disponible"}.`
@@ -470,12 +468,6 @@ function renderAnalisisGeneral(){
  yearNote.className="data-note";
  yearNote.textContent=`${changeText}${incompleteYearNote} Los porcentajes se calculan sobre los registros del periodo seleccionado.`;
  yearlyPanel.append(yearNote);
- filasExportacionAnalisis=[
-   ["Tipo","Nombre","Área","Periodo","Registros","Participación del periodo"],
-   ...categoriesFiltered.map(item=>["Categoría",item.name,area,`${startYear}–${endYear}`,item.filteredRecords,porcentaje(item.filteredRecords,filteredTotal)]),
-   ...crimesFiltered.map(item=>["Delito",item.name,area,`${startYear}–${endYear}`,item.filteredRecords,porcentaje(item.filteredRecords,filteredTotal)]),
-   ...yearlyFiltered.map(item=>["Año",etiquetaAnual(Number(item.label)),area,item.label,item.value,porcentaje(item.value,yearlyTotal)])
- ];
  [document.getElementById("analysisCategories"),document.getElementById("analysisCrimes"),yearlyPanel]
   .forEach(element=>{const panel=element.closest(".data-panel");if(panel){panel.classList.remove("data-revealed");revelarAnalisis(panel)}});
  const todayDailyCount=document.getElementById("todayDailyCount");
@@ -740,9 +732,6 @@ zoneDepartment.addEventListener("change",()=>{
 zoneMunicipality.addEventListener("change",renderZona);
 conectarRangoAnual("zoneYearFrom","zoneYearTo",renderZona);
 conectarRangoAnual("analysisYearFrom","analysisYearTo",actualizarAnalisisCompleto);
-document.getElementById("exportAnalysisCsv").addEventListener("click",()=>{
- descargarCSV("indecol-analisis.csv",filasExportacionAnalisis);
-});
 document.getElementById("resetZoneFilters").addEventListener("click",()=>{
  zoneYearFrom.value=String(CATALOGO.years[0]);
  zoneYearTo.value=String(CATALOGO.years.at(-1));
