@@ -94,7 +94,7 @@ function graficaAnillo(items,valueOf,labelOf,title){
 function graficaLineas(series,labels,title){
  const visibles=series.filter(item=>item.values.some(value=>value>0));
  if(!labels.length||!visibles.length)return '<p class="data-empty">No hay datos válidos para este gráfico.</p>';
- const width=760,height=300,left=58,right=744,top=46,bottom=222;
+ const width=760,height=300,left=58,right=700,top=46,bottom=222;
  const max=Math.max(1,...visibles.flatMap(item=>item.values));
  const xAt=index=>labels.length===1?(left+right)/2:left+(right-left)*index/(labels.length-1);
  const yAt=value=>bottom-(bottom-top)*value/max;
@@ -374,10 +374,10 @@ function renderAnalisisGeneral(){
   departmentPinnedKey?`Análisis de ${area}`:"Análisis de Colombia";
  document.getElementById("analysisIntro").textContent=
   departmentPinnedKey
-   ?`Explora el panorama de ${area} entre ${startYear} y ${endYear}. Compara categorías, consulta los delitos con más registros y revisa su evolución anual para el territorio seleccionado.`
-   :`Explora el panorama de Colombia entre ${startYear} y ${endYear}. Compara categorías, identifica los delitos con más registros y observa su evolución anual. Selecciona un departamento en el mapa para enfocar los resultados en ese territorio.`;
+   ?`Explora los registros de ${area} entre ${startYear} y ${endYear}. Compara categorías, delitos y cambios anuales para este territorio.`
+   :`Compara categorías, delitos y años en el panorama nacional. Selecciona un departamento para enfocar los resultados y revisar sus registros.`;
  document.getElementById("analysisScopeNote").textContent=
-  `Las tarjetas resumen el alcance de la consulta, la categoría y el delito con más registros, y la variación anual. Más abajo encontrarás un mapa interactivo, una comparación entre departamentos y gráficos para explorar la distribución por categoría, delito y año.`;
+  `Las tarjetas resumen la consulta; el mapa y los gráficos permiten explorar departamentos, categorías, delitos y años.`;
  const crimeRank=DELITOS_DATA.map(crime=>({...crime,filteredRecords:registrosDelitoEnArea(crime,range)}))
   .sort((a,b)=>b.filteredRecords-a.filteredRecords);
  const categoryRank=CATALOGO.categories.map(category=>({
@@ -420,13 +420,13 @@ function renderAnalisisGeneral(){
  document.getElementById("analysisMapDescription").textContent=
   `El mapa muestra los conteos departamentales de ${startYear}–${endYear}. Selecciona un departamento para filtrar todos los gráficos y consultar sus delitos más registrados. Son conteos, no tasas ajustadas por población.`;
  document.getElementById("analysisCategoriesDescription").textContent=
-  `Compara las categorías de SIEDCO por número de registros y por su participación en ${area} durante ${startYear}–${endYear}. El amarillo resalta las tres categorías con más registros.`;
+  `Cada segmento representa una categoría: su tamaño corresponde a la proporción de registros dentro del total filtrado. La leyenda muestra el conteo y el porcentaje de ${area} entre ${startYear} y ${endYear}; el amarillo señala las tres categorías con más filas. Son conteos, no tasas ajustadas por población.`;
  document.getElementById("analysisCrimesDescription").textContent=
-  `Presenta los diez delitos con más filas reportadas en ${area} durante ${startYear}–${endYear}, junto con su proporción del total. El amarillo destaca los tres primeros. No es una comparación de tasas ni de personas únicas.`;
+  `Las barras ordenan los diez delitos con más registros en ${area} entre ${startYear} y ${endYear}: una barra más larga indica un conteo mayor y la etiqueta incluye su porcentaje del total filtrado. El amarillo destaca los tres primeros. No son tasas ni personas únicas.`;
  document.getElementById("analysisYearsDescription").textContent=
-  `Compara los registros de ${area} para cada año entre ${startYear} y ${endYear}. Los tres años con más registros se resaltan en amarillo.`;
+  `Cada punto muestra el total de registros reportados en un año: el eje horizontal indica el año y la cifra junto al punto, el conteo. El amarillo destaca los tres años con más filas. Los años parciales no deben compararse como periodos completos.`;
  document.getElementById("analysisDataQuality").textContent=
-  `Usa los selectores de años para elegir el periodo y el mapa para enfocar la consulta en un departamento. También puedes comparar dos territorios y descargar el resumen en CSV. Al cambiar una selección, las tarjetas y los gráficos se actualizan para mostrar la nueva vista.`;
+  `Elige los años, selecciona un departamento o compara dos territorios. Descarga el resumen filtrado en CSV. Los conteos son registros reportados, no tasas de población.`;
  const categoriesFiltered=categoryRank.filter(item=>item.filteredRecords>0);
  const crimesFiltered=crimeRank.filter(item=>item.filteredRecords>0);
  const yearlyFiltered=annualFiltered.map(([year,records])=>({label:String(year),value:records}));
@@ -680,16 +680,16 @@ function renderZona(){
    <div><span>Delito con más registros</span><strong>${htmlSeguro(topCrime?.name||"Sin registros")}</strong><small>${porcentaje(topCrime?.records||0,total)} del total seleccionado</small></div>
  </div>
  <div class="zone-charts">
- <section class="zone-subpanel"><h4>Participación por categoría</h4><p>Proporción de los registros de cada categoría dentro de ${htmlSeguro(where)}.</p>
+ <section class="zone-subpanel"><h4>Participación por categoría</h4><p>El anillo distribuye los registros seleccionados entre categorías: cada segmento representa su proporción del total. La leyenda indica porcentaje y conteo; no son tasas por población.</p>
    ${graficaAnillo(zoneCategories,item=>item.records,item=>item.name,`Participación por categoría en ${where}`)}
  </section>
- <section class="zone-subpanel"><h4>Municipios con más registros</h4><p>Hasta diez municipios con más filas reportadas dentro de los filtros seleccionados. Son conteos, no tasas ajustadas por población.</p>
+ <section class="zone-subpanel"><h4>Municipios con más registros</h4><p>Las barras ordenan hasta diez municipios según el número de filas del periodo y territorio elegidos. La longitud y la cifra al final muestran el conteo; no son tasas ajustadas por población.</p>
    ${graficaDatos(localMunicipalities,item=>item.records,item=>item.label,true)}
  </section>
- <section class="zone-subpanel"><h4>Delitos con más registros</h4><p>Se muestran los ${fmtData(localCrimes.length)} delitos del catálogo; cada barra indica sus filas registradas dentro de los filtros seleccionados y las tres cantidades mayores se resaltan en amarillo.</p>
+ <section class="zone-subpanel"><h4>Delitos con más registros</h4><p>Se muestran ${fmtData(localCrimes.length)} delitos del catálogo para los filtros elegidos. Las barras y cifras comparan sus conteos; el amarillo identifica los tres mayores. Un registro no equivale necesariamente a una persona o un hecho único.</p>
    ${graficaDatos(localCrimes,item=>item.records,item=>item.name,true)}
  </section>
- <section class="zone-subpanel"><h4>Evolución anual</h4><p>Registros de ${range.startYear}–${range.endYear} para ${htmlSeguro(where)}.</p>
+ <section class="zone-subpanel"><h4>Evolución anual</h4><p>La línea muestra el total de filas reportadas cada año en ${htmlSeguro(where)}; el eje horizontal indica el año y cada punto, su conteo. Los años parciales cubren menos meses y se interpretan con cautela.</p>
    ${graficaLineas([{name:"Registros",values:yearlyFiltered.map(item=>item.value)}],yearlyFiltered.map(item=>item.label),`Evolución anual en ${where}`)}
  </section></div>
  ${topCrime?`<div class="zone-advice"><b>Una recomendación relacionada</b><p>${htmlSeguro(consejoPrevencion(topCrime.name))}</p></div>`:"<p class=\"data-empty\">No hay registros para esta combinación de filtros.</p>"}`;
@@ -892,6 +892,15 @@ if(categoriasIncluidas)categoriasIncluidas.textContent=fmtData(CATALOGO.category
 const periodoDatos=document.getElementById("stat-period");
 if(periodoDatos)periodoDatos.textContent=CATALOGO.years.length
  ?`${CATALOGO.years[0]}–${CATALOGO.years.at(-1)}`:"Sin fechas válidas";
+const registrosPortada=document.getElementById("heroRecordCount");
+if(registrosPortada)registrosPortada.textContent=fmtData(CATALOGO.totalRecords);
+const periodoPortada=document.getElementById("heroPeriod");
+if(periodoPortada)periodoPortada.textContent=CATALOGO.years.length
+ ?`${CATALOGO.years[0]}–${CATALOGO.years.at(-1)}`:"Periodo no disponible";
+const departamentosPortada=document.getElementById("heroDepartmentCount");
+if(departamentosPortada)departamentosPortada.textContent=`${mapaDepartamentos.departments.length} departamentos`;
+const mapaPortada=document.getElementById("heroMap");
+if(mapaPortada)mapaPortada.innerHTML=`<svg viewBox="${htmlSeguro(mapaDepartamentos.viewBox)}" focusable="false">${mapaDepartamentos.departments.map(item=>`<path d="${htmlSeguro(item.path)}"></path>`).join("")}</svg>`;
 DELITOS.splice(0,DELITOS.length,...DELITOS_DATA.map(crime=>({nombre:crime.name})));
 document.getElementById("dvCnt").textContent=`${CATALOGO.categoryCount} categorías · ${CATALOGO.crimeCount} delitos`;
 dvNav.innerHTML=CATEGORIAS.map(category=>`<div class="dg" data-cat="${htmlSeguro(category.id)}">
@@ -1129,7 +1138,7 @@ const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalRecords};
  const aniosIntro=CATALOGO.years.length?CATALOGO.years:[INTRO.desde];
  let tm=[],raf=0,t0=0,tp=0,ac=null,mg=null,rv=null,ruido=null,silen=false,fin=false,corre=false,dpr=1,W=0,H=0,cards=[],dim=0,cierreConError=false,focoAnterior=null;
  const ys=[];for(let i=0;i<NY;i++){const d=document.createElement("span");d.className="ix-y";d.textContent=CATALOGO.years[i]??INTRO.desde;$("ixYs").appendChild(d);ys.push(d)}
- $("ixLogo").src=$("ixLg2").src=document.querySelector(".hlogo img").src;
+ $("ixLogo").src=$("ixLg2").src="assets/images/logo-principal.png";
  function rnd(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
  const R=rnd(11);
  // Tarjetas con los delitos del catálogo + tarjetas vacías de fondo.

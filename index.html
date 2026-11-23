@@ -26,39 +26,62 @@
   <video class="ix-video" id="ixVideo" muted playsinline preload="auto" aria-hidden="true">
     <source src="assets/videos/indecol-cierre.mp4" type="video/mp4">
   </video>
-  <div class="ix-fin" id="ixFin"><img id="ixLg2" alt="Indecol"><p>Por eso creamos Indecol, una página que te ayuda a ver más de cerca <em>qué es lo que realmente sucede.</em></p></div>
+  <div class="ix-fin" id="ixFin"><img id="ixLg2" src="assets/images/logo-principal.png" alt="Indecol"><p>Por eso creamos Indecol, una página que te ayuda a ver más de cerca <em>qué es lo que realmente sucede.</em></p></div>
   <div class="ix-end" id="ixEnd"><button type="button" class="ix-go" id="ixGo">Entrar a Indecol</button><button type="button" class="ix-re" id="ixRe">Ver de nuevo</button>  </div>
   <div class="ix-flash" id="ixFl"></div>
   <button type="button" class="ix-btn" id="ixMute" hidden>Sonido activado</button>
   <button type="button" class="ix-btn" id="ixSkip">Saltar introducción</button>
-  <div class="ix-gate" id="ixGate"><img id="ixLogo" alt="Indecol"><p>INTRODUCCIÓN</p><button type="button" class="ix-go" id="ixCon">Comenzar</button></div>
+  <div class="ix-gate" id="ixGate"><img id="ixLogo" src="assets/images/logo-principal.png" alt="Indecol"><p>INTRODUCCIÓN</p><button type="button" class="ix-go" id="ixCon">Comenzar</button></div>
 </div>
+<script>
+try {
+  if ((!location.hash || location.hash === "#inicio") && sessionStorage.getItem("indecol_intro") !== "1") {
+    document.getElementById("ix").hidden = false;
+    document.documentElement.classList.add("nos");
+  }
+} catch {}
+</script>
 <nav>
   <a class="logo" href="#inicio" aria-label="Indecol, inicio"><img src="assets/images/logo-nav.png" alt="Indecol"></a>
-  <div class="links" id="mainLinks"><a href="#inicio">Inicio</a><a href="#delitos" id="mbtn">Delitos</a><a href="#tu-zona">Tu zona</a><a href="#analisis">Análisis</a><a href="#dashboard">Dashboard</a><a href="#informe-r">Informe R</a><a class="mobile-team" href="#grupo-de-trabajo">Grupo de trabajo</a></div>
+  <div class="links" id="mainLinks"><a class="act" href="#inicio">Inicio</a><a href="#analisis">Análisis</a><a href="#tu-zona">Tu zona</a><a href="#delitos" id="mbtn">Delitos</a><a href="#dashboard">Dashboard</a><a href="#informe-r">Informe R</a><a class="mobile-team" href="#grupo-de-trabajo">Grupo de trabajo</a></div>
   <a class="cta" href="#grupo-de-trabajo">Grupo de trabajo</a>
   <button type="button" class="nav-toggle" id="navToggle" aria-label="Abrir menú de navegación" aria-controls="mainLinks" aria-expanded="false"><span></span><span></span><span></span></button>
 </nav>
 
-<div class="pg" id="inicio">
+<div class="pg active" id="inicio">
 <header class="hero">
-  <div class="ph" id="heroCarousel" role="img" aria-label="Categoría destacada: control de armas, sustancias y capturas"></div>
-  <span class="carousel-category" id="carouselCategory">Control de armas, sustancias y capturas</span>
-  <div class="dots" id="dots" aria-label="Explorar categorías"></div>
   <div class="hc">
     <span class="brand">Indicadores delictivos en Colombia</span>
-    <h1 class="hlogo"><img src="assets/images/logo-principal.png" alt="Indecol"></h1>
-    <p>Indecol organiza los registros del SIEDCO de 2020 a 2026 para explorar tendencias nacionales, comparar territorios o consultar un delito. Cada cifra representa filas reportadas, no necesariamente personas o incidentes únicos.</p>
-    <a class="cta" href="#analisis">Ver análisis nacional</a><a class="cta" href="#tu-zona">Explorar mi zona</a>
+    <h1>Explora los datos <em>delictivos de Colombia</em></h1>
+    <p>Consulta registros SIEDCO por año, delito y territorio. Cada cifra representa filas reportadas; no necesariamente personas ni incidentes únicos.</p>
+    <div class="hero-actions">
+      <a class="cta" href="#analisis">Ver análisis nacional</a>
+      <a class="cta" href="#tu-zona">Explorar mi zona</a>
+    </div>
     <button type="button" class="rp" id="rpIntro">Ver la introducción</button>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-photo">
+      <div class="ph" id="heroCarousel" role="img" aria-label="Categoría destacada: control de armas, sustancias y capturas"></div>
+      <span class="carousel-category" id="carouselCategory">Control de armas, sustancias y capturas</span>
+      <div class="dots" id="dots" aria-label="Explorar categorías"></div>
+    </div>
+    <div class="hero-data-card">
+      <div class="hero-map" id="heroMap" aria-hidden="true"></div>
+      <div class="hero-data-copy">
+        <span class="hero-data-label">Registros tabulados</span>
+        <strong id="heroRecordCount">—</strong>
+        <small><span id="heroPeriod">2020–2026</span> · <span id="heroDepartmentCount">33 departamentos</span></small>
+      </div>
+    </div>
   </div>
 </header>
 
 <section class="today" aria-labelledby="todayTitle">
   <div class="today-copy">
     <span class="data-eyebrow">Una mirada a los registros disponibles</span>
-    <h2 id="todayTitle">Hoy en Colombia, contado con datos</h2>
-    <p>Las cifras ayudan a dimensionar realidades que a menudo no vemos. Este promedio se calcula con los años completos disponibles para hurto a personas; no es un contador en tiempo real ni representa necesariamente personas o incidentes únicos.</p>
+    <h2 id="todayTitle">Hurto a personas: promedio diario</h2>
+    <p>Promedio de registros en años completos disponibles. No es un contador en tiempo real ni representa necesariamente personas o incidentes únicos.</p>
   </div>
   <div class="today-stat">
     <strong id="todayDailyCount">—</strong>
@@ -76,17 +99,16 @@
 
 <section class="blk" id="proyecto">
   <h2>Sobre el proyecto</h2>
-  <p>Indecol —Indicadores Delictivos en Colombia— organiza los registros de SIEDCO correspondientes a 2020–2026, disponibles localmente en <code>DataBase/hecho.csv</code>, y los presenta mediante indicadores, gráficos y consultas territoriales. La página de inicio resume la cobertura; el análisis nacional compara categorías, delitos y años, y el mapa permite explorar los departamentos.</p>
-  <p>En “Tu zona” puedes filtrar la información por región, municipio y departamento. En “Delitos” encontrarás el detalle de cada categoría y sus tendencias anuales y mensuales; “Dashboard” y “Informe R” conducen a productos complementarios con otros enfoques y periodos.</p>
-  <p>Los registros SIEDCO 2020–2026 describen únicamente lo reportado en esa fuente; no equivalen necesariamente a personas o incidentes únicos ni representan todos los hechos ocurridos. Las participaciones y conteos territoriales son valores absolutos, no tasas ajustadas por población. Revisa el periodo, la unidad y las notas de cada gráfico antes de comparar o interpretar sus resultados.</p>
+  <p>Indecol organiza registros SIEDCO de 2020–2026 en indicadores, gráficos y consultas territoriales. Explora el panorama nacional, filtra por región, departamento o municipio, y consulta el detalle de cada delito.</p>
+  <p>El Dashboard y el Informe R ofrecen recursos complementarios. Los registros representan lo reportado en la fuente: no necesariamente personas o incidentes únicos ni todos los hechos ocurridos. Los conteos territoriales son valores absolutos, no tasas ajustadas por población.</p>
   <div class="gr" id="info"></div>
 </section>
 </div>
 <section class="pg" id="grupo-de-trabajo">
-  <div class="blk analysis-page" style="padding-bottom:90px">
+  <div class="blk analysis-page">
     <span class="data-eyebrow">Personas detrás de Indecol</span>
     <h2>Grupo de trabajo</h2>
-    <p>El equipo está organizado en dos liderazgos —Backend y Frontend—, cinco integrantes de Frontend y quince de Backend. En forma de pirámide, los instructores conforman la base inferior, seguidos por los dos líderes, los integrantes de Frontend y los integrantes de Backend. Como aún no se han proporcionado los nombres ni las fotografías, las tarjetas conservan identificadores provisionales y retratos ilustrados. La pirámide resume la distribución informada para el proyecto y no representa una valoración del trabajo de cada persona. Cuando se confirmen los datos de identificación, los nombres y las fotografías podrán reemplazar los elementos provisionales sin cambiar la estructura del equipo.</p>
+    <p>El equipo reúne dos líderes, cinco integrantes de Frontend y quince de Backend, además de dos instructores. Como aún no se han proporcionado nombres ni fotografías, se muestran identificadores y retratos ilustrados provisionales. La estructura describe funciones, no una valoración del trabajo.</p>
     <div class="eq" id="eq" aria-label="Equipo de Indecol"></div>
   </div>
 </section>
@@ -94,9 +116,9 @@
   <div class="blk analysis-page">
     <span class="data-eyebrow" id="analysisEyebrow">Lectura territorial · SIEDCO 2020–2026</span>
     <h2 id="analysisScopeTitle">Análisis de Colombia</h2>
-    <p id="analysisIntro">Explora el panorama de Colombia entre 2020 y 2026. Compara categorías, identifica los delitos con más registros y observa su evolución anual. Selecciona un departamento en el mapa para enfocar los resultados en ese territorio.</p>
-    <p class="data-note" id="analysisScopeNote">Las tarjetas resumen el alcance de la consulta, la categoría y el delito con más registros, y la variación anual. Más abajo encontrarás un mapa interactivo, una comparación entre departamentos y gráficos para explorar la distribución por categoría, delito y año.</p>
-    <p class="data-note" id="analysisDataQuality">Usa los selectores de años para elegir el periodo y el mapa para enfocar la consulta en un departamento. También puedes comparar dos territorios y descargar el resumen en CSV. Al cambiar una selección, las tarjetas y los gráficos se actualizan para mostrar la nueva vista.</p>
+    <p id="analysisIntro">Compara categorías, delitos y años en el panorama nacional. Selecciona un departamento para enfocar los resultados y revisar sus registros.</p>
+    <p class="data-note" id="analysisScopeNote">Usa los filtros para elegir el periodo; el mapa, la comparación y los gráficos se actualizan con cada selección.</p>
+    <p class="data-note" id="analysisDataQuality">Los conteos son registros reportados, no tasas ajustadas por población. Puedes descargar el resumen filtrado en CSV.</p>
     <div class="analysis-controls" aria-label="Filtros del análisis nacional">
       <label for="analysisYearFrom">Desde
         <select id="analysisYearFrom"></select>
@@ -141,17 +163,17 @@
     </section>
     <section class="data-panel data-animate">
       <h3>¿Cómo se distribuyen los registros?</h3>
-      <p id="analysisCategoriesDescription">Compara las nueve categorías de SIEDCO por número de registros y por su participación en el total nacional del periodo seleccionado. Así se identifica qué categorías concentran más filas reportadas; el amarillo resalta las tres de mayor conteo.</p>
+      <p id="analysisCategoriesDescription">Cada segmento representa una categoría en proporción a los registros filtrados; la leyenda muestra su conteo y porcentaje. El amarillo señala las tres categorías con más filas. Son conteos, no tasas ajustadas por población.</p>
       <div id="analysisCategories"></div>
     </section>
     <section class="data-panel data-animate">
       <h3>Delitos con más registros</h3>
-      <p id="analysisCrimesDescription">Presenta los diez delitos con más filas reportadas en SIEDCO durante el periodo seleccionado, junto con su proporción del total. Permite distinguir cuáles aparecen con mayor frecuencia en la base; el amarillo destaca los tres primeros. No es una comparación de tasas ni de personas únicas.</p>
+      <p id="analysisCrimesDescription">Las barras ordenan los diez delitos con más registros: su longitud indica el conteo y la etiqueta incluye su porcentaje del total filtrado. El amarillo destaca los tres primeros. No son tasas ni personas únicas.</p>
       <div id="analysisCrimes"></div>
     </section>
     <section class="data-panel data-animate">
       <h3>Evolución anual de los registros</h3>
-      <p id="analysisYearsDescription">Compara el total de filas reportadas para cada año del periodo seleccionado y muestra su participación en el total. Los tres años con más registros se resaltan en amarillo.</p>
+      <p id="analysisYearsDescription">Cada punto muestra el total de registros de un año: el eje horizontal indica el año y la cifra junto al punto, el conteo. El amarillo destaca los tres años con más filas; interpreta con cautela los años parciales.</p>
       <div id="analysisYears"></div>
     </section>
   </div>
@@ -160,9 +182,9 @@
   <div class="blk analysis-page zone-page">
     <span class="data-eyebrow">Exploración territorial</span>
     <h2>Tu zona</h2>
-    <p>Explora y compara los registros por periodo, región, departamento y municipio. Puedes comenzar con todas las regiones y el periodo disponible, o acotar la consulta paso a paso. Las opciones de departamento dependen de la región seleccionada y las de municipio se actualizan según el departamento; así puedes precisar el territorio sin salir de la página. Combina esos filtros con un rango de años para observar solo las filas incluidas en el intervalo elegido. Cada vez que cambias una selección, los indicadores y gráficos se actualizan en conjunto.</p>
-    <p>El resumen muestra el total de registros incluidos, la categoría con mayor volumen y el delito con más filas para la selección actual. Los gráficos permiten revisar la participación por categoría, los municipios con más registros, los delitos más reportados y la evolución anual. La etiqueta bajo los filtros confirma el lugar y el periodo aplicados, para que puedas revisar el alcance de la consulta antes de interpretar o comparar los resultados.</p>
-    <p class="data-note">Las regiones siguen la clasificación consignada en SIEDCO. Los valores son conteos de filas reportadas: no son tasas ajustadas por población ni equivalen necesariamente a personas o incidentes únicos. Ten en cuenta el periodo, el territorio y la información disponible en la fuente al comparar resultados; la sección no representa todos los hechos ocurridos.</p>
+    <p>Filtra los registros por periodo, región, departamento y municipio. Las opciones de departamento y municipio se ajustan a cada selección, y los indicadores y gráficos se actualizan automáticamente.</p>
+    <p>El resumen y los gráficos describen el territorio y el periodo elegidos. Revisa la etiqueta de selección para confirmar el alcance antes de comparar resultados.</p>
+    <p class="data-note">Los datos siguen la clasificación de SIEDCO y son conteos de filas reportadas; no son tasas de población ni necesariamente personas o incidentes únicos.</p>
     <section class="data-panel zone-panel">
       <div class="zone-controls">
         <label for="zoneYearFrom">Año desde
@@ -188,9 +210,10 @@
   </div>
 </section>
 <section class="pg dash" id="dashboard">
-  <div class="blk" style="padding-top:130px;padding-bottom:90px">
+  <div class="blk analysis-page">
+    <span class="data-eyebrow">Exploración interactiva · Power BI</span>
     <h2>Dashboard</h2>
-    <p>Explora el informe interactivo de Power BI para consultar indicadores y visualizar la información mediante sus paneles. Usa sus filtros para recorrer las variables que ofrece y recuerda que el dashboard es un recurso complementario; las cifras y definiciones de cada panel dependen de la fuente que muestra el informe. El panel requiere conexión a Internet; el resto de esta página y sus datos locales se pueden consultar sin conexión.</p>
+    <p>Explora los indicadores y filtros del dashboard interactivo. Requiere conexión a Internet y es complementario a los datos locales de Indecol.</p>
     <div class="dbt" id="dbt"></div>
     <div class="dbf" id="dbf">
       <div class="dbv" id="dbv">
@@ -203,64 +226,24 @@
 </section>
 
 <section class="pg dash" id="informe-r">
-  <div class="blk" style="padding-top:130px;padding-bottom:90px">
+  <div class="blk analysis-page">
+    <span class="data-eyebrow">Análisis complementario · SIEDCO</span>
     <h2>Informe R</h2>
-    <p>Este análisis complementario estudia comparendos de tránsito en Barranquilla durante abril y mayo de 2010. No corresponde al catálogo nacional de delitos de 2020–2026: se trata de otra fuente, otro lugar y otro periodo. Las siguientes visualizaciones resumen resultados reportados en el informe de R.</p>
-    <div class="r-analysis-grid">
-      <article class="r-analysis-card">
-        <span class="rpubs-eyebrow">01 · Comparendos por mes</span>
-        <h3>Mayo registró más comparendos</h3>
-        <p>El informe contabiliza 1.408 comparendos en mayo y 712 en abril, un aumento observado del 98 %. La comparación no está ajustada por días: abril empieza el día 12, por lo que ambos periodos tienen distinta duración.</p>
-        <figure class="r-chart" aria-label="Comparendos por mes: abril 712, mayo 1408">
-          <div class="r-chart-bars">
-            <div class="r-chart-bar"><span>712</span><i style="--bar:50.6%"></i><b>Abril · desde el día 12</b></div>
-            <div class="r-chart-bar"><span>1.408</span><i style="--bar:100%"></i><b>Mayo</b></div>
-          </div>
-          <figcaption>Comparendos registrados por mes en el periodo analizado.</figcaption>
-        </figure>
-      </article>
-      <article class="r-analysis-card">
-        <span class="rpubs-eyebrow">02 · Registros por género o tipo</span>
-        <h3>El informe distingue personas y empresas</h3>
-        <p>Se reportan 970 comparendos asociados a mujeres, 683 a hombres y 467 a empresas. La categoría empresarial no es un género; se conserva aparte para no mezclar tipos distintos de infractor.</p>
-        <figure class="r-chart" aria-label="Comparendos por tipo: mujeres 970, hombres 683, empresas 467">
-          <div class="r-chart-bars">
-            <div class="r-chart-bar"><span>970</span><i style="--bar:100%"></i><b>Mujeres</b></div>
-            <div class="r-chart-bar"><span>683</span><i style="--bar:70.4%"></i><b>Hombres</b></div>
-            <div class="r-chart-bar"><span>467</span><i style="--bar:48.1%"></i><b>Empresas</b></div>
-          </div>
-          <figcaption>Conteos indicados en el análisis publicado en R.</figcaption>
-        </figure>
-      </article>
-      <article class="r-analysis-card">
-        <span class="rpubs-eyebrow">03 · Recaudo por infracción</span>
-        <h3>Dos infracciones concentran el recaudo</h3>
-        <p>El exceso de velocidad suma $418.695.000 COP y no detenerse ante la luz roja o amarilla, $198.275.000 COP. Juntas representan cerca del 95 % del recaudo que el informe atribuye a las infracciones listadas.</p>
-        <figure class="r-chart" aria-label="Recaudo: exceso de velocidad 418695000 pesos, luz roja o amarilla 198275000 pesos">
-          <div class="r-chart-bars">
-            <div class="r-chart-bar"><span>$418,7 M</span><i style="--bar:100%"></i><b>Exceso de velocidad</b></div>
-            <div class="r-chart-bar"><span>$198,3 M</span><i style="--bar:47.4%"></i><b>No detenerse ante luz roja o amarilla</b></div>
-          </div>
-          <figcaption>Valores nominales reportados en pesos colombianos.</figcaption>
-        </figure>
-      </article>
-    </div>
-    <section class="r-conclusion">
-      <h3>Conclusión</h3>
-      <p>En los registros analizados destacan el aumento mensual observado, la concentración del recaudo en dos tipos de infracción y la presencia de comparendos asociados a empresas, además de personas. Estos patrones ayudan a orientar nuevas preguntas sobre control y prevención vial, pero no demuestran por sí solos sus causas. La diferencia entre meses debe leerse con cautela porque abril solo cubre parte del mes, y los resultados corresponden únicamente a Barranquilla en 2010.</p>
-    </section>
+    <p>Consulta el análisis nacional de INDECOL: limpieza y exploración en R de 4.429.202 registros SIEDCO, de enero de 2020 a octubre de 2026. El informe incluye análisis territorial, temático y temporal.</p>
     <div class="rpubs-card">
       <div class="rpubs-content">
-        <span class="rpubs-eyebrow">Informe estadístico · R</span>
+        <span class="rpubs-eyebrow">Publicación de RPubs · R</span>
         <h3>Consulta el informe completo</h3>
-        <p>Revisa la preparación de los datos, el análisis exploratorio, las visualizaciones y las referencias en la publicación original.</p>
-        <a class="rpubs-link" href="https://rpubs.com/Eduardopasion900__/1472170" target="_blank" rel="noopener noreferrer">Abrir el Informe R <span aria-hidden="true">↗</span></a>
+        <p>Revisa la metodología, las tablas y las visualizaciones del análisis publicado.</p>
+        <a class="rpubs-link" href="https://rpubs.com/Junior220208/INDECOL" target="_blank" rel="noopener noreferrer">Abrir el Informe R <span aria-hidden="true">↗</span></a>
       </div>
-      <a class="rpubs-qr" href="https://rpubs.com/Eduardopasion900__/1472170" target="_blank" rel="noopener noreferrer" aria-label="Abrir el Informe R escaneando el código QR">
-        <img src="assets/images/informe-r-qr.png" alt="Código QR para abrir el Informe R en RPubs">
-        <span>Escanea para abrir el informe</span>
-      </a>
+      <div class="rpubs-summary" aria-label="Cobertura del informe">
+        <span>Periodo</span><strong>2020–2026</strong>
+        <span>Registros SIEDCO</span><strong>4.429.202</strong>
+        <small>Datos hasta octubre de 2026</small>
+      </div>
     </div>
+    <p class="data-note">RPubs no permite incrustar esta publicación en la página; usa el botón para abrirla en una pestaña nueva.</p>
   </div>
 </section>
 
@@ -295,8 +278,8 @@
   </footer>
 </template>
 
-<script src="assets/data/catalogo.js"></script>
-<script src="assets/data/departamentos.js"></script>
-<script src="js/app.js"></script>
+<script defer src="assets/data/catalogo.js"></script>
+<script defer src="assets/data/departamentos.js"></script>
+<script defer src="js/app.js"></script>
 </body>
 </html>
