@@ -203,6 +203,12 @@ try {
           <select id="zoneMunicipality"></select>
         </label>
       </div>
+      <div class="zone-actions">
+        <button type="button" class="zone-reset" id="resetZoneFilters">Restablecer filtros</button>
+        <button type="button" class="zone-export" id="exportZoneCsv">Descargar CSV</button>
+        <span class="zone-export-note">El archivo contiene conteos agrupados por región, departamento, municipio, delito y año.</span>
+        <span class="zone-csv-status" id="zoneCsvStatus" role="status" aria-live="polite"></span>
+      </div>
       <p class="data-note" id="zoneFilterSummary" aria-live="polite"></p>
       <div id="zoneResult" aria-live="polite"><p class="data-empty">Selecciona una región, municipio o departamento para consultar los datos.</p></div>
       <p class="data-note">La participación territorial corresponde a registros SIEDCO. No se ajusta por población ni implica que los datos midan todos los hechos ocurridos.</p>
