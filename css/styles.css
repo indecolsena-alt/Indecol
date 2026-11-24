@@ -149,6 +149,7 @@ nav .links a#mbtn.act{box-shadow:0 0 0 3px #203D5655}
 .footer-socials a:focus-visible{outline:3px solid var(--oro);outline-offset:3px}
 @media(max-width:560px){.site-footer{flex-direction:column;justify-content:center;text-align:center;gap:14px;padding:22px 18px}}
 @media(max-width:800px){.wrap{grid-template-columns:1fr}.wrap.rev .txt{order:0}nav b{font-size:14px}nav .links{gap:14px;margin-left:0}.cta{display:none}nav{gap:12px;padding-left:16px}.fl{opacity:.85}}
+@media(min-width:601px) and (max-width:800px){nav .links .mobile-team{display:block}}
 @media(prefers-reduced-motion:reduce){.poli::before,.poli::after{animation:none;opacity:.5}.ciber h2{animation:none}.ph{animation:none}}
 
 /* Textos y composición justificada */
@@ -267,7 +268,7 @@ nav .links a.act{border-color:var(--oro-d)}
 .logo img{height:42px}
 nav .links a#mbtn::after{content:none}
 @media(max-width:800px){.logo img{height:34px}}
-@media(max-width:600px){
+@media(max-width:720px){
  nav{width:calc(100% - 24px);padding:7px 10px 7px 16px;gap:8px;flex-wrap:wrap;justify-content:space-between;border-radius:26px}
  .nav-toggle{order:2;display:grid;place-content:center;gap:4px;width:40px;height:40px;border:1px solid #203D5644;border-radius:50%;background:transparent;color:var(--azul);cursor:pointer}
  .nav-toggle span{display:block;width:17px;height:2px;border-radius:2px;background:currentColor;transition:transform .2s,opacity .2s}
@@ -321,10 +322,13 @@ nav .links a#mbtn::after{content:none}
 .data-page>*{min-width:0}
 .data-animate{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .55s cubic-bezier(.2,.8,.2,1)}
 .data-animate.data-revealed{opacity:1;transform:none}
-.data-hero{background:var(--azul);color:var(--crema);border-radius:30px;padding:clamp(28px,4vw,52px);animation:dvIn .5s both}
+.data-hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(210px,.85fr);grid-template-areas:"copy visual" "stats stats";gap:24px;align-items:center;background:var(--azul);color:var(--crema);border-radius:30px;padding:clamp(28px,4vw,52px);animation:dvIn .5s both}
+.data-hero-copy{grid-area:copy;min-width:0}
+.data-hero-visual{grid-area:visual;min-width:0;min-height:clamp(180px,22vw,280px);border:1px solid #F0E2CF44;border-radius:22px;background-image:linear-gradient(180deg,#0F223408,#0F223466),var(--category-image);background-position:center,var(--category-image-position,center);background-size:cover;background-repeat:no-repeat;box-shadow:0 12px 30px #0002}
+.data-hero .data-stats{grid-area:stats;margin-top:0}
 .data-eyebrow{display:block;color:var(--oro);font-size:12px;letter-spacing:.13em;text-transform:uppercase;font-weight:600;margin-bottom:14px}
 .data-hero h2{font-size:clamp(28px,4vw,54px);line-height:1.04;font-weight:900}
-.data-hero>p{max-width:760px;line-height:1.7;margin-top:14px;color:#F0E2CFdd}
+.data-hero-copy>p{max-width:760px;line-height:1.7;margin-top:14px;color:#F0E2CFdd}
 .data-intro{font:600 13px Poppins,system-ui,sans-serif;color:var(--azul);background:var(--oro);border:0;border-radius:30px;padding:11px 18px;margin-top:18px;cursor:pointer;transition:opacity .2s}
 .data-intro:hover{opacity:.92}
 .data-intro:focus-visible{outline:3px solid var(--crema);outline-offset:3px}
@@ -387,7 +391,7 @@ nav .links a#mbtn::after{content:none}
 .data-crime.data-card-revealed{opacity:1;transform:none}
 .data-crime:hover{transform:translateY(-2px);border-color:var(--azul)}
 .data-crime:focus-visible,.data-back:focus-visible{outline:3px solid var(--oro-d);outline-offset:3px}
-.data-crime-icon{font-size:21px}
+.data-crime-image{display:block;width:60px;height:60px;flex:none;border:1px solid #203D5620;border-radius:10px;background-image:linear-gradient(180deg,#0F223408,#0F223466),var(--crime-image);background-position:center;background-size:cover;background-repeat:no-repeat;box-shadow:0 6px 16px #0f223422}
 .data-crime-info{display:grid;gap:4px;min-width:0;flex:1}
 .data-crime-info b{font-size:14px}
 .data-crime-info small{color:var(--mute);font-size:11px}
@@ -409,6 +413,7 @@ nav .links a#mbtn::after{content:none}
 .rpubs-summary strong{color:var(--azul);font-size:clamp(20px,2.4vw,28px);line-height:1.2}
 .rpubs-summary small{margin-top:8px;color:var(--mute);font-size:11px;line-height:1.5}
 @media(max-width:680px){.rpubs-card{grid-template-columns:1fr;gap:20px}.rpubs-summary{grid-template-columns:1fr 1fr;border-left:0;border-top:3px solid var(--oro)}.rpubs-summary small{grid-column:1/-1}}
+@media(max-width:680px){.data-hero{grid-template-columns:minmax(0,1fr);grid-template-areas:"visual" "copy" "stats";gap:20px}.data-hero-visual{min-height:clamp(170px,52vw,250px)}.data-hero-copy>p{text-align:left}}
 /* cabecera del delito */
 @keyframes dvIn{from{opacity:0;transform:translateY(14px)}}
 .dv-hero{position:relative;overflow:hidden;border-radius:30px;background:var(--bg);color:var(--fg);padding:clamp(28px,4vw,52px);animation:dvIn .6s ease both}
@@ -751,7 +756,6 @@ html.nos{overflow:hidden}
  .zone-annual-download{grid-template-columns:1fr}
  .zone-annual-download button{width:100%}
  .dv-tg{padding:11px 16px}
- .department-compare-controls{grid-template-columns:1fr}
 }
 .eq{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:14px}
 .eqb{padding:18px;transition:transform .25s ease,box-shadow .25s ease}
@@ -802,6 +806,7 @@ html.nos{overflow:hidden}
 .department-compare{margin-top:22px;padding:18px;border:1px solid #203D5620;border-radius:16px;background:#fff8}
 .department-compare h4{font-size:16px;margin-bottom:12px}
 .department-compare-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(max-width:560px){.department-compare-controls{grid-template-columns:minmax(0,1fr)}}
 .department-compare-table-wrap{overflow-x:auto;margin-top:12px}
 .department-compare table{width:100%;border-collapse:collapse;font-size:12px}
 .department-compare caption{text-align:left;color:var(--mute);padding:8px 0}

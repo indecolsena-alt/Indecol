@@ -213,9 +213,12 @@ function paginaCategoria(id){
  const leadingShare=category.records?leadingCrime.records/category.records*100:0;
  dvMain.innerHTML=`<article class="data-page">
   <header class="data-hero data-animate">
+  <div class="data-hero-copy">
    <span class="data-eyebrow">${htmlSeguro(category.icon)} Categoría</span>
    <h2>${htmlSeguro(category.name)}</h2>
    <p>En ${period}, esta categoría reúne ${fmtData(category.records)} registros SIEDCO. ${leadingCrime?`${htmlSeguro(leadingCrime.name)} aporta ${leadingShare.toFixed(1).replace(".",",")}% de ellos;`:""} el gráfico resume sus filas por año y el listado permite abrir el detalle de cada delito. Un registro no equivale necesariamente a un incidente único.</p>
+  </div>
+  ${visualCategoria(category)}
    <div class="data-stats">
     <div><b data-count-value="${category.records}">0</b><span>Registros tabulados</span></div>
     <div><b data-count-value="${category.crimeCount}">0</b><span>Delitos incluidos</span></div>
@@ -231,7 +234,7 @@ function paginaCategoria(id){
    <h3>Delitos de esta categoría</h3>
    <p>Selecciona un delito para consultar su evolución anual y mensual, además de los municipios con más registros.</p>
    <div class="data-crimes">${category.crimes.map(crime=>`<a class="data-crime" href="#delitos/${encodeURIComponent(category.id)}/${encodeURIComponent(crime.id)}">
-    <span class="data-crime-icon">${htmlSeguro(category.icon)}</span><span class="data-crime-info"><b>${htmlSeguro(crime.name)}</b><small><span data-count-value="${crime.records}">0</span> registros tabulados · ${htmlSeguro(periodo(crime.years))}</small></span><span class="data-arrow" aria-hidden="true">→</span>
+    <span class="data-crime-image" aria-hidden="true" style="--crime-image:url('${htmlSeguro(rutaImagenDelito(crime))}')"></span><span class="data-crime-info"><b>${htmlSeguro(crime.name)}</b><small><span data-count-value="${crime.records}">0</span> registros tabulados · ${htmlSeguro(periodo(crime.years))}</small></span><span class="data-arrow" aria-hidden="true">→</span>
    </a>`).join("")}</div>
   </section>
   <p class="data-note">Se cuenta una fila por registro reportado en SIEDCO. Los años parciales se identifican en las etiquetas.</p>
@@ -265,9 +268,12 @@ function paginaDelito(categoryId,crimeId,selectedYear){
  dvMain.innerHTML=`<article class="data-page">
   <a class="data-back" href="#delitos/${encodeURIComponent(category.id)}">← Análisis de ${htmlSeguro(category.name)}</a>
   <header class="data-hero data-animate">
-   <span class="data-eyebrow">${htmlSeguro(category.icon)} ${htmlSeguro(category.name)}</span>
-   <h2>${htmlSeguro(crime.name)}</h2>
-   <p>En ${htmlSeguro(periodo(crime.years))}, SIEDCO reúne ${fmtData(crime.records)} registros para este delito. Aquí puedes consultar su evolución anual y mensual y los municipios con más filas; el conteo no equivale necesariamente al número de personas o incidentes únicos.</p>
+   <div class="data-hero-copy">
+    <span class="data-eyebrow">${htmlSeguro(category.icon)} ${htmlSeguro(category.name)}</span>
+    <h2>${htmlSeguro(crime.name)}</h2>
+    <p>En ${htmlSeguro(periodo(crime.years))}, SIEDCO reúne ${fmtData(crime.records)} registros para este delito. Aquí puedes consultar su evolución anual y mensual y los municipios con más filas; el conteo no equivale necesariamente al número de personas o incidentes únicos.</p>
+   </div>
+   ${visualDelito(category,crime)}
    <div class="data-stats">
     <div><b data-count-value="${crime.records}">0</b><span>Registros tabulados</span></div>
     <div><b data-count-value="${crime.municipalityCount}">0</b><span>Municipios distintos</span></div>
@@ -1076,6 +1082,25 @@ const CATEGORY_CAROUSEL={
   label:"Vehículos y tránsito",src:"assets/images/portada-07.jpg",position:"52% 50%",alt:"Patio con motocicletas recuperadas"
  }
 };
+const CRIME_IMAGE_FILE_OVERRIDES=new Map([
+ ["Capturas","CAPTURAS.jpg"],
+ ["Hurto a Motocicletas","- Hurto a Motocicletas.jpg"],
+ ["Hurto a Personas","- Hurto a Personas.jpg"]
+]);
+function rutaImagenDelito(crime){
+ const filename=CRIME_IMAGE_FILE_OVERRIDES.get(crime.name)||`${crime.name}.jpg`;
+ return new URL(`assets/images/categoria y delitos/delitos/${filename}`,document.baseURI).href;
+}
+function visualDelitos(source,description){
+ return `<div class="data-hero-visual" role="img" aria-label="${htmlSeguro(description)}" style="--category-image:url('${htmlSeguro(source)}')"></div>`;
+}
+function visualCategoria(category){
+ const source=new URL(`assets/images/categoria y delitos/${category.name}.jpg`,document.baseURI).href;
+ return visualDelitos(source,`Imagen de la categoría ${category.name}`);
+}
+function visualDelito(category,crime){
+ return visualDelitos(rutaImagenDelito(crime),`Imagen de ${crime.name}, categoría ${category.name}`);
+}
 const heroCarousel=document.getElementById("heroCarousel");
 const categoryLabel=document.getElementById("carouselCategory");
 const pts=document.getElementById("dots");
