@@ -16,13 +16,14 @@ dvQ.addEventListener("input",()=>{
 });
 dvTg.addEventListener("click",()=>{const open=dvSide.classList.toggle("open");dvTg.setAttribute("aria-expanded",String(open))});
 const CATALOGO=window.INDECOL_CATALOGO;
-if(!CATALOGO)throw new Error("No se pudo cargar assets/data/catalogo.js. Genera el catálogo desde DataBase/hecho.csv.");
+if(!CATALOGO)throw new Error("No se pudo cargar assets/data/catalogo.js. Genera el catálogo desde DataBase/Delitos_final.csv.");
 const CATEGORIAS=CATALOGO.categories;
 const DELITOS_DATA=CATEGORIAS.flatMap(c=>c.crimes.map(d=>({...d,category:c})));
 const CATEGORIA_POR_ID=new Map(CATEGORIAS.map(c=>[c.id,c]));
 const DELITO_POR_ID=new Map(DELITOS_DATA.map(d=>[d.id,d]));
 const htmlSeguro=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 const fmtData=value=>Number(value||0).toLocaleString("es-CO",{maximumFractionDigits:2});
+const casos=item=>Number(item?.cases ?? 0);
 const periodo=items=>items.length?`${items[0].year}–${items[items.length-1].year}`:"Sin fechas válidas";
 const monthsData=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 const coberturaAnual=new Map((CATALOGO.yearCoverage||[]).map(item=>[item.year,item]));
@@ -72,21 +73,21 @@ function graficaAnillo(items,valueOf,labelOf,title){
  const segments=entries.map((entry,index)=>{
   const length=circumference*entry.value/total;
   const color=colors[index%colors.length];
-  const segment=`<circle class="data-donut-segment" cx="110" cy="110" r="68" stroke="${color}" stroke-dasharray="${length.toFixed(2)} ${(circumference-length).toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" transform="rotate(-90 110 110)"><title>${htmlSeguro(labelOf(entry.item))}: ${fmtData(entry.value)} (${(entry.value/total*100).toFixed(1).replace(".",",")}%)</title></circle>`;
+  const segment=`<circle class="data-donut-segment" cx="110" cy="110" r="68" stroke="${color}" stroke-dasharray="0 ${circumference.toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" style="--donut-length:${length.toFixed(2)}px;--donut-circumference:${circumference.toFixed(2)}px;--donut-index:${index}" transform="rotate(-90 110 110)"><title>${htmlSeguro(labelOf(entry.item))}: ${fmtData(entry.value)} (${(entry.value/total*100).toFixed(1).replace(".",",")}%)</title></circle>`;
   offset+=length;
   return segment;
  }).join("");
  const legend=entries.map((entry,index)=>{
   const color=colors[index%colors.length];
   const share=`${(entry.value/total*100).toFixed(1).replace(".",",")}%`;
-  return `<li><i aria-hidden="true" style="--donut-color:${color}"></i><span class="data-donut-label">${htmlSeguro(labelOf(entry.item))}</span><strong>${share}<small>${fmtData(entry.value)} registros</small></strong></li>`;
+  return `<li style="--donut-index:${index}"><i aria-hidden="true" style="--donut-color:${color}"></i><span class="data-donut-label">${htmlSeguro(labelOf(entry.item))}</span><strong>${share}<small>${fmtData(entry.value)} casos</small></strong></li>`;
  }).join("");
- return `<div class="data-donut-layout">
+ return `<div class="data-donut-layout" data-graph-donut>
   <svg class="data-donut" viewBox="0 0 220 220" role="img" aria-label="${htmlSeguro(title)}">
    <circle class="data-donut-track" cx="110" cy="110" r="68"/>
    ${segments}
    <text class="data-donut-total" x="110" y="106" text-anchor="middle">${fmtData(total)}</text>
-   <text class="data-donut-caption" x="110" y="127" text-anchor="middle">registros</text>
+   <text class="data-donut-caption" x="110" y="127" text-anchor="middle">casos</text>
   </svg>
   <ul class="data-donut-legend">${legend}</ul>
  </div>`;
@@ -117,12 +118,20 @@ function graficaLineas(series,labels,title){
 }
 const movimientoReducido=matchMedia("(prefers-reduced-motion: reduce)");
 const animacionesNumero=new WeakMap();
-let observadorAnalisis=null;
+// Un único observador para todos los gráficos del sitio: cada bloque se anima cuando entra en pantalla.
+const observadorAnalisis="IntersectionObserver"in window?new IntersectionObserver(entradas=>{
+ entradas.forEach(entrada=>{
+  if(!entrada.isIntersecting)return;
+  observadorAnalisis.unobserve(entrada.target);
+  revelarAnalisis(entrada.target);
+ });
+},{threshold:.12}):null;
+const enSiguienteCuadro=fn=>requestAnimationFrame(()=>requestAnimationFrame(fn));
 function animarNumero(elemento){
  const objetivo=Number(elemento.dataset.countValue);
+ const token={};animacionesNumero.set(elemento,token);
  if(!Number.isFinite(objetivo)){elemento.textContent="N/D";return}
  if(movimientoReducido.matches){elemento.textContent=fmtData(objetivo);return}
- const token={};animacionesNumero.set(elemento,token);
  const inicio=performance.now(),duracion=1050;
  elemento.textContent="0";
  function actualizar(ahora){
@@ -135,47 +144,51 @@ function animarNumero(elemento){
  requestAnimationFrame(actualizar);
 }
 function revelarAnalisis(bloque){
- if(bloque.classList.contains("data-revealed"))return;
+ const yaRevelado=bloque.classList.contains("data-revealed");
  bloque.classList.add("data-revealed");
- bloque.querySelectorAll("[data-count-value]").forEach(animarNumero);
+ bloque.querySelectorAll("[data-count-value]").forEach(numero=>{if(!animacionesNumero.has(numero))animarNumero(numero)});
  bloque.querySelectorAll("[data-bar-target]").forEach(barra=>{
-  requestAnimationFrame(()=>barra.classList.add("data-bar-revealed"));
+  enSiguienteCuadro(()=>barra.classList.add("data-bar-revealed"));
  });
  bloque.querySelectorAll("[data-graph-line]").forEach(linea=>{
-  requestAnimationFrame(()=>linea.classList.add("data-line-revealed"));
+  enSiguienteCuadro(()=>linea.classList.add("data-line-revealed"));
  });
- bloque.querySelectorAll(".data-crime").forEach((tarjeta,index)=>{
+ bloque.querySelectorAll("[data-graph-donut]").forEach(anillo=>{
+  enSiguienteCuadro(()=>anillo.classList.add("data-donut-revealed"));
+ });
+ if(!yaRevelado)bloque.querySelectorAll(".data-crime").forEach((tarjeta,index)=>{
   requestAnimationFrame(()=>setTimeout(()=>tarjeta.classList.add("data-card-revealed"),index*45));
  });
+}
+// Devuelve un bloque a su estado inicial para que la animación se repita al volver a la página.
+function reiniciarGrafico(bloque){
+ bloque.classList.remove("data-revealed");
+ bloque.querySelectorAll(".data-bar-revealed").forEach(item=>item.classList.remove("data-bar-revealed"));
+ bloque.querySelectorAll(".data-line-revealed").forEach(item=>item.classList.remove("data-line-revealed"));
+ bloque.querySelectorAll(".data-donut-revealed").forEach(item=>item.classList.remove("data-donut-revealed"));
+ bloque.querySelectorAll(".data-card-revealed").forEach(item=>item.classList.remove("data-card-revealed"));
+ bloque.querySelectorAll("[data-count-value]").forEach(item=>{animacionesNumero.delete(item);item.textContent="0"});
 }
 function revelarAnalisisVisibles(){
  requestAnimationFrame(()=>{
   document.querySelectorAll(".pg.active .data-animate:not(.data-revealed)").forEach(bloque=>{
    const limites=bloque.getBoundingClientRect();
-   if(limites.top>=innerHeight||limites.bottom<=0)return;
+   if(!limites.height||limites.top>=innerHeight||limites.bottom<=0)return;
    observadorAnalisis?.unobserve(bloque);
    revelarAnalisis(bloque);
   });
  });
 }
-function animarAnalisis(raiz){
- observadorAnalisis?.disconnect();
+function animarAnalisis(raiz,reiniciar=false){
  const bloques=[...raiz.querySelectorAll(".data-animate")];
- if(movimientoReducido.matches||!("IntersectionObserver"in window)){
-  bloques.forEach(revelarAnalisis);
-  return;
- }
- observadorAnalisis=new IntersectionObserver(entradas=>{
-  entradas.forEach(entrada=>{
-   if(!entrada.isIntersecting)return;
-   observadorAnalisis.unobserve(entrada.target);
-   revelarAnalisis(entrada.target);
-  });
- },{threshold:.12});
- bloques.forEach(bloque=>observadorAnalisis.observe(bloque));
- const cabecera=raiz.querySelector(".data-hero");
- if(cabecera)revelarAnalisis(cabecera);
- requestAnimationFrame(revelarAnalisisVisibles);
+ if(raiz.classList?.contains("data-animate"))bloques.unshift(raiz);
+ bloques.forEach(bloque=>{
+  if(reiniciar){observadorAnalisis?.unobserve(bloque);reiniciarGrafico(bloque)}
+  if(bloque.classList.contains("data-revealed"))return;
+  if(movimientoReducido.matches||!observadorAnalisis){revelarAnalisis(bloque);return}
+  observadorAnalisis.observe(bloque);
+ });
+ revelarAnalisisVisibles();
 }
 addEventListener("scroll",revelarAnalisisVisibles,{passive:true});
 addEventListener("resize",revelarAnalisisVisibles);
@@ -207,37 +220,40 @@ function paginaCategoria(id){
  const period=periodo(category.years);
  const annualBars=category.years.map(item=>({
   label:etiquetaAnual(item.year),
-  value:item.records
+  value:casos(item)
  }));
- const leadingCrime=[...category.crimes].sort((a,b)=>b.records-a.records)[0];
- const leadingShare=category.records?leadingCrime.records/category.records*100:0;
+ const categoryCases=casos(category);
+ const leadingCrime=[...category.crimes].sort((a,b)=>casos(b)-casos(a))[0];
+ const leadingShare=categoryCases?casos(leadingCrime)/categoryCases*100:0;
  dvMain.innerHTML=`<article class="data-page">
   <header class="data-hero data-animate">
   <div class="data-hero-copy">
    <span class="data-eyebrow">${htmlSeguro(category.icon)} Categoría</span>
    <h2>${htmlSeguro(category.name)}</h2>
-   <p>En ${period}, esta categoría reúne ${fmtData(category.records)} registros SIEDCO. ${leadingCrime?`${htmlSeguro(leadingCrime.name)} aporta ${leadingShare.toFixed(1).replace(".",",")}% de ellos;`:""} el gráfico resume sus filas por año y el listado permite abrir el detalle de cada delito. Un registro no equivale necesariamente a un incidente único.</p>
+   <p>En ${period}, esta categoría reúne ${fmtData(categoryCases)} casos según la columna casos de SIEDCO. ${leadingCrime?`${htmlSeguro(leadingCrime.name)} aporta ${leadingShare.toFixed(1).replace(".",",")}% de ellos;`:""} el gráfico resume los casos por año y el listado permite abrir el detalle de cada delito.</p>
   </div>
   ${visualCategoria(category)}
    <div class="data-stats">
-    <div><b data-count-value="${category.records}">0</b><span>Registros tabulados</span></div>
+    <div><b data-count-value="${categoryCases}">0</b><span>Casos reportados</span></div>
     <div><b data-count-value="${category.crimeCount}">0</b><span>Delitos incluidos</span></div>
     <div><b data-count-value="${category.municipalityCount}">0</b><span>Municipios distintos</span></div>
    </div>
   </header>
    <section class="data-panel data-animate">
-   <h3>Registros por año</h3>
-   <p>Conteo de filas registradas en cada año. Los años incompletos se indican como parciales; amarillo resalta los tres años de mayor valor.</p>
+   <h3>Casos por año</h3>
+     <p>Este gráfico compara la suma de casos registrada en cada año de la categoría. La altura de cada barra muestra el volumen relativo frente al año más alto del periodo y el valor superior permite revisar el total exacto. Los años parciales se identifican en la etiqueta y no deben compararse como si tuvieran doce meses.</p>
    ${graficaDatos(annualBars,item=>item.value,item=>item.label)}
+   ${parrafoLectura(lecturaAnual(category.years.map(item=>({year:item.year,value:casos(item)})),`En ${category.name.toLowerCase()}, `))}
   </section>
   <section class="data-panel data-animate">
    <h3>Delitos de esta categoría</h3>
-   <p>Selecciona un delito para consultar su evolución anual y mensual, además de los municipios con más registros.</p>
+   <p>Selecciona un delito para consultar su evolución anual y mensual, además de los municipios con más casos. Cada tarjeta indica el total del delito en el periodo, de modo que puedes comparar de un vistazo cuáles aportan más casos a la categoría.</p>
+   ${parrafoLectura(lecturaRanking(category.crimes,{valor:casos,etiqueta:item=>item.name,total:categoryCases,plural:"delitos"}))}
    <div class="data-crimes">${category.crimes.map(crime=>`<a class="data-crime" href="#delitos/${encodeURIComponent(category.id)}/${encodeURIComponent(crime.id)}">
-    <span class="data-crime-image" aria-hidden="true" style="--crime-image:url('${htmlSeguro(rutaImagenDelito(crime))}')"></span><span class="data-crime-info"><b>${htmlSeguro(crime.name)}</b><small><span data-count-value="${crime.records}">0</span> registros tabulados · ${htmlSeguro(periodo(crime.years))}</small></span><span class="data-arrow" aria-hidden="true">→</span>
+    <span class="data-crime-image" aria-hidden="true" style="--crime-image:url('${htmlSeguro(rutaImagenDelito(crime))}')"></span><span class="data-crime-info"><b>${htmlSeguro(crime.name)}</b><small><span data-count-value="${casos(crime)}">0</span> casos · ${htmlSeguro(periodo(crime.years))}</small></span><span class="data-arrow" aria-hidden="true">→</span>
    </a>`).join("")}</div>
   </section>
-  <p class="data-note">Se cuenta una fila por registro reportado en SIEDCO. Los años parciales se identifican en las etiquetas.</p>
+  <p class="data-note">Los indicadores suman la columna casos de SIEDCO. Los años parciales se identifican en las etiquetas.</p>
  </article>`;
  animarAnalisis(dvMain);
 }
@@ -251,51 +267,54 @@ function paginaDelito(categoryId,crimeId,selectedYear){
  activarCategoria(category.id,crime.id);
  const year=crime.years.find(item=>item.year===Number(selectedYear))||crime.years.at(-1);
  const annualSeries=[{
-  name:"Registros",
-  values:crime.years.map(item=>item.records)
+  name:"Casos",
+  values:crime.years.map(casos)
  }];
  const monthItems=year?.months||[];
  const monthlySeries=[{
-  name:"Registros",
-  values:monthItems.map(item=>item.records),
+   name:"Casos",
+   values:monthItems.map(casos),
   labels:monthItems.map(item=>monthsData[item.month-1]||item.month)
  }];
  const places=crime.municipalities.map(item=>({
   label:item.department?`${item.name} · ${item.department}`:item.name,
-  value:item.records
+  value:casos(item)
  }));
- const placesDescription="Municipios con mayor cantidad de filas para este delito, con departamento para distinguir nombres repetidos.";
+ const placesDescription="Municipios con más casos reportados para este delito, con departamento para distinguir nombres repetidos.";
  dvMain.innerHTML=`<article class="data-page">
   <a class="data-back" href="#delitos/${encodeURIComponent(category.id)}">← Análisis de ${htmlSeguro(category.name)}</a>
   <header class="data-hero data-animate">
    <div class="data-hero-copy">
     <span class="data-eyebrow">${htmlSeguro(category.icon)} ${htmlSeguro(category.name)}</span>
     <h2>${htmlSeguro(crime.name)}</h2>
-    <p>En ${htmlSeguro(periodo(crime.years))}, SIEDCO reúne ${fmtData(crime.records)} registros para este delito. Aquí puedes consultar su evolución anual y mensual y los municipios con más filas; el conteo no equivale necesariamente al número de personas o incidentes únicos.</p>
+    <p>En ${htmlSeguro(periodo(crime.years))}, SIEDCO registra ${fmtData(casos(crime))} casos para este delito. Aquí puedes consultar su evolución anual y mensual y los municipios con más casos.</p>
    </div>
    ${visualDelito(category,crime)}
    <div class="data-stats">
-    <div><b data-count-value="${crime.records}">0</b><span>Registros tabulados</span></div>
+    <div><b data-count-value="${casos(crime)}">0</b><span>Casos reportados</span></div>
     <div><b data-count-value="${crime.municipalityCount}">0</b><span>Municipios distintos</span></div>
    </div>
   </header>
    <section class="data-panel data-animate">
-   <h3>Registros por año</h3>
-   <p>Conteo de filas registradas para este delito por año; los años incompletos se indican como parciales.</p>
-   ${graficaLineas(annualSeries,crime.years.map(item=>String(item.year)),"Evolución anual de registros")}
+   <h3>Casos por año</h3>
+    <p>La línea permite observar cómo cambia el total anual de este delito durante el periodo. Cada punto representa la suma de la columna casos para ese año; su etiqueta facilita comparar los valores. Considera que el último año puede estar incompleto y que los cambios describen reportes, no tasas de riesgo.</p>
+   ${graficaLineas(annualSeries,crime.years.map(item=>String(item.year)),"Evolución anual de casos")}
+   ${parrafoLectura(lecturaAnual(crime.years.map(item=>({year:item.year,value:casos(item)}))))}
   </section>
   <section class="data-panel data-animate">
-   <div class="data-panel-heading"><div><h3>Registros por mes</h3><p>Filas de este delito durante el año seleccionado; amarillo destaca los tres meses con más registros.</p></div>
+   <div class="data-panel-heading"><div><h3>Casos por mes</h3><p>Este gráfico desglosa el año elegido en meses y muestra la suma mensual de casos. Úsalo para comparar la distribución dentro de ese año; no representa una predicción ni explica por sí solo las causas de las variaciones.</p></div>
     <label>Año <select id="dataYear">${crime.years.map(item=>`<option value="${item.year}"${item.year===year?.year?" selected":""}>${etiquetaAnual(item.year)}</option>`).join("")}</select></label>
    </div>
-   <div id="dataMonths">${graficaLineas(monthlySeries,monthItems.map(item=>monthsData[item.month-1]||item.month),"Cantidad de delitos por mes")}</div>
+   <div id="dataMonths">${graficaLineas(monthlySeries,monthItems.map(item=>monthsData[item.month-1]||item.month),"Casos por mes")}</div>
+   ${parrafoLectura(lecturaMensual(monthItems,year?.year),"dataMonthsReading")}
   </section>
   <section class="data-panel data-animate">
-   <h3>Registros por municipio</h3>
-   <p>${placesDescription} Los tres primeros valores se resaltan en amarillo.</p>
+   <h3>Casos por municipio</h3>
+   <p>${placesDescription} Las barras facilitan comparar los municipios incluidos en el catálogo, y los valores a la derecha muestran los casos contabilizados. Revisa también el departamento indicado junto al municipio, pues algunos nombres se repiten en distintas zonas.</p>
    ${graficaDatos(places,item=>item.value,item=>item.label,true)}
+   ${parrafoLectura(lecturaRanking(places,{valor:item=>item.value,etiqueta:item=>item.label,total:casos(crime),plural:"municipios"}))}
   </section>
-  <p class="data-note">Este análisis cuenta filas reportadas en SIEDCO; no equivale necesariamente al número de personas o incidentes únicos. Los años parciales se identifican en las etiquetas.</p>
+  <p class="data-note">Este análisis suma la columna casos de SIEDCO. Los años parciales se identifican en las etiquetas.</p>
  </article>`;
  animarAnalisis(dvMain);
  const yearSelect=document.getElementById("dataYear");
@@ -304,19 +323,123 @@ function paginaDelito(categoryId,crimeId,selectedYear){
   const values=selected?.months||[];
   const months=document.getElementById("dataMonths");
   months.innerHTML=graficaLineas(
-   [{name:"Registros",values:values.map(item=>item.records)}],
+   [{name:"Casos",values:values.map(casos)}],
    values.map(item=>monthsData[item.month-1]||item.month),
-   "Cantidad de delitos por mes"
+   "Casos por mes"
   );
+  escribirLectura("dataMonthsReading",lecturaMensual(values,selected?.year));
   months.classList.remove("data-revealed");
   revelarAnalisis(months);
  });
 }
 const totalAnual=new Map();
 CATALOGO.categories.forEach(category=>category.years.forEach(item=>{
- totalAnual.set(item.year,(totalAnual.get(item.year)||0)+item.records);
+ totalAnual.set(item.year,(totalAnual.get(item.year)||0)+casos(item));
 }));
-const porcentaje=(valor,total)=>total?`${(valor/total*100).toFixed(1).replace(".",",")}%`:"0%";
+const porcentaje=(valor,total)=>{
+ if(!total)return"0%";
+ const share=valor/total*100;
+ return share>0&&share<.05?"<0,1%":`${share.toFixed(1).replace(".",",")}%`;
+};
+// ===== lecturas: párrafos que describen cada gráfico con las cifras que muestra =====
+const MESES_COMPLETOS=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const fmtDecimal=value=>value.toFixed(1).replace(".",",");
+const fmtEntero=value=>fmtData(Math.round(value));
+const listaHumana=items=>items.length<2?items.join(""):`${items.slice(0,-1).join(", ")} y ${items.at(-1)}`;
+const parrafoLectura=(texto,id="")=>`<p class="chart-reading"${id?` id="${id}"`:""}><b>Lectura de los datos.</b> ${htmlSeguro(texto)}</p>`;
+function escribirLectura(id,texto){
+ const elemento=document.getElementById(id);
+ if(elemento)elemento.innerHTML=`<b>Lectura de los datos.</b> ${htmlSeguro(texto)}`;
+}
+function lecturaRanking(items,{valor,etiqueta,total,plural,contexto=""}){
+ const datos=items.map(item=>({nombre:etiqueta(item),valor:valor(item)}))
+  .filter(item=>item.valor>0).sort((a,b)=>b.valor-a.valor);
+ if(!datos.length)return"No hay casos para describir en esta selección.";
+ const suma=datos.reduce((acc,item)=>acc+item.valor,0);
+ const base=total||suma;
+ const [primero,segundo,tercero]=datos;
+ const partes=[`${contexto}${primero.nombre} ocupa el primer lugar con ${fmtData(primero.valor)} casos, el ${porcentaje(primero.valor,base)} del total.`];
+ if(segundo)partes.push(`Le sigue ${segundo.nombre}, con ${fmtData(segundo.valor)} casos (${porcentaje(segundo.valor,base)})${primero.valor>=segundo.valor*1.5?`; el primer lugar lo supera ${fmtDecimal(primero.valor/segundo.valor)} veces`:""}.`);
+ if(tercero){
+  const top3=primero.valor+segundo.valor+tercero.valor;
+  partes.push(`Los tres primeros lugares, completados por ${tercero.nombre}, reúnen ${porcentaje(top3,base)} de los casos.`);
+ }
+ if(datos.length>3){
+  const ultimo=datos.at(-1);
+  partes.push(`En el otro extremo del gráfico, ${ultimo.nombre} suma ${fmtData(ultimo.valor)} casos (${porcentaje(ultimo.valor,base)}).`);
+ }
+ if(total&&suma<total)partes.push(`Los ${datos.length} ${plural} visibles representan ${porcentaje(suma,total)} del total de la selección.`);
+ return partes.join(" ");
+}
+function lecturaAnual(puntos,contexto=""){
+ const validos=puntos.filter(item=>Number.isFinite(item.value));
+ if(!validos.some(item=>item.value>0))return"No hay casos anuales para describir en esta selección.";
+ const completos=validos.filter(item=>periodosCompletos.has(item.year));
+ const base=completos.length?completos:validos;
+ const maximo=base.reduce((a,b)=>b.value>a.value?b:a);
+ const minimo=base.reduce((a,b)=>b.value<a.value?b:a);
+ const promedio=base.reduce((acc,item)=>acc+item.value,0)/base.length;
+ const apertura=completos.length?"entre los años completos":"en los años disponibles";
+ const partes=[`${contexto||apertura[0].toUpperCase()}${contexto?apertura:apertura.slice(1)}, el máximo se registró en ${maximo.year} con ${fmtData(maximo.value)} casos y el mínimo en ${minimo.year} con ${fmtData(minimo.value)}; el promedio es de ${fmtEntero(promedio)} casos por año.`];
+ if(completos.length>=2){
+  const primero=completos[0],ultimo=completos.at(-1);
+  if(primero.value){
+   const cambio=(ultimo.value-primero.value)/primero.value*100;
+   partes.push(`De ${primero.year} a ${ultimo.year} el total ${cambio>=0?"aumentó":"disminuyó"} ${fmtDecimal(Math.abs(cambio))}%, al pasar de ${fmtData(primero.value)} a ${fmtData(ultimo.value)} casos.`);
+  }
+ }
+ const parcial=validos.find(item=>anioParcial(item.year));
+ if(parcial){
+  const meses=coberturaAnual.get(parcial.year)?.monthsAvailable.length||12;
+  const ultimoMes=MESES_COMPLETOS[(coberturaAnual.get(parcial.year)?.monthsAvailable.at(-1)||12)-1];
+  partes.push(`${parcial.year} solo incluye datos hasta ${ultimoMes} (${meses} meses): suma ${fmtData(parcial.value)} casos, unos ${fmtEntero(parcial.value/meses)} por mes${completos.length?`, frente a ${fmtEntero(promedio/12)} por mes en promedio en los años completos`:""}.`);
+ }
+ return partes.join(" ");
+}
+function lecturaMensual(meses,year){
+ const datos=meses.map(item=>({nombre:MESES_COMPLETOS[item.month-1]||String(item.month),valor:casos(item)}));
+ const total=datos.reduce((acc,item)=>acc+item.valor,0);
+ if(!total)return`No hay casos mensuales para ${year}.`;
+ const maximo=datos.reduce((a,b)=>b.valor>a.valor?b:a);
+ const minimo=datos.reduce((a,b)=>b.valor<a.valor?b:a);
+ const partes=[`En ${year} se suman ${fmtData(total)} casos en ${datos.length} meses, con un promedio de ${fmtEntero(total/datos.length)} por mes.`,
+  `El mes con más casos fue ${maximo.nombre} (${fmtData(maximo.valor)}, ${porcentaje(maximo.valor,total)} del año) y el de menos, ${minimo.nombre} (${fmtData(minimo.valor)}).`];
+ if(minimo.valor)partes.push(`La diferencia entre ambos meses es de ${fmtData(maximo.valor-minimo.valor)} casos, es decir, el mes más alto supera al más bajo en ${fmtDecimal((maximo.valor/minimo.valor-1)*100)}%.`);
+ if(anioParcial(year))partes.push(`Este año aún está incompleto, por lo que su total no es comparable con el de un año entero.`);
+ return partes.join(" ");
+}
+function renderHomeInsight(){
+ const leadingCrime=[...DELITOS_DATA].sort((a,b)=>casos(b)-casos(a))[0];
+ if(!leadingCrime)return;
+ const total=CATALOGO.totalCases;
+ const periodoTotal=`${CATALOGO.years[0]}–${CATALOGO.years.at(-1)}`;
+ const share=porcentaje(casos(leadingCrime),total);
+ const rankingDelitos=[...DELITOS_DATA].sort((a,b)=>casos(b)-casos(a));
+ const [,segundoDelito,tercerDelito]=rankingDelitos;
+ const anioPico=[...leadingCrime.years].filter(item=>periodosCompletos.has(item.year)).sort((a,b)=>casos(b)-casos(a))[0];
+ const unoDeCada=casos(leadingCrime)?Math.round(total/casos(leadingCrime)):0;
+ const insightValue=document.getElementById("homeInsightValue");
+ insightValue.dataset.countValue=casos(leadingCrime);
+ insightValue.textContent=fmtData(casos(leadingCrime));
+ document.getElementById("homeInsightLabel").textContent=`casos de ${leadingCrime.name.toLowerCase()}`;
+ document.getElementById("homeInsightFootnote").textContent=
+  `${share} de los ${fmtData(total)} casos de la base · ${periodoTotal}`;
+ document.getElementById("homeInsightText").textContent=
+  `${leadingCrime.name} es el delito con más casos de la base SIEDCO: suma ${fmtData(casos(leadingCrime))} entre ${CATALOGO.years[0]} y ${CATALOGO.years.at(-1)}, cerca de 1 de cada ${unoDeCada} casos registrados.${anioPico?` Su año completo más alto fue ${anioPico.year}, con ${fmtData(casos(anioPico))} casos.`:""}${segundoDelito&&tercerDelito?` Lo siguen ${segundoDelito.name} (${fmtData(casos(segundoDelito))}) y ${tercerDelito.name} (${fmtData(casos(tercerDelito))}).`:""}`;
+ const rankingCategorias=[...CATALOGO.categories].sort((a,b)=>casos(b)-casos(a));
+ const leadingCategory=rankingCategorias[0];
+ const top3Categorias=rankingCategorias.slice(0,3);
+ const top5Delitos=rankingDelitos.slice(0,5).reduce((acc,item)=>acc+casos(item),0);
+ document.getElementById("projectOverview").textContent=
+  `En el periodo ${periodoTotal}, la base reúne ${fmtData(total)} casos distribuidos en ${CATALOGO.crimeCount} delitos y ${CATALOGO.categoryCount} categorías. ${leadingCategory.name} es la categoría más numerosa, con ${fmtData(casos(leadingCategory))} casos (${porcentaje(casos(leadingCategory),total)} del total), y junto con ${listaHumana(top3Categorias.slice(1).map(item=>item.name))} concentra ${porcentaje(top3Categorias.reduce((acc,item)=>acc+casos(item),0),total)} de los registros. En el detalle por delito, ${leadingCrime.name} encabeza la lista con ${fmtData(casos(leadingCrime))} casos (${share}), y los cinco delitos más frecuentes suman ${porcentaje(top5Delitos,total)} de la base. Estas participaciones describen cómo se distribuyen los reportes; no son una probabilidad individual ni una tasa de criminalidad.`;
+ const anuales=[...totalAnual].sort((a,b)=>a[0]-b[0]).map(([year,value])=>({year,value}));
+ const departamentos=[...departmentTotals].map(([key,value])=>({
+  name:mapaDepartamentos.departments.find(item=>item.key===key)?.name||key,value
+ })).sort((a,b)=>b.value-a.value);
+ const top5Deptos=departamentos.slice(0,5).reduce((acc,item)=>acc+item.value,0);
+ document.getElementById("projectTrend").textContent=
+  `${lecturaAnual(anuales,"En el total nacional, ")} En el territorio, la información cubre ${fmtData(zonaMunicipios.size)} municipios de ${mapaDepartamentos.departments.length} departamentos: ${departamentos[0]?.name} reúne ${porcentaje(departamentos[0]?.value||0,totalTerritorialRecords)} de los casos con departamento identificado y los cinco departamentos con más casos suman ${porcentaje(top5Deptos,totalTerritorialRecords)}.`;
+}
 let departmentPinnedKey="";
 function descargarCSV(nombre,filas){
  const escapeCsv=value=>`"${String(value??"").replace(/"/g,'""')}"`;
@@ -361,7 +484,7 @@ function rangoZonaActual(){
 }
 function registrosEnRango(years,range=rangoAnalisisActual()){
  return (years||[]).reduce((sum,item)=>
-  item.year>=range.startYear&&item.year<=range.endYear?sum+item.records:sum,0);
+  item.year>=range.startYear&&item.year<=range.endYear?sum+casos(item):sum,0);
 }
 function registrosDelitoEnArea(crime,range){
  if(!departmentPinnedKey)return registrosEnRango(crime.years,range);
@@ -391,10 +514,8 @@ function renderAnalisisGeneral(){
   departmentPinnedKey?`Análisis de ${area}`:"Análisis de Colombia";
  document.getElementById("analysisIntro").textContent=
   departmentPinnedKey
-   ?`Explora los registros de ${area} entre ${startYear} y ${endYear}. Compara categorías, delitos y cambios anuales para este territorio.`
-   :`Compara categorías, delitos y años en el panorama nacional. Selecciona un departamento para enfocar los resultados y revisar sus registros.`;
- document.getElementById("analysisScopeNote").textContent=
-  `Las tarjetas resumen la consulta; el mapa y los gráficos permiten explorar departamentos, categorías, delitos y años.`;
+   ?`Explora los casos de ${area} entre ${startYear} y ${endYear}. Compara categorías, delitos y cambios anuales para este territorio.`
+   :`Compara categorías, delitos y años en el panorama nacional según los casos reportados. Selecciona un departamento para enfocar los resultados.`;
  const crimeRank=DELITOS_DATA.map(crime=>({...crime,filteredRecords:registrosDelitoEnArea(crime,range)}))
   .sort((a,b)=>b.filteredRecords-a.filteredRecords);
  const categoryRank=CATALOGO.categories.map(category=>({
@@ -421,29 +542,35 @@ function renderAnalisisGeneral(){
  const change=previousYear&&lastCompleteYear[1]
   ?(lastCompleteYear[1]-previousYear[1])/previousYear[1]*100:null;
  const changeText=change===null?"No hay dos años completos para comparar."
-  :`En ${area}, entre ${previousYear[0]} y ${lastCompleteYear[0]}, los registros ${change>=0?"aumentaron":"disminuyeron"} ${Math.abs(change).toFixed(1).replace(".",",")}% (${fmtData(previousYear[1])} a ${fmtData(lastCompleteYear[1])}).`;
+  :`En ${area}, entre ${previousYear[0]} y ${lastCompleteYear[0]}, los casos ${change>=0?"aumentaron":"disminuyeron"} ${Math.abs(change).toFixed(1).replace(".",",")}% (${fmtData(previousYear[1])} a ${fmtData(lastCompleteYear[1])}).`;
  document.getElementById("analysisFindings").innerHTML=[
-  {label:"Cobertura filtrada",value:`${crimeRank.filter(crime=>crime.filteredRecords>0).length} delitos`,detail:`${area} · ${startYear}–${endYear} · ${fmtData(filteredTotal)} registros`},
+  {label:"Cobertura filtrada",value:`${crimeRank.filter(crime=>crime.filteredRecords>0).length} delitos`,detail:`${area} · ${startYear}–${endYear} · ${fmtData(filteredTotal)} casos`},
   {label:"Mayor volumen por categoría",value:leadingCategory?.name||"—",detail:`${porcentaje(leadingCategory?.filteredRecords||0,filteredTotal)} del total filtrado`},
-  {label:"Delito con más registros",value:leadingCrime?.name||"—",detail:`${porcentaje(leadingCrime?.filteredRecords||0,filteredTotal)} del total filtrado`},
+  {label:"Delito con más casos",value:leadingCrime?.name||"—",detail:`${porcentaje(leadingCrime?.filteredRecords||0,filteredTotal)} del total filtrado`},
   {label:"Cambio anual",value:change===null?"—":`${change>=0?"+":"−"}${Math.abs(change).toFixed(1).replace(".",",")}%`,detail:changeText}
  ].map(item=>`<article class="finding-card"><span>${htmlSeguro(item.label)}</span><strong>${htmlSeguro(item.value)}</strong><small>${htmlSeguro(item.detail)}</small></article>`).join("");
  const fewestCrimes=[...crimeRank].filter(crime=>crime.filteredRecords>0).reverse().slice(0,3);
  document.getElementById("analysisLowCrimes").textContent=fewestCrimes.length
-  ?`En ${area}, los delitos con menos registros entre ${startYear} y ${endYear} son ${fewestCrimes.map(crime=>`${crime.name} (${fmtData(crime.filteredRecords)}; categoría: ${crime.category.name})`).join("; ")}. Son conteos, no tasas ni una medida de hechos únicos.`
-  :`No hay registros para ${area} en el periodo ${startYear}–${endYear}.`;
+  ?`En ${area}, los delitos con menos casos entre ${startYear} y ${endYear} son ${fewestCrimes.map(crime=>`${crime.name} (${fmtData(crime.filteredRecords)}; categoría: ${crime.category.name})`).join("; ")}.`
+  :`No hay casos reportados para ${area} en el periodo ${startYear}–${endYear}.`;
  document.getElementById("analysisFilterSummary").textContent=
   `Mostrando ${area} · ${startYear}–${endYear}; la comparación anual usa solo años completos.`;
  document.getElementById("analysisMapDescription").textContent=
-  `El mapa muestra los conteos departamentales de ${startYear}–${endYear}. Selecciona un departamento para filtrar todos los gráficos y consultar sus delitos más registrados. Son conteos, no tasas ajustadas por población.`;
+  `El color de cada departamento representa la suma de casos de ${startYear}–${endYear} respecto a los demás territorios visibles. Pasa el cursor o enfoca un departamento para consultar su resumen; selecciónalo para filtrar las tarjetas y los gráficos. El mapa muestra totales absolutos, no tasas ajustadas por población.`;
  document.getElementById("analysisCategoriesDescription").textContent=
-  `Cada segmento representa una categoría: su tamaño corresponde a la proporción de registros dentro del total filtrado. La leyenda muestra el conteo y el porcentaje de ${area} entre ${startYear} y ${endYear}; el amarillo señala las tres categorías con más filas. Son conteos, no tasas ajustadas por población.`;
+  `El anillo reparte los ${fmtData(filteredTotal)} casos del filtro entre las categorías con actividad. El tamaño de cada segmento corresponde a su participación porcentual y la leyenda indica tanto el porcentaje como el total de casos; así puedes identificar qué temas concentran más reportes en ${area}.`;
  document.getElementById("analysisCrimesDescription").textContent=
-  `Las barras ordenan los diez delitos con más registros en ${area} entre ${startYear} y ${endYear}: una barra más larga indica un conteo mayor y la etiqueta incluye su porcentaje del total filtrado. El amarillo destaca los tres primeros. No son tasas ni personas únicas.`;
+  `Estas barras ordenan los diez delitos con mayor número de casos en ${area} entre ${startYear} y ${endYear}. La longitud compara cada delito con el valor más alto del listado y la cifra al final conserva el conteo exacto; el porcentaje de la etiqueta indica su peso sobre el total filtrado.`;
  document.getElementById("analysisYearsDescription").textContent=
-  `Cada punto muestra el total de registros reportados en un año: el eje horizontal indica el año y la cifra junto al punto, el conteo. El amarillo destaca los tres años con más filas. Los años parciales no deben compararse como periodos completos.`;
+  `La línea resume la evolución temporal de los casos para el territorio y periodo seleccionados: cada punto corresponde a un año y su etiqueta muestra la suma registrada. La dirección de la línea ayuda a localizar aumentos o descensos, pero no explica sus causas. El año parcial se señala y debe compararse con cautela.`;
+ const nationalRangeTotal=selectedYears.reduce((sum,[,records])=>sum+records,0);
+ const activeCategories=categoryRank.filter(item=>item.filteredRecords>0).length;
+ const activeCrimes=crimeRank.filter(item=>item.filteredRecords>0).length;
+ const completeInRange=selectedYears.filter(([year])=>periodosCompletos.has(year)).length;
+ document.getElementById("analysisScopeNote").textContent=
+  `La consulta actual abarca ${selectedYears.length} ${selectedYears.length===1?"año":"años"} (${completeInRange} ${completeInRange===1?"completo":"completos"}) y suma ${fmtData(filteredTotal)} casos repartidos en ${activeCrimes} delitos y ${activeCategories} categorías${departmentPinnedKey?`, equivalentes al ${porcentaje(filteredTotal,nationalRangeTotal)} de los ${fmtData(nationalRangeTotal)} casos del país en el mismo periodo`:""}.`;
  document.getElementById("analysisDataQuality").textContent=
-  `Elige los años, selecciona un departamento o compara dos territorios. Los conteos son registros reportados, no tasas de población.`;
+  `Cómo se calculan las cifras: cada valor es la suma de la columna casos de SIEDCO para el territorio y los años elegidos. Los porcentajes se calculan sobre el total de esa misma selección, el cambio anual compara únicamente años de doce meses y ${CATALOGO.yearCoverage?.at(-1)?.complete===false?`${CATALOGO.yearCoverage.at(-1).year} se muestra como año parcial`:"todos los años están completos"}. Son conteos absolutos: un territorio más poblado tiende a acumular más casos, por lo que estas cifras no equivalen a tasas por habitante.`;
  const categoriesFiltered=categoryRank.filter(item=>item.filteredRecords>0);
  const crimesFiltered=crimeRank.filter(item=>item.filteredRecords>0);
  const yearlyFiltered=annualFiltered.map(([year,records])=>({label:String(year),value:records}));
@@ -452,7 +579,6 @@ function renderAnalisisGeneral(){
   ?` ${latestAvailable.year} es parcial: hay datos de ${latestAvailable.monthsAvailable.length} meses, hasta ${monthsData[latestAvailable.monthsAvailable.at(-1)-1]||"el último mes disponible"}.`
   :"";
  const yearlyPanel=document.getElementById("analysisYears");
- yearlyPanel.closest(".data-panel")?.classList.remove("data-revealed");
  document.getElementById("analysisCategories").innerHTML=graficaAnillo(
   categoriesFiltered,
   item=>item.filteredRecords,
@@ -466,43 +592,71 @@ function renderAnalisisGeneral(){
   true
  );
  yearlyPanel.innerHTML=graficaLineas(
-  [{name:"Registros",values:yearlyFiltered.map(item=>item.value)}],
+  [{name:"Casos",values:yearlyFiltered.map(item=>item.value)}],
   yearlyFiltered.map(item=>item.label),
-  `Evolución anual de registros en ${area}`
+  `Evolución anual de casos en ${area}`
  );
  const yearNote=document.createElement("p");
  yearNote.className="data-note";
- yearNote.textContent=`${changeText}${incompleteYearNote} Los porcentajes se calculan sobre los registros del periodo seleccionado.`;
+ yearNote.textContent=`${changeText}${incompleteYearNote} Los porcentajes se calculan sobre los casos del periodo seleccionado.`;
  yearlyPanel.append(yearNote);
- [document.getElementById("analysisCategories"),document.getElementById("analysisCrimes"),yearlyPanel]
-  .forEach(element=>{const panel=element.closest(".data-panel");if(panel){panel.classList.remove("data-revealed");revelarAnalisis(panel)}});
- const todayDailyCount=document.getElementById("todayDailyCount");
- const todayInterval=document.getElementById("todayInterval");
- const todayDailyLabel=document.getElementById("todayDailyLabel");
- const peopleTheft=DELITOS_DATA.find(crime=>norm(crime.name)==="hurto a personas");
- const fullYears=peopleTheft?.years.filter(item=>periodosCompletos.has(item.year))||[];
- const dailyTotal=fullYears.reduce((sum,item)=>sum+item.records,0);
- const days=fullYears.reduce((sum,item)=>sum+
-  (Date.UTC(item.year+1,0,1)-Date.UTC(item.year,0,1))/86400000,0);
- if(peopleTheft&&days>0&&dailyTotal>0){
-  const dailyAverage=dailyTotal/days;
-  const avgMinutes=1440/dailyAverage;
-  todayDailyCount.dataset.countValue=String(dailyAverage);
-  animarNumero(todayDailyCount);
-  todayDailyLabel.textContent="registros tabulados de hurto a personas por día, en promedio";
-  todayInterval.textContent=`Equivale a un registro aproximadamente cada ${fmtData(avgMinutes)} minutos, con datos de ${fullYears[0].year}–${fullYears.at(-1).year}. No es un dato en tiempo real.`;
- }else{
-  todayDailyCount.textContent="N/D";
-  todayDailyLabel.textContent="No hay registros comparables de hurto a personas.";
-  todayInterval.textContent="Consulta los análisis por categoría y territorio.";
+ escribirLectura("analysisCategoriesReading",lecturaRanking(categoriesFiltered,{
+  valor:item=>item.filteredRecords,etiqueta:item=>item.name,total:filteredTotal,plural:"categorías",contexto:`En ${area}, `
+ })+` ${activeCategories<CATALOGO.categoryCount?`${CATALOGO.categoryCount-activeCategories} de las ${CATALOGO.categoryCount} categorías no registran casos en esta selección.`:`Las ${CATALOGO.categoryCount} categorías tienen casos en esta selección.`}`);
+ escribirLectura("analysisCrimesReading",lecturaRanking(crimesFiltered.slice(0,10),{
+  valor:item=>item.filteredRecords,etiqueta:item=>item.name,total:filteredTotal,plural:"delitos"
+ })+(crimesFiltered.length>10?` Los ${crimesFiltered.length-10} delitos restantes aportan ${porcentaje(crimesFiltered.slice(10).reduce((sum,item)=>sum+item.filteredRecords,0),filteredTotal)}.`:""));
+ escribirLectura("analysisYearsReading",lecturaAnual(annualFiltered.map(([year,value])=>({year,value})),`En ${area}, `));
+ resumenAnalisis={area,startYear,endYear,filteredTotal,nationalRangeTotal,categoryRank,crimeRank,annualFiltered,change,lastCompleteYear,previousYear};
+ ["analysisCategories","analysisCrimes","analysisYears"].forEach(id=>{
+  const panel=document.getElementById(id).closest(".data-panel");
+  if(panel)animarAnalisis(panel,true);
+ });
+}
+let resumenAnalisis=null;
+// Párrafo principal del análisis y lectura del mapa: usa los totales departamentales ya calculados.
+function renderAnalisisNarrativa(){
+ const resumen=resumenAnalisis;
+ if(!resumen)return;
+ const {area,startYear,endYear,filteredTotal,nationalRangeTotal,categoryRank,crimeRank,annualFiltered,change,lastCompleteYear,previousYear}=resumen;
+ const narrative=document.getElementById("analysisNarrative");
+ const mapReading=document.getElementById("analysisMapReading");
+ if(!filteredTotal){
+  narrative.textContent=`No hay casos reportados para ${area} entre ${startYear} y ${endYear}. Prueba con otro periodo o vuelve al panorama nacional.`;
+  if(mapReading)mapReading.innerHTML="";
+  return;
  }
- const analysisPage=document.getElementById("analisis");
- animarAnalisis(analysisPage);
+ const categorias=categoryRank.filter(item=>item.filteredRecords>0);
+ const delitos=crimeRank.filter(item=>item.filteredRecords>0);
+ const top3Cat=categorias.slice(0,3);
+ const top5Del=delitos.slice(0,5).reduce((sum,item)=>sum+item.filteredRecords,0);
+ const completos=annualFiltered.filter(([year])=>periodosCompletos.has(year));
+ const promedio=completos.length?completos.reduce((sum,[,value])=>sum+value,0)/completos.length:0;
+ const pico=[...completos].sort((a,b)=>b[1]-a[1])[0];
+ const departamentos=[...departmentTotals].map(([key,value])=>({key,value,
+  name:mapaDepartamentos.departments.find(item=>item.key===key)?.name||key
+ })).filter(item=>item.value>0).sort((a,b)=>b.value-a.value);
+ const partes=[];
+ partes.push(departmentPinnedKey
+  ?`Entre ${startYear} y ${endYear}, ${area} acumula ${fmtData(filteredTotal)} casos, el ${porcentaje(filteredTotal,nationalRangeTotal)} del total nacional del mismo periodo${(()=>{const puesto=departamentos.findIndex(item=>item.key===departmentPinnedKey);return puesto>=0?`, lo que lo ubica en el puesto ${puesto+1} de ${departamentos.length} departamentos por volumen`:""})()}.`
+  :`Entre ${startYear} y ${endYear}, Colombia acumula ${fmtData(filteredTotal)} casos en la base SIEDCO.`);
+ if(top3Cat.length)partes.push(`Las categorías con más casos son ${listaHumana(top3Cat.map(item=>`${item.name.toLowerCase()} (${porcentaje(item.filteredRecords,filteredTotal)})`))}; juntas representan ${porcentaje(top3Cat.reduce((sum,item)=>sum+item.filteredRecords,0),filteredTotal)} de la selección.`);
+ if(delitos[0])partes.push(`Por delito, ${delitos[0].name} lidera con ${fmtData(delitos[0].filteredRecords)} casos (${porcentaje(delitos[0].filteredRecords,filteredTotal)}) y los cinco delitos más frecuentes suman ${porcentaje(top5Del,filteredTotal)} del total, de modo que una parte importante de los reportes se concentra en pocos tipos de delito.`);
+ if(pico)partes.push(`El año completo con más casos fue ${pico[0]} (${fmtData(pico[1])}) y el promedio de los años completos es de ${fmtEntero(promedio)} casos por año.`);
+ if(change!==null)partes.push(`En la comparación más reciente, de ${previousYear[0]} a ${lastCompleteYear[0]}, el volumen ${change>=0?"creció":"se redujo"} ${fmtDecimal(Math.abs(change))}%.`);
+ narrative.textContent=partes.join(" ");
+ if(mapReading){
+  const top5=departamentos.slice(0,5);
+  const sumaTop5=top5.reduce((sum,item)=>sum+item.value,0);
+  const ultimo=departamentos.at(-1);
+  mapReading.innerHTML=departamentos.length?`<b>Lectura de los datos.</b> ${htmlSeguro(`Entre ${startYear} y ${endYear}, ${departamentos[0].name} es el departamento con más casos: ${fmtData(departamentos[0].value)}, el ${porcentaje(departamentos[0].value,totalTerritorialRecords)} de los casos con departamento identificado. Los cinco primeros (${listaHumana(top5.map(item=>item.name))}) suman ${porcentaje(sumaTop5,totalTerritorialRecords)}, mientras que ${ultimo.name} registra el menor volumen, con ${fmtData(ultimo.value)} casos. Los tonos más oscuros del mapa corresponden a estos territorios de mayor volumen absoluto.`)}`:"";
+ }
 }
 function actualizarAnalisisCompleto(){
  renderAnalisisGeneral();
  renderDepartmentMap();
  renderDepartmentComparison();
+ renderAnalisisNarrativa();
 }
 function consejoPrevencion(crimeName){
  const name=norm(crimeName);
@@ -531,7 +685,7 @@ const REGION_POR_DEPTO=new Map(REGIONES_COLOMBIA.flatMap(region=>
 const TODAS_ZONAS="__all__";
 const zonaMunicipios=new Map(),zonaDepartamentos=new Map();
 function acumularAnios(totals,years){
- (years||[]).forEach(item=>totals.set(item.year,(totals.get(item.year)||0)+item.records));
+ (years||[]).forEach(item=>totals.set(item.year,(totals.get(item.year)||0)+casos(item)));
 }
 function sumarAniosEnRango(totals,range){
  let total=0;
@@ -555,7 +709,7 @@ DELITOS_DATA.forEach(crime=>(crime.municipalityData||[]).forEach(item=>{
   if(departmentValue.region!==region){
    throw new Error(`SIEDCO asigna más de una región al departamento ${department}.`);
   }
-  departmentValue.records+=item.records;
+  departmentValue.records+=casos(item);
   zonaDepartamentos.set(departmentId,departmentValue);
   return;
  }
@@ -566,7 +720,7 @@ DELITOS_DATA.forEach(crime=>(crime.municipalityData||[]).forEach(item=>{
  if(municipality.region!==region){
   throw new Error(`SIEDCO asigna más de una región a ${name}, ${department}.`);
  }
- municipality.records+=item.records;
+ municipality.records+=casos(item);
  acumularAnios(municipality.annualRecords,item.years);
  zonaMunicipios.set(municipalityKey,municipality);
  const departmentId=departmentKey(department);
@@ -578,7 +732,7 @@ DELITOS_DATA.forEach(crime=>(crime.municipalityData||[]).forEach(item=>{
  if(departmentValue.region!==region){
    throw new Error(`SIEDCO asigna más de una región al departamento ${department}.`);
  }
- departmentValue.records+=item.records;
+ departmentValue.records+=casos(item);
  zonaDepartamentos.set(departmentId,departmentValue);
 }));
 const zoneRegion=document.getElementById("zoneRegion");
@@ -687,40 +841,48 @@ function renderZona(){
  document.getElementById("zoneFilterSummary").textContent=
   `Mostrando ${where} · ${range.startYear}–${range.endYear}.`;
  const result=document.getElementById("zoneResult");
- result.innerHTML=`<div class="zone-summary">
-   <div><span>Registros incluidos</span><strong>${fmtData(total)}</strong></div>
-   <div><span>Categoría con mayor volumen</span><strong>${htmlSeguro(category?.name||"Sin registros")}</strong><small>${porcentaje(topCategory?.[1]||0,total)} del total seleccionado</small></div>
-   <div><span>Delito con más registros</span><strong>${htmlSeguro(topCrime?.name||"Sin registros")}</strong><small>${porcentaje(topCrime?.records||0,total)} del total seleccionado</small></div>
+ const nationalTotal=CATALOGO.years.filter(year=>year>=range.startYear&&year<=range.endYear)
+  .reduce((sum,year)=>sum+(totalAnual.get(year)||0),0);
+ const lecturaZona=total?`${where==="todas las regiones"?"El país":where} suma ${fmtData(total)} casos entre ${range.startYear} y ${range.endYear}${where==="todas las regiones"?"":`, el ${porcentaje(total,nationalTotal)} del total nacional del mismo periodo`}. ${zoneCategories.length} categorías y ${localCrimes.filter(item=>item.records>0).length} delitos registran al menos un caso en esta selección.`:"";
+ result.innerHTML=`<p class="chart-reading zone-intro-reading data-animate">${lecturaZona?`<b>Resumen de la selección.</b> ${htmlSeguro(lecturaZona)}`:""}</p>
+ <div class="zone-summary data-animate">
+   <div><span>Casos incluidos</span><strong data-count-value="${total}">0</strong></div>
+   <div><span>Categoría con más casos</span><strong>${htmlSeguro(category?.name||"Sin datos")}</strong><small>${porcentaje(topCategory?.[1]||0,total)} del total seleccionado</small></div>
+   <div><span>Delito con más casos</span><strong>${htmlSeguro(topCrime?.name||"Sin datos")}</strong><small>${porcentaje(topCrime?.records||0,total)} del total seleccionado</small></div>
  </div>
  <div class="zone-charts">
- <section class="zone-subpanel"><h4>Participación por categoría</h4><p>El anillo distribuye los registros seleccionados entre categorías: cada segmento representa su proporción del total. La leyenda indica porcentaje y conteo; no son tasas por población.</p>
+ <section class="zone-subpanel data-animate"><h4>Participación por categoría</h4><p>El anillo reparte los ${fmtData(total)} casos de ${htmlSeguro(where)} entre las categorías con actividad. Cada segmento representa la proporción de esa categoría y la leyenda muestra su porcentaje y total, lo que permite comparar rápidamente la composición del territorio filtrado.</p>
    ${graficaAnillo(zoneCategories,item=>item.records,item=>item.name,`Participación por categoría en ${where}`)}
+   ${parrafoLectura(lecturaRanking(zoneCategories,{valor:item=>item.records,etiqueta:item=>item.name,total,plural:"categorías"}))}
  </section>
- <section class="zone-subpanel"><h4>Municipios con más registros</h4><p>Las barras ordenan hasta diez municipios según el número de filas del periodo y territorio elegidos. La longitud y la cifra al final muestran el conteo; no son tasas ajustadas por población.</p>
+ <section class="zone-subpanel data-animate"><h4>Municipios con más casos</h4><p>Se muestran hasta diez municipios ordenados por la suma de casos del periodo elegido. La longitud de las barras facilita la comparación y el valor junto a cada nombre indica el total; el departamento se incluye para distinguir municipios homónimos.</p>
    ${graficaDatos(localMunicipalities,item=>item.records,item=>item.label,true)}
+   ${parrafoLectura(lecturaRanking(localMunicipalities,{valor:item=>item.records,etiqueta:item=>item.label,total,plural:"municipios"}))}
  </section>
- <section class="zone-subpanel"><h4>Delitos con más registros</h4><p>Se muestran ${fmtData(localCrimes.length)} delitos del catálogo para los filtros elegidos. Las barras y cifras comparan sus conteos; el amarillo identifica los tres mayores. Un registro no equivale necesariamente a una persona o un hecho único.</p>
+ <section class="zone-subpanel data-animate"><h4>Delitos con más casos</h4><p>El gráfico compara los ${fmtData(localCrimes.length)} delitos incluidos en el catálogo para esta selección y ordena primero los de mayor total. La longitud indica el volumen relativo y la cifra final da el número exacto de casos, útil para reconocer qué delitos concentran más reportes en la zona.</p>
    ${graficaDatos(localCrimes,item=>item.records,item=>item.name,true)}
+   ${parrafoLectura(lecturaRanking(localCrimes,{valor:item=>item.records,etiqueta:item=>item.name,total,plural:"delitos"}))}
  </section>
- <section class="zone-subpanel"><h4>Evolución anual</h4><p>La línea muestra el total de filas reportadas cada año en ${htmlSeguro(where)}; el eje horizontal indica el año y cada punto, su conteo. Los años parciales cubren menos meses y se interpretan con cautela.</p>
-   ${graficaLineas([{name:"Registros",values:yearlyFiltered.map(item=>item.value)}],yearlyFiltered.map(item=>item.label),`Evolución anual en ${where}`)}
+ <section class="zone-subpanel data-animate"><h4>Evolución anual</h4><p>La línea resume cómo se distribuyen los casos de ${htmlSeguro(where)} entre los años seleccionados. Cada punto representa la suma anual y ayuda a identificar cambios de volumen; no demuestra por sí mismo qué los causó. Los años parciales cubren menos meses y se comparan con cautela.</p>
+   ${graficaLineas([{name:"Casos",values:yearlyFiltered.map(item=>item.value)}],yearlyFiltered.map(item=>item.label),`Evolución anual en ${where}`)}
+   ${parrafoLectura(lecturaAnual(yearlyFiltered.map(item=>({year:Number(item.label),value:item.value}))))}
  </section></div>
- ${topCrime?`<div class="zone-advice"><b>Una recomendación relacionada</b><p>${htmlSeguro(consejoPrevencion(topCrime.name))}</p></div>`:"<p class=\"data-empty\">No hay registros para esta combinación de filtros.</p>"}`;
- result.querySelectorAll(".zone-summary,.zone-subpanel").forEach(revelarAnalisis);
+ ${topCrime?`<div class="zone-advice"><b>Una recomendación relacionada</b><p>${htmlSeguro(consejoPrevencion(topCrime.name))}</p></div>`:"<p class=\"data-empty\">No hay casos para esta combinación de filtros.</p>"}`;
+ animarAnalisis(result);
 }
 function filasCSVAnual(year){
- const rows=[["Región","Departamento","Municipio","Categoría","Delito","Año","Registros"]];
+ const rows=[["Región","Departamento","Municipio","Categoría","Delito","Año","Casos"]];
  DELITOS_DATA.forEach(crime=>{
   (crime.municipalityData||[]).forEach(item=>{
    const yearData=(item.years||[]).find(entry=>Number(entry.year)===year);
-   if(!yearData?.records)return;
+   if(!casos(yearData))return;
    const department=String(item.department||"").trim()||"Departamento no especificado";
    const region=item.region||REGION_POR_DEPTO.get(norm(department))||"sin-region";
    const regionName=REGIONES_COLOMBIA.find(candidate=>candidate.id===region)?.name
     ||(region==="sin-region"?"Sin región asignada":region);
    rows.push([
     regionName,department,String(item.name||"").trim()||"Municipio no especificado",
-    crime.category.name,crime.name,year,yearData.records
+    crime.category.name,crime.name,year,casos(yearData)
    ]);
   });
  });
@@ -754,12 +916,12 @@ document.getElementById("exportAnnualZoneCsv").addEventListener("click",()=>{
  const recordRows=rows.length-1;
  zoneAnnualCsvStatus.textContent="";
  if(!recordRows){
-  zoneAnnualCsvStatus.textContent=`No hay registros para ${year}.`;
+  zoneAnnualCsvStatus.textContent=`No hay casos registrados para ${year}.`;
   return;
  }
  const recordTotal=rows.slice(1).reduce((sum,row)=>sum+Number(row[6]),0);
  descargarCSV(`indecol-datos-${year}.csv`,rows);
- zoneAnnualCsvStatus.textContent=`CSV ${year} descargado: ${fmtData(recordRows)} filas agregadas y ${fmtData(recordTotal)} registros.`;
+ zoneAnnualCsvStatus.textContent=`CSV ${year} descargado: ${fmtData(recordRows)} combinaciones y ${fmtData(recordTotal)} casos.`;
 });
 renderAnalisisGeneral();
 inicializarAniosZona();
@@ -798,21 +960,29 @@ function renderDepartmentDetails(key){
  }
  const {total,crimes}=registrosDepartamento(key);
  const {startYear,endYear}=rangoAnalisisActual();
- departmentSelection.innerHTML=`<strong>${htmlSeguro(name)}</strong><span>${fmtData(total)} registros · ${startYear}–${endYear} · ${porcentaje(total,totalTerritorialRecords)} del total territorial</span>`;
+ departmentSelection.innerHTML=`<strong>${htmlSeguro(name)}</strong><span>${fmtData(total)} casos · ${startYear}–${endYear} · ${porcentaje(total,totalTerritorialRecords)} del total territorial</span>`;
  if(!total){
-  departmentCrimes.innerHTML=`<p class="data-empty">No se encontraron registros SIEDCO asociados a ${htmlSeguro(name)}.</p>`;
+  departmentCrimes.innerHTML=`<p class="data-empty">No se encontraron casos SIEDCO asociados a ${htmlSeguro(name)}.</p>`;
   return;
  }
  departmentCrimes.innerHTML=`<h4>Top 10 delitos en ${htmlSeguro(name)}</h4><p>Conteos para ${startYear}–${endYear}. Al seleccionar el departamento, los demás gráficos también se filtran por este territorio.</p>
- <div class="map-top-header" aria-hidden="true"><span></span><span>Delito</span><span>Registros</span><span>%</span></div>
+ <div class="map-top-header" aria-hidden="true"><span></span><span>Delito</span><span>Casos</span><span>%</span></div>
  <ol class="map-top-list">${crimes.slice(0,10).map((crime,index)=>`<li>
   <span class="map-rank">${String(index+1).padStart(2,"0")}</span>
-  <span class="map-crime-name" title="${htmlSeguro(crime.name)}: ${fmtData(crime.records)} registros, ${porcentaje(crime.records,total)}"><span>${htmlSeguro(crime.name)}</span><i><b style="--bar:${(crime.records/total*100).toFixed(2)}%"></b></i></span>
+  <span class="map-crime-name" title="${htmlSeguro(crime.name)}: ${fmtData(crime.records)} casos, ${porcentaje(crime.records,total)}"><span>${htmlSeguro(crime.name)}</span><i><b data-bar-target style="--bar:${(crime.records/total*100).toFixed(2)}%;--i:${index}"></b></i></span>
   <strong>${fmtData(crime.records)}</strong><small>${porcentaje(crime.records,total)}</small>
- </li>`).join("")}</ol>`;
+ </li>`).join("")}</ol>
+ ${parrafoLectura(`En ${name}, ${crimes[0].name} es el delito con más casos (${porcentaje(crimes[0].records,total)} del departamento) y los diez primeros de la lista reúnen ${porcentaje(crimes.slice(0,10).reduce((sum,item)=>sum+item.records,0),total)} de sus ${fmtData(total)} casos.`)}`;
+ const barras=departmentCrimes.querySelectorAll("[data-bar-target]");
+ if(movimientoReducido.matches)barras.forEach(barra=>barra.classList.add("data-bar-revealed"));
+ else enSiguienteCuadro(()=>barras.forEach(barra=>barra.classList.add("data-bar-revealed")));
 }
-function setHoveredDepartment(key){
+let detalleDepartamentoActual="";
+function setHoveredDepartment(key,forzar=false){
  const visibleKey=departmentPinnedKey||key||"";
+ const firma=`${visibleKey}|${departmentPinnedKey}`;
+ if(!forzar&&firma===detalleDepartamentoActual)return;
+ detalleDepartamentoActual=firma;
  departmentMap.classList.toggle("has-pinned-selection",Boolean(departmentPinnedKey));
  departmentMap.querySelectorAll("[data-department]").forEach(path=>{
   path.classList.toggle("is-active",path.dataset.department===visibleKey);
@@ -852,7 +1022,7 @@ document.getElementById("departmentPicker").addEventListener("change",event=>{
 const svgPaths=mapaDepartamentos.departments.map(item=>{
  const total=departmentTotals.get(item.key)||0;
  const fill=departmentColor(total);
- return `<path class="department-shape" data-department="${htmlSeguro(item.key)}" d="${item.path}" fill="${fill}" tabindex="0" role="button" aria-pressed="false" aria-label="${htmlSeguro(item.name)}: ${fmtData(total)} registros tabulados"><title>${htmlSeguro(item.name)} · ${fmtData(total)} registros</title></path>`;
+ return `<path class="department-shape" data-department="${htmlSeguro(item.key)}" d="${item.path}" fill="${fill}" tabindex="0" role="button" aria-pressed="false" aria-label="${htmlSeguro(item.name)}: ${fmtData(total)} casos reportados"><title>${htmlSeguro(item.name)} · ${fmtData(total)} casos</title></path>`;
 }).join("");
 departmentMap.innerHTML=`<svg viewBox="${htmlSeguro(mapaDepartamentos.viewBox)}" role="group" aria-label="Mapa interactivo de los departamentos de Colombia">${svgPaths}</svg>`;
 function renderDepartmentMap(){
@@ -866,10 +1036,10 @@ function renderDepartmentMap(){
   const total=departmentTotals.get(path.dataset.department)||0;
   const name=mapaDepartamentos.departments.find(item=>item.key===path.dataset.department)?.name||path.dataset.department;
   path.setAttribute("fill",departmentColor(total));
-  path.setAttribute("aria-label",`${name}: ${fmtData(total)} registros entre ${startYear} y ${endYear}`);
-  path.querySelector("title").textContent=`${name} · ${fmtData(total)} registros`;
+  path.setAttribute("aria-label",`${name}: ${fmtData(total)} casos entre ${startYear} y ${endYear}`);
+  path.querySelector("title").textContent=`${name} · ${fmtData(total)} casos`;
  });
- setHoveredDepartment(departmentPinnedKey);
+ setHoveredDepartment(departmentPinnedKey,true);
 }
 function renderDepartmentComparison(){
  const firstSelect=document.getElementById("departmentCompareA");
@@ -897,15 +1067,26 @@ function renderDepartmentComparison(){
   .sort((a,b)=>Math.max(b.first,b.second)-Math.max(a.first,a.second)||a.name.localeCompare(b.name,"es"))
   .slice(0,10);
  const {startYear,endYear}=rangoAnalisisActual();
+ const mayor=firstData.total>=secondData.total?{name:firstName,data:firstData}:{name:secondName,data:secondData};
+ const menor=mayor.name===firstName?{name:secondName,data:secondData}:{name:firstName,data:firstData};
+ const brecha=[...rows].sort((a,b)=>Math.abs(b.first-b.second)-Math.abs(a.first-a.second))[0];
+ const compartidos=rows.filter(item=>item.first&&item.second).length;
+ const lecturaComparacion=`${mayor.name} registra ${fmtData(mayor.data.total)} casos entre ${startYear} y ${endYear}${menor.data.total?`, ${fmtDecimal((mayor.data.total/menor.data.total-1)*100)}% más que ${menor.name} (${fmtData(menor.data.total)})`:`, mientras ${menor.name} no tiene casos en el periodo`}. El delito principal es ${firstData.crimes[0]?.name||"—"} en ${firstName} y ${secondData.crimes[0]?.name||"—"} en ${secondName}.${brecha?` La mayor diferencia aparece en ${brecha.name}: ${fmtData(Math.abs(brecha.first-brecha.second))} casos de distancia.`:""} ${compartidos} de los ${rows.length} delitos de la tabla tienen casos en ambos departamentos.`;
  result.innerHTML=`<p>Compara conteos SIEDCO de ${startYear}–${endYear}, no tasas ajustadas por población. Se muestran los delitos con mayor volumen en cualquiera de los dos departamentos.</p>
- <div class="department-compare-totals"><strong>${htmlSeguro(firstName)}: ${fmtData(firstData.total)}</strong><strong>${htmlSeguro(secondName)}: ${fmtData(secondData.total)}</strong></div>
+ <div class="department-compare-chart">${graficaDatos(
+  [{label:firstName,value:firstData.total},{label:secondName,value:secondData.total}],
+  item=>item.value,item=>item.label,true)}</div>
+ ${parrafoLectura(lecturaComparacion)}
  <div class="department-compare-table-wrap"><table><caption>Diez delitos con mayor conteo combinado · ${startYear}–${endYear}</caption>
  <thead><tr><th scope="col">Delito</th><th scope="col">${htmlSeguro(firstName)}</th><th scope="col">${htmlSeguro(secondName)}</th></tr></thead>
  <tbody>${rows.map(item=>`<tr><th scope="row">${htmlSeguro(item.name)}</th><td>${fmtData(item.first)}</td><td>${fmtData(item.second)}</td></tr>`).join("")}</tbody>
  </table></div>`;
+ revelarAnalisis(result);
 }
 renderDepartmentComparison();
 renderDepartmentMap();
+renderAnalisisNarrativa();
+renderHomeInsight();
 departmentMap.addEventListener("pointerover",event=>{
  const path=event.target.closest("[data-department]");
  if(path&&!departmentPinnedKey)setHoveredDepartment(path.dataset.department);
@@ -927,17 +1108,19 @@ departmentMap.addEventListener("keydown",event=>{
  departmentPinnedKey=departmentPinnedKey===path.dataset.department?"":path.dataset.department;
  actualizarAnalisisCompleto();
 });
-const conteoRegistros=document.getElementById("stat-records");
-if(conteoRegistros)conteoRegistros.textContent=fmtData(CATALOGO.totalRecords);
-const delitosIncluidos=document.getElementById("stat-crimes");
-if(delitosIncluidos)delitosIncluidos.textContent=fmtData(CATALOGO.crimeCount);
-const categoriasIncluidas=document.getElementById("stat-categories");
-if(categoriasIncluidas)categoriasIncluidas.textContent=fmtData(CATALOGO.categoryCount);
+[["stat-records",CATALOGO.totalCases],["stat-crimes",CATALOGO.crimeCount],["stat-categories",CATALOGO.categoryCount]].forEach(([id,value])=>{
+ const elemento=document.getElementById(id);
+ if(!elemento)return;
+ elemento.dataset.countValue=value;
+ elemento.textContent=fmtData(value);
+});
 const periodoDatos=document.getElementById("stat-period");
 if(periodoDatos)periodoDatos.textContent=CATALOGO.years.length
  ?`${CATALOGO.years[0]}–${CATALOGO.years.at(-1)}`:"Sin fechas válidas";
 const registrosPortada=document.getElementById("heroRecordCount");
-if(registrosPortada)registrosPortada.textContent=fmtData(CATALOGO.totalRecords);
+if(registrosPortada)registrosPortada.textContent=fmtData(CATALOGO.totalCases);
+const rpubsCases=document.getElementById("rpubsCases");
+if(rpubsCases)rpubsCases.textContent=fmtData(CATALOGO.totalCases);
 const periodoPortada=document.getElementById("heroPeriod");
 if(periodoPortada)periodoPortada.textContent=CATALOGO.years.length
  ?`${CATALOGO.years[0]}–${CATALOGO.years.at(-1)}`:"Periodo no disponible";
@@ -956,10 +1139,10 @@ dvNav.innerHTML=CATEGORIAS.map(category=>`<div class="dg" data-cat="${htmlSeguro
 </div>`).join("")+'<p class="dv-vacio" id="dvNo" hidden>No hay categorías o delitos con ese nombre.</p>';
 const mapaCobertura=`<svg class="info-coverage-map" viewBox="${htmlSeguro(mapaDepartamentos.viewBox)}" role="img" aria-label="Mapa de Colombia dividido por departamentos">${mapaDepartamentos.departments.map(item=>`<path d="${htmlSeguro(item.path)}"></path>`).join("")}</svg>`;
 const INFO=[
- {title:"Qué es Indecol",visual:'<img class="info-brand-logo" src="assets/images/logo-principal.png" alt="Logotipo de Indecol">',text:"Indecol significa Indicadores Delictivos en Colombia. Es una página para explorar los registros reportados y conocer cómo se distribuyen por delito, año y territorio."},
- {title:"Fuente",visual:'<div class="info-source-mark"><img src="assets/images/escudo-policia-nacional.png" alt="Escudo de la Policía Nacional de Colombia"><span><strong>SIEDCO</strong><small>Policía Nacional de Colombia</small></span></div>',text:`Los datos provienen del Sistema de Información Estadístico, Delincuencial, Contravencional y Operativo (SIEDCO), de la Policía Nacional. Aquí se organizan los registros de ${CATALOGO.years[0]} a ${CATALOGO.years.at(-1)} para su consulta.`,link:"https://portalsiedco.policia.gov.co:4443/extensions/PortalPublico/index.html",linkLabel:"Visitar el portal oficial"},
- {title:"Cobertura",visual:mapaCobertura,text:`La base reúne ${fmtData(CATALOGO.totalRecords)} registros de ${CATALOGO.crimeCount} delitos, agrupados en ${CATALOGO.categoryCount} categorías, entre ${CATALOGO.years[0]} y ${CATALOGO.years.at(-1)}. En el mapa de Análisis puedes explorar lo reportado en cada departamento.`},
- {title:"Cómo leer los datos",visual:'<svg class="info-reading-icon" viewBox="0 0 120 90" aria-hidden="true"><path d="M12 75h96M22 68V47h17v21M52 68V29h17v39M82 68V15h17v53" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"></path><path d="m18 35 25-15 24 2 28-14" fill="none" stroke="var(--oro-d)" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"></path><circle cx="18" cy="35" r="4" fill="var(--oro-d)"></circle><circle cx="43" cy="20" r="4" fill="var(--oro-d)"></circle><circle cx="67" cy="22" r="4" fill="var(--oro-d)"></circle><circle cx="95" cy="8" r="4" fill="var(--oro-d)"></circle></svg>',text:"Cada cifra muestra un registro reportado; no siempre corresponde a una persona o a un hecho distinto. Los gráficos ayudan a comparar lo que aparece en la base por delito y territorio. El periodo 2026 incluye registros hasta octubre."}
+ {title:"Qué es Indecol",visual:'<img class="info-brand-logo" src="assets/images/logo-principal.png" alt="Logotipo de Indecol">',text:"Indecol significa Indicadores Delictivos en Colombia. Es una página para explorar los casos reportados por delito, año y territorio, pensada para estudiantes, periodistas, autoridades locales y cualquier ciudadano que quiera entender mejor su entorno con datos."},
+ {title:"Fuente",visual:'<div class="info-source-mark"><img src="assets/images/escudo-policia-nacional.png" alt="Escudo de la Policía Nacional de Colombia"><span><strong>SIEDCO</strong><small>Policía Nacional de Colombia</small></span></div>',text:`Los datos provienen del Sistema de Información Estadístico, Delincuencial, Contravencional y Operativo (SIEDCO), de la Policía Nacional. Aquí se suma la columna casos de ${CATALOGO.years[0]} a ${CATALOGO.years.at(-1)} para su consulta. SIEDCO consolida las denuncias y actuaciones registradas por la Policía en todo el país.`,link:"https://portalsiedco.policia.gov.co:4443/extensions/PortalPublico/index.html",linkLabel:"Visitar el portal oficial"},
+ {title:"Cobertura",visual:mapaCobertura,text:`La base reúne ${fmtData(CATALOGO.totalCases)} casos para ${CATALOGO.crimeCount} delitos, agrupados en ${CATALOGO.categoryCount} categorías, entre ${CATALOGO.years[0]} y ${CATALOGO.years.at(-1)}. Incluye ${mapaDepartamentos.departments.length} departamentos y ${fmtData(zonaMunicipios.size)} municipios; en el mapa de Análisis puedes explorar los casos por departamento.`},
+ {title:"Cómo leer los datos",visual:'<svg class="info-reading-icon" viewBox="0 0 120 90" aria-hidden="true"><path d="M12 75h96M22 68V47h17v21M52 68V29h17v39M82 68V15h17v53" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"></path><path d="m18 35 25-15 24 2 28-14" fill="none" stroke="var(--oro-d)" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"></path><circle cx="18" cy="35" r="4" fill="var(--oro-d)"></circle><circle cx="43" cy="20" r="4" fill="var(--oro-d)"></circle><circle cx="67" cy="22" r="4" fill="var(--oro-d)"></circle><circle cx="95" cy="8" r="4" fill="var(--oro-d)"></circle></svg>',text:`Cada cifra suma la columna casos de la base final. Los gráficos comparan los casos por delito y territorio, y bajo cada uno encontrarás una lectura con sus cifras clave. ${CATALOGO.yearCoverage?.at(-1)?.complete===false?`El periodo ${CATALOGO.yearCoverage.at(-1).year} incluye datos hasta ${MESES_COMPLETOS[CATALOGO.yearCoverage.at(-1).monthsAvailable.at(-1)-1]}.`:""}`}
 ];
 const RETRATO_PALETAS=["#d9b8a5","#c99e82","#e4c4a0","#b9856d","#d8aa83","#c8a9a0","#dfb994","#ae806b"];
 const integrantes=Array.from({length:22},(_,index)=>{
@@ -1175,7 +1358,8 @@ function ruta(forzar){
   }else paginaCategoria(sel||CATEGORIAS[0]?.id);
  }
  else{
-  if(pg.id==="analisis")animarAnalisis(pg);
+  // Igual que en Delitos: cada visita a la página vuelve a reproducir las animaciones de sus gráficos.
+  animarAnalisis(pg,true);
   pg.querySelectorAll("[data-n]").forEach(contar);
   if(ancla&&pg.contains(ancla))setTimeout(()=>ancla.scrollIntoView({behavior:"smooth"}),50)
  }
@@ -1191,7 +1375,7 @@ document.addEventListener("click",e=>{
 addEventListener("hashchange",()=>ruta());addEventListener("popstate",()=>ruta());ruta();
 
 // ===== introducción: el total debe salir de la base de datos del proyecto =====
-const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalRecords};
+const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalCases};
 (function(){
  const MAPA={"w":722,"h":1000,"ring":[216,752,190,738,161,718,144,728,93,720,79,694,68,695,8,661,0,642,22,638,20,608,34,586,63,582,88,544,111,513,89,499,100,464,87,410,100,394,90,343,66,312,74,282,93,287,104,269,90,234,98,225,128,227,173,185,198,179,198,159,209,109,243,81,281,80,286,67,332,72,379,42,402,29,431,0,452,4,468,19,456,39,418,50,403,79,380,97,363,119,355,161,339,196,369,200,377,228,390,241,395,265,388,287,390,300,405,305,419,325,495,320,530,327,572,379,596,372,639,375,673,369,694,379,683,411,670,431,665,474,677,514,694,532,696,545,666,575,688,588,704,609,722,668,710,676,699,640,682,621,663,642,547,641,547,678,582,684,580,707,568,701,535,711,534,754,561,776,570,810,569,836,542,1000,512,968,494,967,533,906,487,878,451,883,430,873,397,889,353,881,318,818,290,803,271,775,231,747,216,752],"dots":[540,847,164,518,480,841,188,236,238,732,29,648,225,203,542,658,132,654,510,670,541,795,455,533,540,829,370,693,476,710,374,517,333,163,531,689,443,872,242,494,607,479,292,348,290,118,412,650,505,877,671,591,105,283,436,824,395,63,254,585,179,327,493,693,442,506,437,651,237,241,482,578,457,15,61,661,665,484,118,695,598,404,581,416,226,567,253,532,591,432,180,266,325,269,527,649,393,700,327,300,170,247,467,549,426,492,423,24,471,800,653,545,391,525,348,367,247,265,346,141,435,689,318,183,187,693,393,549,659,443,349,617,372,618,482,458,123,318,434,10,664,402,476,362,490,815,552,573,343,503,174,440,180,422,220,324,650,588,114,300,406,350,333,575,268,595,558,508,654,383,537,379,294,611,445,850,383,816,361,668,651,501,143,220,239,646,508,827,540,899,28,668,229,276,73,575,192,642,80,307,325,140,415,560,423,664,414,779,550,364,589,453,212,578,527,578,226,255,465,498,283,399,284,507,391,717,708,657,502,594,403,671,234,544,343,819,379,875,457,746,55,624,488,609,510,636,514,763,458,825,331,237,175,390,365,319,433,550,328,339,478,742,528,616,327,318,261,500,137,387,339,840,415,826,491,428,437,457,194,466,353,571,359,553,480,379,131,720,450,475,439,781,118,512,246,349,481,632,130,582,315,773,414,880,395,314,514,860,350,864,533,921,219,381,541,413,574,699,527,670,497,762,182,515,90,626,440,736,138,302,260,428,357,383,205,215,372,400,90,559,234,151,141,319,461,372,585,634,507,806,295,73,234,469,164,598,253,549,387,366,87,594,495,390,369,485,632,640,265,303,327,533,112,716,345,286,569,523,310,166,317,677,442,33,243,109,285,269,700,638,225,305,608,586,250,705,182,293,445,432,447,766,247,91,106,228,377,677,323,438,157,369,336,207,149,243,327,458,47,645,572,618,210,711,529,451,512,447,302,757,319,706,402,491,487,675,459,699,102,604,346,259,548,556,323,751,562,389,145,710,240,606,152,435,668,564,417,397,585,575,268,340,8,645,390,455,295,155,232,407,267,388,226,628,204,332,501,324,130,250,514,394,299,409,594,373,641,421,153,623,647,562,189,717,181,310,480,341,502,845,267,566,397,883,310,493,399,80,293,137,386,497,534,509,572,460,185,481,296,283,305,554,198,262,235,518,601,527,588,472,96,361,554,617,639,522,346,684,592,509,509,966,289,446,118,632,161,546,506,564,453,356,33,626,325,386,304,698,691,617,69,598,101,447,21,610,557,802,617,533,141,488,384,754,145,505,679,391,500,472,322,516,679,549,209,289,426,435,615,618,249,142,347,424,519,729,127,232,364,720,458,784,125,602,366,642,255,375,176,574,106,254,159,227,93,431,270,620,505,498,137,461,280,224,491,554,279,251,292,741,419,597,495,710,307,659,400,440,533,743,357,835,195,565,389,336,455,418,214,441,556,704,359,220,399,602,644,627,283,171,139,364,254,675,455,725,271,734,255,639,227,586,623,575,662,634,201,415,337,788,379,583,279,669,289,688,161,417,672,372,223,105,47,590,560,890,260,765,244,421,380,238,517,529,524,556,242,750,217,545,455,394,76,324,508,612,316,116,207,145,569,824,631,379,574,548,460,636,263,123,530,778,679,519,452,681,317,620,409,373,578,498,306,455,625,486,442,708,169,630,109,672,618,414,189,367,430,620,136,537,281,326,468,879,406,760,352,91,427,861,439,582,186,202,513,483,477,596,138,284,418,326,106,393,134,412,596,619,443,807,517,354,264,475,481,779,378,98,438,328,488,525,425,44,370,252,615,639,117,432,497,653,200,619,689,595,562,842,223,603,288,487,330,552,679,412,232,663,275,712,349,71,284,304,553,536,95,704,267,97,97,327,122,267,316,725,134,435,154,452,511,426,148,663,362,768,255,458,305,437,342,664,544,678,192,399,425,801,454,657,307,338,413,418,215,497,431,345,665,609,344,589,548,868,355,797,262,282,466,444,542,478,187,666,373,465,237,189,366,367,227,169,423,529,467,765,539,431,273,529,543,636,173,650,309,637,609,552,142,638,83,656,579,592,503,737,197,500,336,484,530,812,224,137,97,309,389,841,630,555,385,386,157,400,592,559,317,421,268,447,411,728,400,574,561,480,155,340,223,357,144,608,121,344,551,780,200,525,328,809,252,327,419,456,454,563,299,524,263,197,303,257,40,609,362,112,374,600,380,564,309,600,500,365,400,797,351,465,478,860,385,779,389,276,346,174,383,650,469,405,293,470,340,400,196,738,160,312,474,658,471,515,369,54,274,641,663,528,215,739,342,722,427,758,200,162,189,546,221,691,484,496,283,763,83,289,647,473,265,163,342,223,337,119,512,691,198,184,152,684,376,434,530,713,87,683,362,532,102,344,560,640,298,102,363,852,327,88,306,309,563,426,150,263,310,86,380,76,167,203,254,245,359,300,412,700,218,422,288,791,455,603,364,746,221,648,364,419,404,849,285,550,160,291,245,439,255,722,528,339,238,223,212,459,303,583,101,650,344,333,116,365,403,628,372,339,364,272,545,599,247,393,169,461,205,662,613,380,534,976,106,573,163,705,438,380,124,473,184,599,202,351,282,86,75,634,503,787,152,581,281,420,314,228,374,292,218,480,315,202,116,410,467,616,320,367,272,685,220,233,206,306,232,711,616,510,317,791,204,242,118,535,636,601,513,945,208,117,275,144,293,238,309,394,277,365,168,485,398,406,297,201,110,489,625,449,535,537,407,508,332,641,361,444,182,347,537,945,134,554]};
  const $=id=>document.getElementById(id),el=$("ix");if(!el)return;

@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "DataBase" / "hecho.csv"
+SOURCE = ROOT / "DataBase" / "Delitos_final.csv"
 OUTPUT = ROOT / "assets" / "data" / "catalogo.js"
 DEPARTMENT_SOURCE = ROOT / "assets" / "data" / "departamentos.geojson"
 DEPARTMENT_OUTPUT = ROOT / "assets" / "data" / "departamentos.js"
@@ -175,14 +175,13 @@ def display_label(value: str) -> str:
 
 
 def value_bucket() -> dict[str, Any]:
-    return {"records": 0, "quantity": 0, "quantityByUnit": Counter()}
+    return {"records": 0, "cases": 0}
 
 
 def finish_bucket(bucket: dict[str, Any]) -> dict[str, Any]:
     return {
         "records": bucket["records"],
-        "quantity": bucket["quantity"],
-        "quantityByUnit": dict(bucket["quantityByUnit"]),
+        "cases": bucket["cases"],
     }
 
 
@@ -198,8 +197,7 @@ def summarize_crime(
         finished_years.append({
             "year": year,
             "records": bucket["records"],
-            "quantity": bucket["quantity"],
-            "quantityByUnit": dict(bucket["quantityByUnit"]),
+            "cases": bucket["cases"],
             "months": [
                 {"month": month, **finish_bucket(months[month])}
                 for month in range(1, 13)
@@ -211,7 +209,7 @@ def summarize_crime(
     ranked_municipalities = sorted(
         municipalities.items(),
         key=lambda item: (
-            -item[1]["records"],
+            -item[1]["cases"],
             normalize(item[0][1]),
             normalize(item[0][0]),
         ),
@@ -228,10 +226,7 @@ def summarize_crime(
         "records": crime["records"],
         "municipalityCount": len(municipality_locations),
         "_municipalityLocations": sorted(municipality_locations),
-        "quantity": crime["quantity"],
-        "quantityByUnit": dict(crime["quantityByUnit"]),
-        "units": sorted(crime["quantityByUnit"]),
-        "quantityComparable": len(crime["quantityByUnit"]) == 1,
+        "cases": crime["cases"],
         "years": finished_years,
         "municipalities": [
             {
@@ -248,7 +243,11 @@ def summarize_crime(
                 "region": bucket["region"],
                 **finish_bucket(bucket),
                 "years": [
-                    {"year": year, "records": yearly["records"]}
+                    {
+                        "year": year,
+                        "records": yearly["records"],
+                        "cases": yearly["cases"],
+                    }
                     for year, yearly in sorted(bucket.get("years", {}).items())
                 ],
             }
@@ -263,7 +262,9 @@ def build_catalog() -> dict[str, Any]:
 
     categories_by_id: dict[str, dict[str, Any]] = {}
     total_records = 0
+    total_cases = 0
     duplicate_records = 0
+    source_records = 0
     months_by_year: dict[int, set[int]] = defaultdict(set)
     with SOURCE.open("r", encoding="utf-8-sig", newline="") as source:
         reader = csv.DictReader(source)
@@ -275,7 +276,7 @@ def build_catalog() -> dict[str, Any]:
             if header is not None
         }
         required = (
-            "tematica", "delito", "ano", "mes", "municipio", "cantidad", "region",
+            "tematica", "delito", "ano", "mes", "municipio", "casos", "region",
         )
         missing = [field for field in required if field not in columns]
         if missing:
@@ -284,20 +285,21 @@ def build_catalog() -> dict[str, Any]:
             )
         department_column = columns.get("departamento")
         dane_code_column = columns.get("codigo_dane")
-        unit_column = columns.get("unidad")
         duplicate_column = columns.get("es_duplicado")
         region_column = columns["region"]
 
         for row in reader:
             if not row or not any(value for value in row.values() if value is not None):
                 continue
-            total_records += 1
+            source_records += 1
             duplicate_flag = (
                 normalize(row.get(duplicate_column))
                 if duplicate_column else ""
             )
             if duplicate_flag in {"1", "true", "si", "yes"}:
                 duplicate_records += 1
+                continue
+            total_records += 1
             category_name = str(row.get(columns["tematica"]) or "").strip()
             crime_name = str(row.get(columns["delito"]) or "").strip()
             if not category_name or not crime_name:
@@ -323,24 +325,24 @@ def build_catalog() -> dict[str, Any]:
             crime = category["crimes"].setdefault(crime_id, {
                 "name": display_label(crime_name),
                 "records": 0,
+                "cases": 0,
                 "years": defaultdict(lambda: {
                     "records": 0,
-                    "quantity": 0,
-                    "quantityByUnit": Counter(),
+                    "cases": 0,
                     "months": defaultdict(value_bucket),
                 }),
                 "municipalities": defaultdict(value_bucket),
-                "quantity": 0,
-                "quantityByUnit": Counter(),
             })
             crime["records"] += 1
 
-            raw_unit = row.get(unit_column) if unit_column else None
-            unit = str(raw_unit).strip() if raw_unit and str(raw_unit).strip() else "unidades reportadas"
-            quantity_value = number(row.get(columns["cantidad"]))
-            if quantity_value is not None:
-                crime["quantity"] += quantity_value
-                crime["quantityByUnit"][unit] += quantity_value
+            cases_value = number(row.get(columns["casos"]))
+            if cases_value is None:
+                raise ValueError(
+                    f"{SOURCE.name}, línea {reader.line_num}: "
+                    f"valor inválido en la columna casos: {row.get(columns['casos'])!r}"
+                )
+            total_cases += cases_value
+            crime["cases"] += cases_value
 
             year = year_value(row.get(columns["ano"]))
             month = month_value(row.get(columns["mes"]))
@@ -349,15 +351,11 @@ def build_catalog() -> dict[str, Any]:
             if year is not None:
                 yearly = crime["years"][year]
                 yearly["records"] += 1
-                if quantity_value is not None:
-                    yearly["quantity"] += quantity_value
-                    yearly["quantityByUnit"][unit] += quantity_value
+                yearly["cases"] += cases_value
                 if month is not None:
                     monthly = yearly["months"][month]
                     monthly["records"] += 1
-                    if quantity_value is not None:
-                        monthly["quantity"] += quantity_value
-                        monthly["quantityByUnit"][unit] += quantity_value
+                    monthly["cases"] += cases_value
 
             municipality = str(row.get(columns["municipio"]) or "").strip()
             department = (
@@ -390,12 +388,11 @@ def build_catalog() -> dict[str, Any]:
                         f"{municipality!r} en {department!r} aparece en más de una región"
                     )
                 location["records"] += 1
-                if quantity_value is not None:
-                    location["quantity"] += quantity_value
-                    location["quantityByUnit"][unit] += quantity_value
+                location["cases"] += cases_value
                 if year is not None:
                     location_year = location.setdefault("years", defaultdict(value_bucket))[year]
                     location_year["records"] += 1
+                    location_year["cases"] += cases_value
 
     categories = []
     all_years: set[int] = set()
@@ -412,15 +409,13 @@ def build_catalog() -> dict[str, Any]:
             )
         ]
         records_by_year: Counter[int] = Counter()
-        quantity_by_year: dict[int, Counter[str]] = defaultdict(Counter)
-        category_quantity_by_unit: Counter[str] = Counter()
+        cases_by_year: Counter[int] = Counter()
         municipalities: set[tuple[str, str]] = set()
         for crime in crimes:
             crime_count += 1
-            category_quantity_by_unit.update(crime["quantityByUnit"])
             for item in crime["years"]:
                 records_by_year[item["year"]] += item["records"]
-                quantity_by_year[item["year"]].update(item["quantityByUnit"])
+                cases_by_year[item["year"]] += item["cases"]
                 all_years.add(item["year"])
             municipalities.update(crime.pop("_municipalityLocations"))
 
@@ -429,14 +424,14 @@ def build_catalog() -> dict[str, Any]:
             "name": category["name"],
             "icon": category["icon"],
             "records": sum(crime["records"] for crime in crimes),
+            "cases": sum(crime["cases"] for crime in crimes),
             "crimeCount": len(crimes),
             "municipalityCount": len(municipalities),
-            "quantityByUnit": dict(category_quantity_by_unit),
             "years": [
                 {
                     "year": year,
                     "records": records_by_year[year],
-                    "quantityByUnit": dict(quantity_by_year[year]),
+                    "cases": cases_by_year[year],
                 }
                 for year in sorted(records_by_year)
             ],
@@ -446,11 +441,12 @@ def build_catalog() -> dict[str, Any]:
     if not categories:
         raise ValueError(f"No se encontraron registros en {SOURCE}")
     return {
-        "generatedFrom": "DataBase/hecho.csv",
+        "generatedFrom": "DataBase/Delitos_final.csv",
         "sourceMetadata": {
             "filename": SOURCE.name,
             "sizeBytes": SOURCE.stat().st_size,
-            "duplicateRecordsIncluded": duplicate_records,
+            "sourceRecords": source_records,
+            "duplicateRecordsExcluded": duplicate_records,
             "modifiedAt": datetime.fromtimestamp(
                 SOURCE.stat().st_mtime
             ).astimezone().isoformat(timespec="minutes"),
@@ -458,6 +454,7 @@ def build_catalog() -> dict[str, Any]:
         "crimeCount": crime_count,
         "categoryCount": len(categories),
         "totalRecords": total_records,
+        "totalCases": total_cases,
         "years": sorted(all_years),
         "yearCoverage": [
             {
@@ -569,7 +566,9 @@ def main() -> None:
     )
     print(
         f"Catálogo generado: {len(catalog['categories'])} categorías, "
-        f"{catalog['crimeCount']} delitos, {catalog['totalRecords']:,} registros."
+        f"{catalog['crimeCount']} delitos, "
+        f"{catalog['totalCases']:,.0f} casos "
+        f"({catalog['sourceMetadata']['duplicateRecordsExcluded']:,} duplicados excluidos)."
     )
     print(OUTPUT.relative_to(ROOT))
     print(

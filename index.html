@@ -53,7 +53,7 @@ try {
   <div class="hc">
     <span class="brand">Indicadores delictivos en Colombia</span>
     <h1>Explora los datos <em>delictivos de Colombia</em></h1>
-    <p>Consulta registros SIEDCO por año, delito y territorio. Cada cifra representa filas reportadas; no necesariamente personas ni incidentes únicos.</p>
+    <p>Consulta los casos SIEDCO por año, delito y territorio. Los indicadores usan la suma de la columna casos.</p>
     <div class="hero-actions">
       <a class="cta" href="#analisis">Ver análisis nacional</a>
       <a class="cta" href="#tu-zona">Explorar mi zona</a>
@@ -69,7 +69,7 @@ try {
     <div class="hero-data-card">
       <div class="hero-map" id="heroMap" aria-hidden="true"></div>
       <div class="hero-data-copy">
-        <span class="hero-data-label">Registros tabulados</span>
+        <span class="hero-data-label">Casos reportados</span>
         <strong id="heroRecordCount">—</strong>
         <small><span id="heroPeriod">2020–2026</span> · <span id="heroDepartmentCount">33 departamentos</span></small>
       </div>
@@ -77,31 +77,50 @@ try {
   </div>
 </header>
 
-<section class="today" aria-labelledby="todayTitle">
+<section class="today data-animate" aria-labelledby="todayTitle">
   <div class="today-copy">
-    <span class="data-eyebrow">Una mirada a los registros disponibles</span>
-    <h2 id="todayTitle">Hurto a personas: promedio diario</h2>
-    <p>Promedio de registros en años completos disponibles. No es un contador en tiempo real ni representa necesariamente personas o incidentes únicos.</p>
+    <span class="data-eyebrow">Hallazgo del conjunto de datos</span>
+    <h2 id="todayTitle">El delito con más casos del periodo</h2>
+    <p id="homeInsightText">El indicador se calcula sumando la columna casos de la base final, sin convertirlo en un promedio diario ni en una tasa poblacional.</p>
   </div>
   <div class="today-stat">
-    <strong id="todayDailyCount">—</strong>
-    <span id="todayDailyLabel">registros por día en promedio</span>
-    <small id="todayInterval">Calculando con los registros SIEDCO 2020–2026…</small>
+    <strong id="homeInsightValue">—</strong>
+    <span id="homeInsightLabel">Delito con mayor número de casos</span>
+    <small id="homeInsightFootnote">Calculando sobre el periodo disponible…</small>
   </div>
 </section>
 
-<section class="sum" id="resumen">
-  <div><h3>Filas tabuladas</h3><strong id="stat-records">0</strong><small>no equivale a incidentes</small></div>
-  <div><h3>Delitos incluidos</h3><strong id="stat-crimes">0</strong><small>según los registros SIEDCO</small></div>
+<section class="sum data-animate" id="resumen">
+  <div><h3>Casos totales</h3><strong id="stat-records">0</strong><small>suma de la columna casos</small></div>
+  <div><h3>Delitos incluidos</h3><strong id="stat-crimes">0</strong><small>según la clasificación SIEDCO</small></div>
   <div><h3>Categorías</h3><strong id="stat-categories">0</strong><small>según la temática reportada</small></div>
   <div><h3>Periodo</h3><strong id="stat-period">—</strong><small>años disponibles en SIEDCO</small></div>
 </section>
 
 <section class="blk" id="proyecto">
   <h2>Sobre el proyecto</h2>
-  <p>Indecol organiza registros SIEDCO de 2020–2026 en indicadores, gráficos y consultas territoriales. Explora el panorama nacional, filtra por región, departamento o municipio, y consulta el detalle de cada delito.</p>
-  <p>El Dashboard y el Informe R ofrecen recursos complementarios. Los registros representan lo reportado en la fuente: no necesariamente personas o incidentes únicos ni todos los hechos ocurridos. Los conteos territoriales son valores absolutos, no tasas ajustadas por población.</p>
+  <p>Indecol nace con una idea sencilla: que cualquier persona pueda entender qué delitos se reportan en Colombia, dónde y cuándo, sin tener que descargar ni procesar una base de datos de millones de filas. Para lograrlo, el proyecto transforma la base final de SIEDCO en una herramienta de consulta que organiza los casos por delito, categoría, año, región, departamento y municipio, y los presenta en indicadores, mapas y gráficos que se leen en pocos segundos.</p>
+  <p>Los indicadores y gráficos de esta página se construyen sumando la columna <strong>casos</strong>; las filas marcadas como duplicadas se excluyen al generar el catálogo. Las cifras representan lo consignado en la fuente: no son tasas por población ni una garantía de que cada caso equivalga a un hecho o persona únicos. El último año puede tener cobertura parcial, por lo que debe compararse con cautela frente a años completos.</p>
+  <p id="projectOverview">Preparando el resumen estadístico de la base disponible…</p>
+  <p id="projectTrend">Calculando la evolución anual de los casos…</p>
+  <p>La página se divide en secciones complementarias. <strong>Análisis</strong> ofrece el panorama nacional con un mapa por departamento, la participación de cada categoría, el ranking de delitos y la evolución anual. <strong>Tu zona</strong> permite bajar hasta el nivel de región, departamento y municipio, y descargar los datos de cada año. <strong>Delitos</strong> reúne una ficha por categoría y por delito con su comportamiento anual, mensual y municipal. Por último, el <strong>Dashboard</strong> de Power BI y el <strong>Informe R</strong> amplían el análisis con herramientas y metodologías adicionales.</p>
+  <p>Indecol es un proyecto formativo que busca promover el uso responsable de los datos abiertos. Las cifras ayudan a identificar dónde se concentran los reportes y cómo cambian con el tiempo, pero no explican por sí solas las causas de esos cambios: factores como la población, la denuncia o los operativos policiales también influyen en lo que queda registrado.</p>
   <div class="gr" id="info"></div>
+  <section class="info-videos" aria-labelledby="infoVideosTitle">
+    <span class="data-eyebrow">Material audiovisual</span>
+    <h3 id="infoVideosTitle">Videos informativos</h3>
+    <p>En este espacio se publicarán los videos informativos de Indecol: piezas cortas que explican cómo navegar cada sección, cómo interpretar los gráficos y qué muestran los principales hallazgos de los datos SIEDCO.</p>
+    <div class="info-videos-grid" id="infoVideos">
+      <article class="info-video-slot">
+        <div class="info-video-frame"><video controls preload="metadata" playsinline aria-label="Video informativo 1 de Indecol"><source src="assets/videos/video1.mp4" type="video/mp4">Tu navegador no puede reproducir este video.</video></div>
+        <h4>Video informativo 1</h4>
+      </article>
+      <article class="info-video-slot">
+        <div class="info-video-frame"><video controls preload="metadata" playsinline aria-label="Video informativo 2 de Indecol"><source src="assets/videos/video2.mp4" type="video/mp4">Tu navegador no puede reproducir este video.</video></div>
+        <h4>Video informativo 2</h4>
+      </article>
+    </div>
+  </section>
 </section>
 </div>
 <section class="pg" id="grupo-de-trabajo">
@@ -116,9 +135,9 @@ try {
   <div class="blk analysis-page">
     <span class="data-eyebrow" id="analysisEyebrow">Lectura territorial · SIEDCO 2020–2026</span>
     <h2 id="analysisScopeTitle">Análisis de Colombia</h2>
-    <p id="analysisIntro">Compara categorías, delitos y años en el panorama nacional. Selecciona un departamento para enfocar los resultados y revisar sus registros.</p>
+    <p id="analysisIntro">Compara categorías, delitos y años en el panorama nacional según los casos reportados. Selecciona un departamento para enfocar los resultados.</p>
     <p class="data-note" id="analysisScopeNote">Usa los filtros para elegir el periodo; el mapa, la comparación y los gráficos se actualizan con cada selección.</p>
-    <p class="data-note" id="analysisDataQuality">Los conteos son registros reportados, no tasas ajustadas por población.</p>
+    <p class="data-note" id="analysisDataQuality">Los conteos corresponden a la suma de la columna casos.</p>
     <div class="analysis-controls" aria-label="Filtros del análisis nacional">
       <label for="analysisYearFrom">Desde
         <select id="analysisYearFrom"></select>
@@ -130,17 +149,28 @@ try {
     </div>
     <p class="data-note" id="analysisLowCrimes" aria-live="polite"></p>
     <div class="analysis-findings" id="analysisFindings" aria-live="polite"></div>
+    <p class="analysis-narrative" id="analysisNarrative" aria-live="polite">Los hallazgos estadísticos aparecerán según el periodo y el territorio seleccionados.</p>
+    <section class="analysis-howto" aria-labelledby="analysisHowtoTitle">
+      <h3 id="analysisHowtoTitle">Guía rápida: cómo usar esta sección</h3>
+      <ol class="analysis-steps">
+        <li><b>Define el periodo.</b> En «Desde» y «Hasta» marca los años que quieres revisar; si inviertes el orden, la página los corrige sola.</li>
+        <li><b>Escoge un territorio.</b> Haz clic sobre un departamento del mapa o búscalo en la lista desplegable. Todo lo que está debajo pasará a mostrar solo ese departamento.</li>
+        <li><b>Vuelve al país.</b> Haz clic otra vez en el mismo departamento o elige «Todos los departamentos» para regresar a la vista nacional.</li>
+        <li><b>Enfrenta dos departamentos.</b> En «Comparar dos departamentos» elige A y B para ver sus totales y sus diez delitos principales lado a lado.</li>
+        <li><b>Lee cada gráfico.</b> Bajo cada visualización encontrarás un párrafo «Lectura de los datos» con las cifras clave que resume.</li>
+      </ol>
+    </section>
     <section class="data-panel data-animate map-panel">
       <div class="map-heading">
         <div>
           <h3>Explora los departamentos</h3>
-          <p id="analysisMapDescription">Selecciona un departamento para filtrar los gráficos y consultar sus delitos más registrados en el rango elegido. Son conteos, no tasas ajustadas por población.</p>
+          <p id="analysisMapDescription">Selecciona un departamento para filtrar los gráficos y consultar los delitos con más casos en el rango elegido.</p>
         </div>
         <div class="map-selection" id="departmentSelection" aria-live="polite">Selecciona un departamento en el mapa.</div>
       </div>
       <div class="map-tools">
-        <div class="map-legend" role="img" aria-label="Escala de registros: menos a más">
-          <span>Menos registros</span><i></i><span>Más registros</span>
+        <div class="map-legend" role="img" aria-label="Escala de casos: menos a más">
+          <span>Menos casos</span><i></i><span>Más casos</span>
         </div>
         <label class="department-access" for="departmentPicker">Filtrar el análisis por departamento
           <select id="departmentPicker"></select>
@@ -150,6 +180,7 @@ try {
         <div id="departmentMap" class="department-map" role="group" aria-label="Mapa interactivo de Colombia"></div>
         <div id="departmentCrimes" class="department-crimes"><p class="data-empty">Mueve el cursor sobre un departamento para explorar sus datos.</p></div>
       </div>
+      <p class="chart-reading" id="analysisMapReading"></p>
       <section class="department-compare" aria-labelledby="departmentCompareTitle">
         <h4 id="departmentCompareTitle">Comparar dos departamentos</h4>
         <div class="department-compare-controls">
@@ -161,19 +192,22 @@ try {
       <p class="map-credit">Límites departamentales: Marco Geoestadístico Nacional de Colombia 2018 (DANE), compartido por <a href="https://github.com/caticoa3/colombia_mapa" target="_blank" rel="noopener noreferrer">caticoa3/colombia_mapa</a>.</p>
     </section>
     <section class="data-panel data-animate">
-      <h3>¿Cómo se distribuyen los registros?</h3>
-      <p id="analysisCategoriesDescription">Cada segmento representa una categoría en proporción a los registros filtrados; la leyenda muestra su conteo y porcentaje. El amarillo señala las tres categorías con más filas. Son conteos, no tasas ajustadas por población.</p>
+      <h3>¿Cómo se distribuyen los casos?</h3>
+      <p id="analysisCategoriesDescription">Cada segmento representa una categoría en proporción a los casos filtrados; la leyenda muestra su valor y porcentaje. El amarillo señala las tres categorías con más casos.</p>
       <div id="analysisCategories"></div>
+      <p class="chart-reading" id="analysisCategoriesReading"></p>
     </section>
     <section class="data-panel data-animate">
-      <h3>Delitos con más registros</h3>
-      <p id="analysisCrimesDescription">Las barras ordenan los diez delitos con más registros: su longitud indica el conteo y la etiqueta incluye su porcentaje del total filtrado. El amarillo destaca los tres primeros. No son tasas ni personas únicas.</p>
+      <h3>Delitos con más casos</h3>
+      <p id="analysisCrimesDescription">Las barras ordenan los diez delitos con más casos: su longitud indica el total y la etiqueta incluye su porcentaje del total filtrado.</p>
       <div id="analysisCrimes"></div>
+      <p class="chart-reading" id="analysisCrimesReading"></p>
     </section>
     <section class="data-panel data-animate">
-      <h3>Evolución anual de los registros</h3>
-      <p id="analysisYearsDescription">Cada punto muestra el total de registros de un año: el eje horizontal indica el año y la cifra junto al punto, el conteo. El amarillo destaca los tres años con más filas; interpreta con cautela los años parciales.</p>
+      <h3>Evolución anual de casos</h3>
+      <p id="analysisYearsDescription">Cada punto muestra los casos reportados en un año. Interpreta con cautela los años parciales.</p>
       <div id="analysisYears"></div>
+      <p class="chart-reading" id="analysisYearsReading"></p>
     </section>
   </div>
 </section>
@@ -181,9 +215,9 @@ try {
   <div class="blk analysis-page zone-page">
     <span class="data-eyebrow">Exploración territorial</span>
     <h2>Tu zona</h2>
-    <p>Filtra los registros por periodo, región, departamento y municipio. Las opciones de departamento y municipio se ajustan a cada selección, y los indicadores y gráficos se actualizan automáticamente.</p>
+    <p>Filtra los casos por periodo, región, departamento y municipio. Las opciones de departamento y municipio se ajustan a cada selección, y los indicadores y gráficos se actualizan automáticamente.</p>
     <p>El resumen y los gráficos describen el territorio y el periodo elegidos. Revisa la etiqueta de selección para confirmar el alcance antes de comparar resultados.</p>
-    <p class="data-note">Los datos siguen la clasificación de SIEDCO y son conteos de filas reportadas; no son tasas de población ni necesariamente personas o incidentes únicos.</p>
+    <p class="data-note">Los datos siguen la clasificación de SIEDCO y se calculan sumando la columna casos; no son tasas de población.</p>
     <section class="data-panel zone-panel">
       <div class="zone-controls">
         <label for="zoneYearFrom">Año desde
@@ -215,7 +249,7 @@ try {
       </div>
       <p class="data-note" id="zoneFilterSummary" aria-live="polite"></p>
       <div id="zoneResult" aria-live="polite"><p class="data-empty">Selecciona una región, municipio o departamento para consultar los datos.</p></div>
-      <p class="data-note">La participación territorial corresponde a registros SIEDCO. No se ajusta por población ni implica que los datos midan todos los hechos ocurridos.</p>
+      <p class="data-note">La participación territorial corresponde a los casos SIEDCO. No se ajusta por población ni implica que los datos midan todos los hechos ocurridos.</p>
     </section>
   </div>
 </section>
@@ -239,7 +273,7 @@ try {
   <div class="blk analysis-page">
     <span class="data-eyebrow">Análisis complementario · SIEDCO</span>
     <h2>Informe R</h2>
-    <p>Consulta el análisis nacional de INDECOL: limpieza y exploración en R de 4.429.202 registros SIEDCO, de enero de 2020 a octubre de 2026. El informe incluye análisis territorial, temático y temporal.</p>
+    <p>Consulta el análisis nacional de INDECOL: limpieza y exploración en R de los casos SIEDCO, de enero de 2020 a octubre de 2026. El informe incluye análisis territorial, temático y temporal.</p>
     <div class="rpubs-card">
       <div class="rpubs-content">
         <span class="rpubs-eyebrow">Publicación de RPubs · R</span>
@@ -249,7 +283,7 @@ try {
       </div>
       <div class="rpubs-summary" aria-label="Cobertura del informe">
         <span>Periodo</span><strong>2020–2026</strong>
-        <span>Registros SIEDCO</span><strong>4.429.202</strong>
+        <span>Casos SIEDCO</span><strong id="rpubsCases">Calculando…</strong>
         <small>Datos hasta octubre de 2026</small>
       </div>
     </div>
