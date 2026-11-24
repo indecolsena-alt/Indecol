@@ -31,7 +31,7 @@
   <div class="ix-flash" id="ixFl"></div>
   <button type="button" class="ix-btn" id="ixMute" hidden>Sonido activado</button>
   <button type="button" class="ix-btn" id="ixSkip">Saltar introducción</button>
-  <div class="ix-gate" id="ixGate"><img id="ixLogo" src="assets/images/logo-principal.png" alt="Indecol"><p>INTRODUCCIÓN</p><button type="button" class="ix-go" id="ixCon">Comenzar</button></div>
+  <div class="ix-gate" id="ixGate"><canvas class="ix-gate-ambient" id="ixGateAmbient" width="48" height="27" aria-hidden="true"></canvas><video class="ix-gate-video" id="ixGateVideo" muted loop playsinline preload="auto" aria-hidden="true" tabindex="-1"><source src="assets/videos/introduccion%20Pagina.mp4" type="video/mp4"></video><img id="ixLogo" src="assets/images/logo-principal.png" alt="Indecol"><p>INTRODUCCIÓN</p><button type="button" class="ix-go" id="ixCon">Comenzar</button></div>
 </div>
 <script>
 try {
@@ -109,14 +109,14 @@ try {
   <section class="info-videos" aria-labelledby="infoVideosTitle">
     <span class="data-eyebrow">Material audiovisual</span>
     <h3 id="infoVideosTitle">Videos informativos</h3>
-    <p>En este espacio se publicarán los videos informativos de Indecol: piezas cortas que explican cómo navegar cada sección, cómo interpretar los gráficos y qué muestran los principales hallazgos de los datos SIEDCO.</p>
+    <p>Conoce Indecol en video: piezas cortas que explican cómo navegar cada sección, cómo interpretar los gráficos y qué muestran los principales hallazgos de los datos SIEDCO. Puedes verlos aquí mismo o ampliarlos a pantalla completa desde el botón del reproductor.</p>
     <div class="info-videos-grid" id="infoVideos">
       <article class="info-video-slot">
-        <div class="info-video-frame"><video controls preload="metadata" playsinline aria-label="Video informativo 1 de Indecol"><source src="assets/videos/video1.mp4" type="video/mp4">Tu navegador no puede reproducir este video.</video></div>
+        <div class="info-video-frame"><video controls preload="metadata" playsinline aria-label="Video informativo 1 de Indecol"><source src="assets/videos/video1.mp4#t=0.1" type="video/mp4">Tu navegador no puede reproducir este video.</video></div>
         <h4>Video informativo 1</h4>
       </article>
       <article class="info-video-slot">
-        <div class="info-video-frame"><video controls preload="metadata" playsinline aria-label="Video informativo 2 de Indecol"><source src="assets/videos/video2.mp4" type="video/mp4">Tu navegador no puede reproducir este video.</video></div>
+        <div class="info-video-frame"><video controls preload="metadata" playsinline aria-label="Video informativo 2 de Indecol"><source src="assets/videos/video2.mp4#t=0.1" type="video/mp4">Tu navegador no puede reproducir este video.</video></div>
         <h4>Video informativo 2</h4>
       </article>
     </div>
