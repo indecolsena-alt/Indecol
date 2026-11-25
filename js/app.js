@@ -41,7 +41,7 @@ const NOMBRES_CATALOGO={
  "Lesiones en Accidentes de Transito":"Lesiones en accidentes de tránsito","Motocicletas Recuperadas":"Motocicletas recuperadas"
 };
 const sinTildes=texto=>texto.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase();
-const PALABRAS_CON_TILDE=new Map("Acacías Acandí Achí Águila Agustín Albán Alcalá Alejandría Amagá Andalucía Andaquíes Andrés Ángel Angelópolis Anorí Anzá Anzoátegui Apartadó Apía Apicalá Ariguaní Arbeláez Atlántico Bagadó Bahía Bajirá Baudó Belalcázar Belén Beltrán Berrío Betéitiva Bogotá Bojacá Bojayá Bolívar Boyacá Briceño Buriticá Busbanzá Cáceres Cáchira Cácota Caguán Cajibío Cajicá Calarcá Cañasgordas Cantón Caparrapí Cáqueza Caquetá Caracolí Carcasí Carreño Carurú Cereté Cértegui Chachagüí Chaguaní Chairá Chalán Chámeza Charalá Chía Chigorodó Chinácota Chinchiná Chinú Chipatá Chiquinquirá Chíquiza Chiriguaná Chitagá Chivatá Choachí Chocó Chocontá Chucurí Ciénaga Ciénega Cocorná Colón Colosó Cómbita Concepción Consacá Contratación Convención Córdoba Córdobas Covarachía Coveñas Cristóbal Cubará Cucunubá Cúcuta Cuítiva Curití Curumaní Darién Distracción Ebéjico Elías Entrerríos Facatativá Florián Fómeque Fundación Fúquene Fusagasugá Gachalá Gachancipá Gachantivá Gachetá Gaitán Galán Gámbita Gámeza Garzón Génova Girón Gómez González Guacarí Guachené Guachetá Gualmatán Guapí Guapotá Guatapé Guataquí Guática Guavatá Guayatá Güepsa Güicán Gutiérrez Guzmán Hacarí Herrán Ibagué Imués Inírida Inzá Íquira Iró Itagüí Jambaló Jamundí Jardín Jericó Jerónimo Jerusalén Jesús Joaquín Jordán José Junín Juradó Landázuri Leguízamo Lejanías Lérida Líbano Lloró López Lucía Magangué Magüí Málaga Manatí Maní Mapiripán María Maripí Martín Matías Medellín Milán Mistrató Mitú Mompós Monguí Moniquirá Moñitos Montañita Montelíbano Montería Murindó Mutatá Nariño Nátaga Nechí Necoclí Nemocón Norosí Nóvita Nunchía Nuquí Ocaña Oicatá Opón Orocué Pácora Páez Páramo Patía Payán Peña Peñol Peñón Piendamó Pijiño Piñón Piojó Playón Popayán Potosí Pulí Puracé Purificación Purísima Quibdó Quinchía Quindío Quípama Ramiriquí Ráquira Repelón Retén Río Riofrío Rondón Rosalía Saboyá Sácama Sáchica Sahagún Saldaña Samacá Samaná Sampués Sandoná Santafé Sebastián Sesquilé Sibaté Simití Sincé Sipí Síquima Soatá Socotá Sofía Sonsón Sopetrán Sopó Soracá Sotaquirá Sotará Suárez Supatá Supía Suratá Susacón Sutamarchán Tablón Tadó Támesis Tarazá Tibaná Tibú Timaná Timbío Timbiquí Tinjacá Tocancipá Togüí Tolú Tomás Tópaga Topaipí Toribío Totoró Tubará Tuchín Tuluá Túquerres Turmequé Ubalá Ubaté Úmbita Umbría Unguía Unión Upía Urabá Uré Usiacurí Útica Valparaíso Vegachí Vélez Vianí Vigía Villagarzón Villagómez Villamaría Villapinzón Viotá Viracachá Yacopí Yalí Yolombó Yondó Zapayán Zenón Zetaquirá Zipacón Zipaquirá Guainía Vaupés Machetá Támara".split(" ").map(palabra=>[sinTildes(palabra),palabra]));
+const PALABRAS_CON_TILDE=new Map("Acacías Acandí Achí Águila Agustín Albán Alcalá Alejandría Amagá Andalucía Andaquíes Andrés Ángel Angelópolis Anorí Anzá Anzoátegui Apartadó Apía Apicalá Ariguaní Arbeláez Atlántico Bagadó Bahía Bajirá Baudó Belalcázar Belén Beltrán Berrío Betéitiva Bogotá Bojacá Bojayá Bolívar Boyacá Briceño Buriticá Busbanzá Cáceres Cáchira Cácota Caguán Cajibío Cajicá Calarcá Cañasgordas Cantón Caparrapí Cáqueza Caquetá Caracolí Carcasí Carreño Carurú Cereté Cértegui Chachagüí Chaguaní Chairá Chalán Chámeza Charalá Chía Chigorodó Chinácota Chinchiná Chinú Chipatá Chiquinquirá Chíquiza Chiriguaná Chitagá Chivatá Choachí Chocó Chocontá Chucurí Ciénaga Ciénega Cocorná Colón Colosó Cómbita Concepción Consacá Contratación Convención Córdoba Córdobas Covarachía Coveñas Cristóbal Cubará Cucunubá Cúcuta Cuítiva Curití Curumaní Darién Distracción Ebéjico Elías Entrerríos Facatativá Florián Fómeque Fundación Fúquene Fusagasugá Gachalá Gachancipá Gachantivá Gachetá Gaitán Galán Gámbita Gámeza Garzón Génova Girón Gómez González Guacarí Guachené Guachetá Gualmatán Guapí Guapotá Guatapé Guataquí Guática Guavatá Guayatá Güepsa Güicán Gutiérrez Guzmán Hacarí Herrán Ibagué Imués Inírida Inzá Íquira Iró Itagüí Jambaló Jamundí Jardín Jericó Jerónimo Jerusalén Jesús Joaquín Jordán José Junín Juradó Landázuri Leguízamo Lejanías Lérida Líbano Lloró López Lucía Magangué Magüí Málaga Manatí Maní Mapiripán María Maripí Martín Matías Medellín Milán Mistrató Mitú Mompós Monguí Moniquirá Moñitos Montañita Montelíbano Montería Murindó Mutatá Nariño Nátaga Nechí Necoclí Nemocón Norosí Nóvita Nunchía Nuquí Ocaña Oicatá Opón Orocué Pácora Páez Páramo Patía Payán Peña Peñol Peñón Piendamó Pijiño Piñón Piojó Playón Popayán Potosí Pulí Puracé Purificación Purísima Quibdó Quinchía Quindío Quípama Ramiriquí Ráquira Repelón Retén Río Riofrío Rondón Rosalía Saboyá Sácama Sáchica Sahagún Saldaña Samacá Samaná Sampués Sandoná Santafé Sebastián Sesquilé Sibaté Simití Sincé Sipí Síquima Soatá Socotá Sofía Sonsón Sopetrán Sopó Soracá Sotaquirá Sotará Suárez Supatá Supía Suratá Susacón Sutamarchán Tablón Tadó Támesis Tarazá Tibaná Tibú Timaná Timbío Timbiquí Tinjacá Tocancipá Togüí Tolú Tomás Tópaga Topaipí Toribío Totoró Tubará Tuchín Tuluá Túquerres Turmequé Ubalá Ubaté Úmbita Umbría Unguía Unión Upía Urabá Uré Usiacurí Útica Valparaíso Vegachí Vélez Vianí Vigía Villagarzón Villagómez Villamaría Villapinzón Viotá Viracachá Yacopí Yalí Yolombó Yondó Zapayán Zenón Zetaquirá Zipacón Zipaquirá Guainía Vaupés Machetá Támara Asís".split(" ").map(palabra=>[sinTildes(palabra),palabra]));
 const PALABRAS_MENORES=new Set(["de","del","la","las","los","y","el","en","reportado"]);
 function nombreLugar(texto){
  if(!texto)return texto;
@@ -405,15 +405,107 @@ function paginaCategoria(id){
   </section>
   <section class="data-panel data-animate">
    <h3>Delitos de esta categoría</h3>
-   <p>Selecciona un delito para consultar su evolución anual y mensual, además de los municipios con más casos. Cada tarjeta indica el total del delito en el periodo, de modo que puedes comparar de un vistazo cuáles aportan más casos a la categoría.</p>
-   ${parrafoLectura(lecturaRanking(category.crimes,{valor:casos,etiqueta:item=>item.name,total:categoryCases,plural:"delitos"}))}
+   <p>Selecciona un delito para consultar su evolución anual y mensual, además de los municipios con más casos. Cada tarjeta indica el total del delito en el periodo (la incautación de estupefacientes se mide en toneladas), de modo que puedes comparar de un vistazo cuáles aportan más casos a la categoría.</p>
+   ${parrafoLectura(lecturaRanking(category.crimes.filter(casos),{valor:casos,etiqueta:item=>item.name,total:categoryCases,plural:"delitos"}))}
    <div class="data-crimes">${category.crimes.map(crime=>`<a class="data-crime" href="#delitos/${encodeURIComponent(category.id)}/${encodeURIComponent(crime.id)}">
-    <span class="data-crime-image" aria-hidden="true" style="--crime-image:url('${htmlSeguro(rutaImagenDelito(crime))}')"></span><span class="data-crime-info"><b>${htmlSeguro(crime.name)}</b><small>${casos(crime)?`<span data-count-value="${casos(crime)}">0</span> casos · ${htmlSeguro(periodo(crime.years))}`:"No se mide en casos"}</small></span><span class="data-arrow" aria-hidden="true">→</span>
+    <span class="data-crime-image" aria-hidden="true" style="--crime-image:url('${htmlSeguro(rutaImagenDelito(crime))}')"></span><span class="data-crime-info"><b>${htmlSeguro(crime.name)}</b><small>${casos(crime)?`<span data-count-value="${casos(crime)}">0</span> casos · ${htmlSeguro(periodo(crime.years))}`:usaIncautaciones(crime)?`<span data-count-value="${toneladas(INCAUTACIONES.grams)}">0</span> toneladas incautadas`:"No se mide en casos"}</small></span><span class="data-arrow" aria-hidden="true">→</span>
    </a>`).join("")}</div>
   </section>
   <p class="data-note">Los indicadores suman la columna casos de SIEDCO. Los años parciales se identifican en las etiquetas.</p>
  </article>`;
  animarAnalisis(dvMain);
+}
+// ===== incautación de estupefacientes: la base la mide en gramos, aparte de los casos =====
+const INCAUTACIONES=window.INDECOL_INCAUTACIONES;
+const SUSTANCIAS={"COCAINA":"Cocaína","MARIHUANA":"Marihuana","BASE DE COCA":"Base de coca","BASUCO":"Basuco","HEROINA":"Heroína","SIN CLASIFICAR":"Sin clasificar"};
+const toneladas=gramos=>Math.round(gramos/1e5)/10;
+const usaIncautaciones=crime=>Boolean(INCAUTACIONES)&&crime.id.endsWith("incautacion-de-estupefacientes");
+// el último año puede traer menos meses que la base de casos
+function etiquetaIncautacion(item){
+ if(item.months.length===12)return String(item.year);
+ return `${item.year} · parcial (hasta ${monthsData[item.months.at(-1).month-1]})`;
+}
+function graficaIncautacionMensual(item){
+ return graficaLineas([{name:"Toneladas",values:item.months.map(mes=>toneladas(mes.grams))}],
+  item.months.map(mes=>monthsData[mes.month-1]),`Toneladas incautadas por mes en ${item.year}`);
+}
+function lecturaIncautacionMensual(item){
+ const orden=[...item.months].sort((a,b)=>b.grams-a.grams),mayor=orden[0],menor=orden.at(-1);
+ const total=item.months.reduce((sum,mes)=>sum+mes.grams,0);
+ return `En ${item.year} se incautaron ${fmtData(toneladas(total))} toneladas en ${item.months.length} meses, un promedio de ${fmtData(toneladas(total/item.months.length))} por mes. El mes con más cantidad fue ${MESES_COMPLETOS[mayor.month-1]} (${fmtData(toneladas(mayor.grams))} toneladas) y el de menos, ${MESES_COMPLETOS[menor.month-1]} (${fmtData(toneladas(menor.grams))}).${item.months.length<12?" Este año está incompleto, por lo que su total no es comparable con el de un año entero.":""}`;
+}
+function paginaIncautaciones(category,crime){
+ const datos=INCAUTACIONES,anios=datos.years,ultimo=anios.at(-1);
+ const periodoDatos=`${anios[0].year}–${ultimo.year}`;
+ const completos=anios.filter(item=>item.months.length===12);
+ const sustancias=datos.substances.map(item=>({label:SUSTANCIAS[item.name]||item.name,value:toneladas(item.grams),grams:item.grams}));
+ const departamentos=datos.departments.map(item=>({label:nombreLugar(item.name),value:toneladas(item.grams),grams:item.grams}));
+ const municipios=datos.municipalities.map(item=>({label:etiquetaLugar(nombreLugar(item.name),nombreLugar(item.department)),value:toneladas(item.grams),grams:item.grams}));
+ const parte=item=>porcentaje(item.grams,datos.grams);
+ const mayorAnio=[...completos].sort((a,b)=>b.grams-a.grams)[0],menorAnio=[...completos].sort((a,b)=>a.grams-b.grams)[0];
+ const inicial=completos[0],final=completos.at(-1),cambio=(final.grams/inicial.grams-1)*100;
+ const lecturaAnios=`Entre los años completos, la mayor cantidad se incautó en ${mayorAnio.year} con ${fmtData(toneladas(mayorAnio.grams))} toneladas y la menor en ${menorAnio.year} con ${fmtData(toneladas(menorAnio.grams))}. De ${inicial.year} a ${final.year} la cantidad ${cambio>=0?"aumentó":"disminuyó"} ${fmtDecimal(Math.abs(cambio))}%. ${ultimo.months.length<12?`${ultimo.year} solo incluye ${ultimo.months.length} meses y suma ${fmtData(toneladas(ultimo.grams))} toneladas.`:""}`;
+ const lecturaSustancias=`${sustancias[0].label} es la sustancia con mayor cantidad incautada: ${fmtData(sustancias[0].value)} toneladas, el ${parte(sustancias[0])} del total. Le sigue la ${sustancias[1].label.toLowerCase()} con ${fmtData(sustancias[1].value)} toneladas (${parte(sustancias[1])}). ${sustancias.slice(2).map(item=>`${item.label} suma ${fmtData(item.value)} toneladas (${parte(item)}).`).join(" ")}`;
+ const sumaTres=departamentos.slice(0,3).reduce((sum,item)=>sum+item.grams,0);
+ const lecturaDepartamentos=`${departamentos[0].label} encabeza la lista con ${fmtData(departamentos[0].value)} toneladas, el ${parte(departamentos[0])} del total. Junto con ${departamentos[1].label} y ${departamentos[2].label} reúne el ${porcentaje(sumaTres,datos.grams)} de lo incautado.`;
+ const record=datos.largest;
+ dvMain.innerHTML=`<article class="data-page">
+  <a class="data-back" href="#delitos/${encodeURIComponent(category.id)}">← Análisis de ${htmlSeguro(category.name)}</a>
+  <header class="data-hero data-animate">
+   <div class="data-hero-copy">
+    <span class="data-eyebrow">${iconoCategoria(category.id)} ${htmlSeguro(category.name)}</span>
+    <h2>${htmlSeguro(crime.name)}</h2>
+    <p>Esta actuación se mide por la cantidad incautada, no por número de casos. Entre ${periodoDatos} la base suma ${fmtData(toneladas(datos.grams))} toneladas.</p>
+   </div>
+   ${visualDelito(category,crime)}
+   <div class="data-stats">
+    <div><b data-count-value="${toneladas(datos.grams)}">0</b><span>Toneladas incautadas</span></div>
+    <div><b data-count-value="${datos.records}">0</b><span>Registros en la base</span></div>
+    <div><b data-count-value="${crime.municipalityCount}">0</b><span>Municipios distintos</span></div>
+   </div>
+  </header>
+  <section class="data-panel data-animate">
+   <h3>Toneladas por año</h3>
+   <p>Cada punto es la suma de la cantidad incautada en el año, convertida de gramos a toneladas. Refleja lo que se logró incautar, no cuánto delito hubo.</p>
+   ${graficaLineas([{name:"Toneladas",values:anios.map(item=>toneladas(item.grams))}],anios.map(item=>String(item.year)),"Toneladas incautadas por año")}
+   ${parrafoLectura(lecturaAnios)}
+  </section>
+  <section class="data-panel data-animate">
+   <h3>Toneladas por sustancia</h3>
+   <p>Compara el peso total incautado de cada sustancia en ${periodoDatos}. Un mismo peso de sustancias distintas no tiene el mismo significado.</p>
+   ${graficaDatos(sustancias,item=>item.value,item=>`${item.label} · ${parte(item)}`,true)}
+   ${parrafoLectura(lecturaSustancias)}
+  </section>
+  <section class="data-panel data-animate">
+   <div class="data-panel-heading"><div><h3>Toneladas por mes</h3><p>Muestra cómo se repartió la cantidad incautada dentro del año elegido. Un solo operativo grande puede producir un salto.</p></div>
+    <label>Año <select id="dataYear">${anios.map(item=>`<option value="${item.year}"${item===ultimo?" selected":""}>${etiquetaIncautacion(item)}</option>`).join("")}</select></label>
+   </div>
+   <div id="dataMonths">${graficaIncautacionMensual(ultimo)}</div>
+   ${parrafoLectura(lecturaIncautacionMensual(ultimo),"dataMonthsReading")}
+  </section>
+  <section class="data-panel data-animate">
+   <h3>Departamentos con más toneladas</h3>
+   <p>Los diez departamentos con mayor peso incautado en ${periodoDatos}.</p>
+   ${graficaDatos(departamentos,item=>item.value,item=>item.label,true)}
+   ${parrafoLectura(lecturaDepartamentos)}
+  </section>
+  <section class="data-panel data-animate">
+   <h3>Municipios con más toneladas</h3>
+   <p>Los diez municipios con mayor peso incautado, junto a su departamento.</p>
+   ${graficaDatos(municipios,item=>item.value,item=>item.label,true)}
+   ${parrafoLectura(`${municipios[0].label} es el municipio con más cantidad incautada: ${fmtData(municipios[0].value)} toneladas, el ${parte(municipios[0])} del total.`)}
+  </section>
+  <p class="data-note">Cantidades de la columna cantidad_incautada, en toneladas. No se suman a los casos de Indecol. El mayor registro individual es de ${fmtData(toneladas(record.grams))} toneladas de ${(SUSTANCIAS[record.substance]||record.substance).toLowerCase()} (${htmlSeguro(nombreLugar(record.department))}, ${MESES_COMPLETOS[record.month-1]} de ${record.year}).</p>
+ </article>`;
+ animarAnalisis(dvMain);
+ const selector=document.getElementById("dataYear");
+ selector.addEventListener("change",()=>{
+  const elegido=anios.find(item=>item.year===Number(selector.value));
+  const meses=document.getElementById("dataMonths");
+  meses.innerHTML=graficaIncautacionMensual(elegido);
+  escribirLectura("dataMonthsReading",lecturaIncautacionMensual(elegido));
+  animarAnalisis(meses.closest(".data-animate"),true);
+ });
 }
 function paginaDelito(categoryId,crimeId,selectedYear){
  const crime=DELITO_POR_ID.get(crimeId);
@@ -423,15 +515,15 @@ function paginaDelito(categoryId,crimeId,selectedYear){
  }
  const category=crime.category;
  activarCategoria(category.id,crime.id);
+ if(usaIncautaciones(crime)){paginaIncautaciones(category,crime);return}
  if(!casos(crime)&&crime.records){
-  const enGramos=crime.id.includes("estupefacientes");
   dvMain.innerHTML=`<article class="data-page">
   <a class="data-back" href="#delitos/${encodeURIComponent(category.id)}">← Análisis de ${htmlSeguro(category.name)}</a>
   <header class="data-hero data-animate">
    <div class="data-hero-copy">
     <span class="data-eyebrow">${iconoCategoria(category.id)} ${htmlSeguro(category.name)}</span>
     <h2>${htmlSeguro(crime.name)}</h2>
-    <p>${enGramos?"Esta actuación se mide por la cantidad incautada, no por número de casos.":"La base no reporta casos para este delito."}</p>
+    <p>La base no reporta casos para este delito.</p>
    </div>
    ${visualDelito(category,crime)}
    <div class="data-stats">
@@ -441,7 +533,7 @@ function paginaDelito(categoryId,crimeId,selectedYear){
   </header>
   <section class="data-panel data-animate">
    <h3>¿Por qué no hay gráficos?</h3>
-   <p>${enGramos?"En la base final, la columna casos vale 0 en todos los registros de incautación de estupefacientes; la cantidad incautada está en gramos, en una columna aparte.":"En la base final, la columna casos vale 0 en todos sus registros."} Los indicadores de Indecol suman la columna casos, por eso este delito no aparece en las comparaciones.</p>
+   <p>En la base final, la columna casos vale 0 en todos sus registros. Los indicadores de Indecol suman la columna casos, por eso este delito no aparece en las comparaciones.</p>
   </section>
  </article>`;
   animarAnalisis(dvMain);

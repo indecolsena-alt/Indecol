@@ -1208,3 +1208,5 @@ details.analysis-howto{margin:4px 0 14px;padding:14px 18px}
  .pg .analysis-page .zone-barra .data-note{font-size:11.5px;line-height:1.45}
  .zone-barra button{padding:7px 10px;font-size:11.5px}
 }
+/* pantallas muy angostas: el título de la ficha no parte las palabras */
+@media(max-width:360px){.data-hero h2{font-size:23px}.data-hero{padding:22px 18px}}
