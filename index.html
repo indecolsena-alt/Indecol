@@ -31,7 +31,28 @@
   <div class="ix-flash" id="ixFl"></div>
   <button type="button" class="ix-btn" id="ixMute" hidden>Sonido activado</button>
   <button type="button" class="ix-btn" id="ixSkip">Saltar introducción</button>
-  <div class="ix-gate" id="ixGate"><canvas class="ix-gate-ambient" id="ixGateAmbient" width="48" height="27" aria-hidden="true"></canvas><video class="ix-gate-video" id="ixGateVideo" muted loop playsinline preload="auto" aria-hidden="true" tabindex="-1"><source src="assets/videos/introduccion%20Pagina.mp4" type="video/mp4"></video><img id="ixLogo" src="assets/images/logo-principal.png" alt="Indecol"><p>INTRODUCCIÓN</p><button type="button" class="ix-go" id="ixCon">Comenzar</button></div>
+  <div class="ix-gate" id="ixGate">
+  <div class="ix-scene" aria-hidden="true">
+    <i class="ix-orbit o1"></i><i class="ix-orbit o2"></i>
+    <span class="ix-obj o-mapa" style="--w:15.9;--x:14%;--y:29%;--mx:21%;--my:18%;--g:26deg;--t:11s;--f:9s;--d:0s"><img src="assets/images/intro/mapa.webp" alt=""></span>
+    <span class="ix-obj o-barras" style="--w:14.2;--x:33.7%;--y:23%;--mx:50%;--my:29.5%;--g:30deg;--t:9s;--f:7s;--d:0.08s"><img src="assets/images/intro/barras.webp" alt=""></span>
+    <span class="ix-obj o-lupa" style="--w:16.2;--x:74.5%;--y:25%;--mx:76%;--my:17%;--g:52deg;--t:8s;--f:8s;--d:0.16s"><img src="assets/images/intro/lupa.webp" alt=""></span>
+    <span class="ix-obj o-escudo" style="--w:11.2;--x:90%;--y:39.5%;--mx:84%;--my:31%;--g:62deg;--t:10s;--f:6.5s;--d:0.24s"><img src="assets/images/intro/escudo.webp" alt=""></span>
+    <span class="ix-obj o-lineas" style="--w:14.5;--x:78.5%;--y:54%;--mx:74%;--my:71%;--g:40deg;--t:9.5s;--f:7.5s;--d:0.32s"><img src="assets/images/intro/lineas.webp" alt=""></span>
+    <span class="ix-obj o-jaguar" style="--w:16.4;--x:82%;--y:75%;--mx:67%;--my:87%;--g:30deg;--t:12s;--f:8.5s;--d:0.4s"><img src="assets/images/intro/jaguar.webp" alt=""></span>
+    <span class="ix-obj o-huella" style="--w:18.0;--x:17.3%;--y:63%;--mx:24%;--my:77%;--g:28deg;--t:10.5s;--f:9.5s;--d:0.12s"><img src="assets/images/intro/huella.webp" alt=""></span>
+    <span class="ix-obj ix-cubo" style="--w:3.8;--x:4.4%;--y:45%;--mx:8%;--my:66%;--b:0px;--g:55deg;--t:10.4s;--f:13s;--d:0s"><img src="assets/images/intro/cubo1.webp" alt=""></span>
+    <span class="ix-obj ix-cubo" style="--w:6.9;--x:6%;--y:81%;--mx:11%;--my:93%;--b:2px;--g:55deg;--t:8.8s;--f:11s;--d:0.2s"><img src="assets/images/intro/cubo2.webp" alt=""></span>
+    <span class="ix-obj ix-cubo" style="--w:4.4;--x:86.6%;--y:24.5%;--mx:93%;--my:9%;--b:0px;--g:55deg;--t:9.6s;--f:12s;--d:0.3s"><img src="assets/images/intro/cubo3.webp" alt=""></span>
+    <span class="ix-obj ix-cubo" style="--w:2.3;--x:23.8%;--y:18%;--mx:36%;--my:10%;--b:1px;--g:55deg;--t:8.0s;--f:10s;--d:0.4s"><img src="assets/images/intro/cubo1.webp" alt=""></span>
+    <span class="ix-obj ix-cubo" style="--w:2.7;--x:27.8%;--y:45.5%;--mx:10%;--my:38%;--b:0px;--g:55deg;--t:11.2s;--f:14s;--d:0.1s"><img src="assets/images/intro/cubo1.webp" alt=""></span>
+    <span class="ix-obj ix-cubo" style="--w:2.2;--x:63%;--y:26.5%;--mx:60%;--my:36%;--b:1px;--g:55deg;--t:7.2s;--f:9s;--d:0.5s"><img src="assets/images/intro/cubo3.webp" alt=""></span>
+    <span class="ix-obj ix-cubo" style="--w:2.8;--x:67%;--y:64%;--mx:43%;--my:70%;--b:0px;--g:55deg;--t:9.6s;--f:12s;--d:0.3s"><img src="assets/images/intro/cubo1.webp" alt=""></span>
+    <span class="ix-obj ix-cubo" style="--w:2.3;--x:75%;--y:83.5%;--mx:38%;--my:93%;--b:1px;--g:55deg;--t:8.0s;--f:10s;--d:0.2s"><img src="assets/images/intro/cubo3.webp" alt=""></span>
+    <span class="ix-obj ix-cubo" style="--w:3.6;--x:32.5%;--y:80%;--mx:90%;--my:57%;--b:3px;--g:55deg;--t:12.0s;--f:15s;--d:0.35s"><img src="assets/images/intro/cubo2.webp" alt=""></span>
+    <span class="ix-obj ix-cubo" style="--w:2.7;--x:93.5%;--y:60%;--mx:6%;--my:58%;--b:2px;--g:55deg;--t:10.4s;--f:13s;--d:0.45s"><img src="assets/images/intro/cubo3.webp" alt=""></span>
+  </div>
+  <img id="ixLogo" src="assets/images/logo-principal.png" alt="Indecol"><p>INTRODUCCIÓN</p><button type="button" class="ix-go" id="ixCon">Comenzar</button></div>
 </div>
 <script>
 try {
@@ -97,14 +118,23 @@ try {
   <div><h3>Periodo</h3><strong id="stat-period">—</strong><small>años disponibles en SIEDCO</small></div>
 </section>
 
+<section class="accesos" aria-label="Explora Indecol">
+  <a href="#analisis"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V11M12 19V5M19 19v-5M3 21h18"/></svg><strong>Análisis nacional</strong><span>Mapa, categorías y evolución de los casos en Colombia.</span><em>Ver el análisis →</em></a>
+  <a href="#tu-zona"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-12a7 7 0 0114 0c0 5.8-7 12-7 12zM12 11.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"/></svg><strong>Tu zona</strong><span>Filtra por región, departamento, municipio y año.</span><em>Explorar mi zona →</em></a>
+  <a href="#delitos"><svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4a7 7 0 100 14 7 7 0 000-14zM16 16l5 5"/></svg><strong>Delitos</strong><span>Una ficha para cada categoría y cada delito.</span><em>Consultar delitos →</em></a>
+</section>
+
 <section class="blk" id="proyecto">
   <h2>Sobre el proyecto</h2>
   <p>Indecol nace con una idea sencilla: que cualquier persona pueda entender qué delitos se reportan en Colombia, dónde y cuándo, sin tener que descargar ni procesar una base de datos de millones de filas. Para lograrlo, el proyecto transforma la base final de SIEDCO en una herramienta de consulta que organiza los casos por delito, categoría, año, región, departamento y municipio, y los presenta en indicadores, mapas y gráficos que se leen en pocos segundos.</p>
-  <p>Los indicadores y gráficos de esta página se construyen sumando la columna <strong>casos</strong>; las filas marcadas como duplicadas se excluyen al generar el catálogo. Las cifras representan lo consignado en la fuente: no son tasas por población ni una garantía de que cada caso equivalga a un hecho o persona únicos. El último año puede tener cobertura parcial, por lo que debe compararse con cautela frente a años completos.</p>
-  <p id="projectOverview">Preparando el resumen estadístico de la base disponible…</p>
-  <p id="projectTrend">Calculando la evolución anual de los casos…</p>
-  <p>La página se divide en secciones complementarias. <strong>Análisis</strong> ofrece el panorama nacional con un mapa por departamento, la participación de cada categoría, el ranking de delitos y la evolución anual. <strong>Tu zona</strong> permite bajar hasta el nivel de región, departamento y municipio, y descargar los datos de cada año. <strong>Delitos</strong> reúne una ficha por categoría y por delito con su comportamiento anual, mensual y municipal. Por último, el <strong>Dashboard</strong> de Power BI y el <strong>Informe R</strong> amplían el análisis con herramientas y metodologías adicionales.</p>
   <p>Indecol es un proyecto formativo que busca promover el uso responsable de los datos abiertos. Las cifras ayudan a identificar dónde se concentran los reportes y cómo cambian con el tiempo, pero no explican por sí solas las causas de esos cambios: factores como la población, la denuncia o los operativos policiales también influyen en lo que queda registrado.</p>
+  <details class="mas-proyecto">
+    <summary>Leer más sobre los datos y las secciones</summary>
+    <p>Los indicadores y gráficos de esta página se construyen sumando la columna <strong>casos</strong>; las filas marcadas como duplicadas se excluyen al generar el catálogo. Las cifras representan lo consignado en la fuente: no son tasas por población ni una garantía de que cada caso equivalga a un hecho o persona únicos. El último año puede tener cobertura parcial, por lo que debe compararse con cautela frente a años completos.</p>
+    <p id="projectOverview">Preparando el resumen estadístico de la base disponible…</p>
+    <p id="projectTrend">Calculando la evolución anual de los casos…</p>
+    <p>La página se divide en secciones complementarias. <strong>Análisis</strong> ofrece el panorama nacional con un mapa por departamento, la participación de cada categoría, el ranking de delitos y la evolución anual. <strong>Tu zona</strong> permite bajar hasta el nivel de región, departamento y municipio, y descargar los datos de cada año. <strong>Delitos</strong> reúne una ficha por categoría y por delito con su comportamiento anual, mensual y municipal. Por último, el <strong>Dashboard</strong> de Power BI y el <strong>Informe R</strong> amplían el análisis con herramientas y metodologías adicionales.</p>
+  </details>
   <div class="gr" id="info"></div>
   <section class="info-videos" aria-labelledby="infoVideosTitle">
     <span class="data-eyebrow">Material audiovisual</span>
@@ -127,7 +157,7 @@ try {
   <div class="blk analysis-page">
     <span class="data-eyebrow">Personas detrás de Indecol</span>
     <h2>Grupo de trabajo</h2>
-    <p>El equipo reúne dos líderes, cinco integrantes de Frontend y quince de Backend, además de dos instructores. Como aún no se han proporcionado nombres ni fotografías, se muestran identificadores y retratos ilustrados provisionales. La estructura describe funciones, no una valoración del trabajo.</p>
+    <p>El equipo reúne dos instructores, dos líderes, cinco integrantes de Frontend y quince de Backend. Como aún no se han proporcionado nombres ni fotografías, se muestran identificadores y retratos ilustrados provisionales. La estructura describe funciones, no una valoración del trabajo.</p>
     <div class="eq" id="eq" aria-label="Equipo de Indecol"></div>
   </div>
 </section>
@@ -136,8 +166,19 @@ try {
     <span class="data-eyebrow" id="analysisEyebrow">Lectura territorial · SIEDCO 2020–2026</span>
     <h2 id="analysisScopeTitle">Análisis de Colombia</h2>
     <p id="analysisIntro">Compara categorías, delitos y años en el panorama nacional según los casos reportados. Selecciona un departamento para enfocar los resultados.</p>
-    <p class="data-note" id="analysisScopeNote">Usa los filtros para elegir el periodo; el mapa, la comparación y los gráficos se actualizan con cada selección.</p>
-    <p class="data-note" id="analysisDataQuality">Los conteos corresponden a la suma de la columna casos.</p>
+    <details class="analysis-howto">
+      <summary>Cómo leer y usar esta sección</summary>
+      <ol class="analysis-steps">
+        <li><b>Define el periodo.</b> En «Desde» y «Hasta» marca los años que quieres revisar; si inviertes el orden, la página los corrige sola.</li>
+        <li><b>Escoge un territorio.</b> Haz clic sobre un departamento del mapa o búscalo en la lista desplegable. Todo lo que está debajo pasará a mostrar solo ese departamento.</li>
+        <li><b>Vuelve al país.</b> Haz clic otra vez en el mismo departamento o elige «Todos los departamentos» para regresar a la vista nacional.</li>
+        <li><b>Enfrenta dos departamentos.</b> En «Comparar dos departamentos» elige A y B para ver sus totales y sus diez delitos principales lado a lado.</li>
+        <li><b>Lee cada gráfico.</b> Bajo cada visualización encontrarás una «Lectura de los datos» con las cifras clave; pulsa «Ver más» para leerla completa.</li>
+      </ol>
+      <p class="data-note" id="analysisScopeNote">Usa los filtros para elegir el periodo; el mapa, la comparación y los gráficos se actualizan con cada selección.</p>
+      <p class="data-note" id="analysisDataQuality">Los conteos corresponden a la suma de la columna casos.</p>
+      <p class="data-note" id="analysisLowCrimes" aria-live="polite"></p>
+    </details>
     <div class="analysis-controls" aria-label="Filtros del análisis nacional">
       <label for="analysisYearFrom">Desde
         <select id="analysisYearFrom"></select>
@@ -145,21 +186,12 @@ try {
       <label for="analysisYearTo">Hasta
         <select id="analysisYearTo"></select>
       </label>
+          <label class="department-access" for="departmentPicker">Departamento
+          <select id="departmentPicker"></select>
+        </label>
       <span id="analysisFilterSummary" aria-live="polite"></span>
     </div>
-    <p class="data-note" id="analysisLowCrimes" aria-live="polite"></p>
     <div class="analysis-findings" id="analysisFindings" aria-live="polite"></div>
-    <p class="analysis-narrative" id="analysisNarrative" aria-live="polite">Los hallazgos estadísticos aparecerán según el periodo y el territorio seleccionados.</p>
-    <section class="analysis-howto" aria-labelledby="analysisHowtoTitle">
-      <h3 id="analysisHowtoTitle">Guía rápida: cómo usar esta sección</h3>
-      <ol class="analysis-steps">
-        <li><b>Define el periodo.</b> En «Desde» y «Hasta» marca los años que quieres revisar; si inviertes el orden, la página los corrige sola.</li>
-        <li><b>Escoge un territorio.</b> Haz clic sobre un departamento del mapa o búscalo en la lista desplegable. Todo lo que está debajo pasará a mostrar solo ese departamento.</li>
-        <li><b>Vuelve al país.</b> Haz clic otra vez en el mismo departamento o elige «Todos los departamentos» para regresar a la vista nacional.</li>
-        <li><b>Enfrenta dos departamentos.</b> En «Comparar dos departamentos» elige A y B para ver sus totales y sus diez delitos principales lado a lado.</li>
-        <li><b>Lee cada gráfico.</b> Bajo cada visualización encontrarás un párrafo «Lectura de los datos» con las cifras clave que resume.</li>
-      </ol>
-    </section>
     <section class="data-panel data-animate map-panel">
       <div class="map-heading">
         <div>
@@ -172,15 +204,12 @@ try {
         <div class="map-legend" role="img" aria-label="Escala de casos: menos a más">
           <span>Menos casos</span><i></i><span>Más casos</span>
         </div>
-        <label class="department-access" for="departmentPicker">Filtrar el análisis por departamento
-          <select id="departmentPicker"></select>
-        </label>
       </div>
       <div class="department-map-layout">
         <div id="departmentMap" class="department-map" role="group" aria-label="Mapa interactivo de Colombia"></div>
         <div id="departmentCrimes" class="department-crimes"><p class="data-empty">Mueve el cursor sobre un departamento para explorar sus datos.</p></div>
       </div>
-      <p class="chart-reading" id="analysisMapReading"></p>
+      <div class="chart-reading" id="analysisMapReading"></div>
       <section class="department-compare" aria-labelledby="departmentCompareTitle">
         <h4 id="departmentCompareTitle">Comparar dos departamentos</h4>
         <div class="department-compare-controls">
@@ -195,20 +224,21 @@ try {
       <h3>¿Cómo se distribuyen los casos?</h3>
       <p id="analysisCategoriesDescription">Cada segmento representa una categoría en proporción a los casos filtrados; la leyenda muestra su valor y porcentaje. El amarillo señala las tres categorías con más casos.</p>
       <div id="analysisCategories"></div>
-      <p class="chart-reading" id="analysisCategoriesReading"></p>
+      <div class="chart-reading" id="analysisCategoriesReading"></div>
     </section>
     <section class="data-panel data-animate">
       <h3>Delitos con más casos</h3>
       <p id="analysisCrimesDescription">Las barras ordenan los diez delitos con más casos: su longitud indica el total y la etiqueta incluye su porcentaje del total filtrado.</p>
       <div id="analysisCrimes"></div>
-      <p class="chart-reading" id="analysisCrimesReading"></p>
+      <div class="chart-reading" id="analysisCrimesReading"></div>
     </section>
     <section class="data-panel data-animate">
       <h3>Evolución anual de casos</h3>
       <p id="analysisYearsDescription">Cada punto muestra los casos reportados en un año. Interpreta con cautela los años parciales.</p>
       <div id="analysisYears"></div>
-      <p class="chart-reading" id="analysisYearsReading"></p>
+      <div class="chart-reading" id="analysisYearsReading"></div>
     </section>
+    <div class="analysis-narrative" id="analysisNarrative" aria-live="polite">Los hallazgos estadísticos aparecerán según el periodo y el territorio seleccionados.</div>
   </div>
 </section>
 <section class="pg" id="tu-zona">
@@ -247,7 +277,10 @@ try {
         <span class="zone-annual-note">Incluye todas las regiones, departamentos y municipios, con conteos por categoría y delito. No depende de los filtros anteriores; 2026 contiene datos hasta octubre.</span>
         <span class="zone-annual-status" id="zoneAnnualCsvStatus" role="status" aria-live="polite"></span>
       </div>
-      <p class="data-note" id="zoneFilterSummary" aria-live="polite"></p>
+      <div class="zone-barra">
+        <p class="data-note" id="zoneFilterSummary" aria-live="polite"></p>
+        <button type="button" id="zoneChange">Cambiar filtros</button>
+      </div>
       <div id="zoneResult" aria-live="polite"><p class="data-empty">Selecciona una región, municipio o departamento para consultar los datos.</p></div>
       <p class="data-note">La participación territorial corresponde a los casos SIEDCO. No se ajusta por población ni implica que los datos midan todos los hechos ocurridos.</p>
     </section>
@@ -288,6 +321,8 @@ try {
       </div>
     </div>
     <p class="data-note">RPubs no permite incrustar esta publicación en la página; usa el botón para abrirla en una pestaña nueva.</p>
+    <h3 class="hallazgos-titulo">Hallazgos clave de la base de datos</h3>
+    <div class="hallazgos" id="rpubsHallazgos"></div>
   </div>
 </section>
 

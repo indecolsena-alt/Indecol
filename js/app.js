@@ -18,6 +18,69 @@ dvTg.addEventListener("click",()=>{const open=dvSide.classList.toggle("open");dv
 const CATALOGO=window.INDECOL_CATALOGO;
 if(!CATALOGO)throw new Error("No se pudo cargar assets/data/catalogo.js. Genera el catálogo desde DataBase/Delitos_final.csv.");
 const CATEGORIAS=CATALOGO.categories;
+// ===== nombres para mostrar: la base viene en mayúsculas y sin tildes =====
+const NOMBRES_CATALOGO={
+ "CONTROL DE ARMAS, SUSTANCIAS Y CAPTURAS":"Control de armas, sustancias y capturas",
+ "DELITOS CONTRA BIENES Y RECURSOS":"Delitos contra bienes y recursos",
+ "DELITOS CONTRA LA VIDA E INTEGRIDAD":"Delitos contra la vida e integridad",
+ "DELITOS INFORMATICOS Y PROPIEDAD INTELECTUAL":"Delitos informáticos y propiedad intelectual",
+ "GESTION Y FUNCION PUBLICA":"Gestión y función pública",
+ "LIBERTAD, MOVILIDAD HUMANA Y SECUESTROS":"Libertad, movilidad humana y secuestros",
+ "MODALIDADES DE HURTOS":"Modalidades de hurtos",
+ "PROTECCION AMBIENTAL Y ANIMAL":"Protección ambiental y animal",
+ "VEHICULOS Y TRANSITO":"Vehículos y tránsito",
+ "Incautacion Armas de Fuego":"Incautación de armas de fuego","Incautacion de Estupefacientes":"Incautación de estupefacientes",
+ "Extorsion":"Extorsión","Delitos Sexuales":"Delitos sexuales","Injuria y Calumnia":"Injuria y calumnia","Lesiones Personales":"Lesiones personales",
+ "Violencia Intrafamiliar":"Violencia intrafamiliar","Delitos Informaticos":"Delitos informáticos","Derechos de Autor":"Derechos de autor",
+ "Contra Administracion Publica":"Contra la administración pública","Violencia a Servidor Publico":"Violencia a servidor público",
+ "Secuestro Extorsivo":"Secuestro extorsivo","Secuestro Simple":"Secuestro simple","Trafico Migrantes":"Tráfico de migrantes","Trata Personas":"Trata de personas",
+ "Hurto a Automotores":"Hurto a automotores","Hurto a Comercio":"Hurto a comercio","Hurto a Entidades Financieras":"Hurto a entidades financieras",
+ "Hurto a Motocicletas":"Hurto a motocicletas","Hurto a Personas":"Hurto a personas","Hurto a Residencias":"Hurto a residencias",
+ "Pirateria Terrestre":"Piratería terrestre","Delitos Contra El Medio Ambiente":"Delitos contra el medio ambiente","Maltrato Animal":"Maltrato animal",
+ "Automotores Recuperados":"Automotores recuperados","Homicidios en Accidentes de Transito":"Homicidios en accidentes de tránsito",
+ "Lesiones en Accidentes de Transito":"Lesiones en accidentes de tránsito","Motocicletas Recuperadas":"Motocicletas recuperadas"
+};
+const sinTildes=texto=>texto.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase();
+const PALABRAS_CON_TILDE=new Map("Acacías Acandí Achí Águila Agustín Albán Alcalá Alejandría Amagá Andalucía Andaquíes Andrés Ángel Angelópolis Anorí Anzá Anzoátegui Apartadó Apía Apicalá Ariguaní Arbeláez Atlántico Bagadó Bahía Bajirá Baudó Belalcázar Belén Beltrán Berrío Betéitiva Bogotá Bojacá Bojayá Bolívar Boyacá Briceño Buriticá Busbanzá Cáceres Cáchira Cácota Caguán Cajibío Cajicá Calarcá Cañasgordas Cantón Caparrapí Cáqueza Caquetá Caracolí Carcasí Carreño Carurú Cereté Cértegui Chachagüí Chaguaní Chairá Chalán Chámeza Charalá Chía Chigorodó Chinácota Chinchiná Chinú Chipatá Chiquinquirá Chíquiza Chiriguaná Chitagá Chivatá Choachí Chocó Chocontá Chucurí Ciénaga Ciénega Cocorná Colón Colosó Cómbita Concepción Consacá Contratación Convención Córdoba Córdobas Covarachía Coveñas Cristóbal Cubará Cucunubá Cúcuta Cuítiva Curití Curumaní Darién Distracción Ebéjico Elías Entrerríos Facatativá Florián Fómeque Fundación Fúquene Fusagasugá Gachalá Gachancipá Gachantivá Gachetá Gaitán Galán Gámbita Gámeza Garzón Génova Girón Gómez González Guacarí Guachené Guachetá Gualmatán Guapí Guapotá Guatapé Guataquí Guática Guavatá Guayatá Güepsa Güicán Gutiérrez Guzmán Hacarí Herrán Ibagué Imués Inírida Inzá Íquira Iró Itagüí Jambaló Jamundí Jardín Jericó Jerónimo Jerusalén Jesús Joaquín Jordán José Junín Juradó Landázuri Leguízamo Lejanías Lérida Líbano Lloró López Lucía Magangué Magüí Málaga Manatí Maní Mapiripán María Maripí Martín Matías Medellín Milán Mistrató Mitú Mompós Monguí Moniquirá Moñitos Montañita Montelíbano Montería Murindó Mutatá Nariño Nátaga Nechí Necoclí Nemocón Norosí Nóvita Nunchía Nuquí Ocaña Oicatá Opón Orocué Pácora Páez Páramo Patía Payán Peña Peñol Peñón Piendamó Pijiño Piñón Piojó Playón Popayán Potosí Pulí Puracé Purificación Purísima Quibdó Quinchía Quindío Quípama Ramiriquí Ráquira Repelón Retén Río Riofrío Rondón Rosalía Saboyá Sácama Sáchica Sahagún Saldaña Samacá Samaná Sampués Sandoná Santafé Sebastián Sesquilé Sibaté Simití Sincé Sipí Síquima Soatá Socotá Sofía Sonsón Sopetrán Sopó Soracá Sotaquirá Sotará Suárez Supatá Supía Suratá Susacón Sutamarchán Tablón Tadó Támesis Tarazá Tibaná Tibú Timaná Timbío Timbiquí Tinjacá Tocancipá Togüí Tolú Tomás Tópaga Topaipí Toribío Totoró Tubará Tuchín Tuluá Túquerres Turmequé Ubalá Ubaté Úmbita Umbría Unguía Unión Upía Urabá Uré Usiacurí Útica Valparaíso Vegachí Vélez Vianí Vigía Villagarzón Villagómez Villamaría Villapinzón Viotá Viracachá Yacopí Yalí Yolombó Yondó Zapayán Zenón Zetaquirá Zipacón Zipaquirá Guainía Vaupés Machetá Támara".split(" ").map(palabra=>[sinTildes(palabra),palabra]));
+const PALABRAS_MENORES=new Set(["de","del","la","las","los","y","el","en","reportado"]);
+function nombreLugar(texto){
+ if(!texto)return texto;
+ return String(texto).replace(/\s*\(CT\)/i,"").trim().split(/\s+/).map((parte,indice)=>
+  /^D\.C\.?$/i.test(parte)?"D.C.":parte.replace(/[\p{L}]+/gu,palabra=>{
+   const minuscula=palabra.toLowerCase();
+   if(indice&&PALABRAS_MENORES.has(minuscula))return minuscula;
+   return PALABRAS_CON_TILDE.get(palabra.toUpperCase())||palabra[0].toUpperCase()+minuscula.slice(1);
+  })
+ ).join(" ").replace(/^Guajira$/,"La Guajira");
+}
+// si el municipio y el departamento se llaman igual (Bogotá), se escribe una sola vez
+const etiquetaLugar=(municipio,departamento)=>{
+ const clave=texto=>sinTildes(String(texto)).replace(/\./g,"");
+ return !departamento||clave(municipio)===clave(departamento)?municipio:`${municipio} · ${departamento}`;
+};
+CATEGORIAS.forEach(categoria=>{
+ categoria.rawName=categoria.name;categoria.name=NOMBRES_CATALOGO[categoria.name]||categoria.name;
+ categoria.crimes.forEach(delito=>{
+  delito.rawName=delito.name;delito.name=NOMBRES_CATALOGO[delito.name]||delito.name;
+  [...(delito.municipalityData||[]),...(delito.municipalities||[])].forEach(lugar=>{
+   lugar.rawName=lugar.name;lugar.rawDepartment=lugar.department;
+   lugar.name=nombreLugar(lugar.name);lugar.department=nombreLugar(lugar.department);
+  });
+ });
+});
+// iconos de línea, iguales en estilo, para cada categoría
+const ICONOS_CATEGORIA={
+ "control-de-armas-sustancias-y-capturas":"M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM8.5 12l2.5 2.5 4.5-5",
+ "delitos-contra-bienes-y-recursos":"M4 7h15a1 1 0 011 1v11H5a2 2 0 01-2-2V6a2 2 0 012-2h12v3M16 13h1",
+ "delitos-contra-la-vida-e-integridad":"M12 20s-8-4.8-8-10.5A4.5 4.5 0 0112 7a4.5 4.5 0 018 2.500C20 15.200 12 20 12 20z",
+ "delitos-informaticos-y-propiedad-intelectual":"M3 5h18v11H3zM8 20h8M12 16v4",
+ "gestion-y-funcion-publica":"M3 9l9-5 9 5zM5 9v8M10 9v8M14 9v8M19 9v8M3 20h18",
+ "libertad-movilidad-humana-y-secuestros":"M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.700l-1.500 1.500M14 10a4 4 0 00-5.700 0l-3 3a4 4 0 005.700 5.700l1.500-1.500",
+ "modalidades-de-hurtos":"M6 11h12v9H6zM8.500 11V8a3.500 3.500 0 017 0v3M12 14.500v2",
+ "proteccion-ambiental-y-animal":"M5 19C4 10 10 4 20 4c0 10-6 16-15 15zM5 19l8-8",
+ "vehiculos-y-transito":"M4 16v-4l2-5h12l2 5v4zM4 12h16M7 16v3M17 16v3"
+};
+const iconoCategoria=id=>`<svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONOS_CATEGORIA[id]||"M5 19V10M12 19V5M19 19v-6"}"/></svg>`;
 const DELITOS_DATA=CATEGORIAS.flatMap(c=>c.crimes.map(d=>({...d,category:c})));
 const CATEGORIA_POR_ID=new Map(CATEGORIAS.map(c=>[c.id,c]));
 const DELITO_POR_ID=new Map(DELITOS_DATA.map(d=>[d.id,d]));
@@ -95,14 +158,16 @@ function graficaAnillo(items,valueOf,labelOf,title){
 function graficaLineas(series,labels,title){
  const visibles=series.filter(item=>item.values.some(value=>value>0));
  if(!labels.length||!visibles.length)return '<p class="data-empty">No hay datos válidos para este gráfico.</p>';
- const width=760,height=300,left=58,right=700,top=46,bottom=222;
+ const top=46,bottom=222;
+ // En contenedores angostos se dibuja una segunda versión: solo rotula el máximo y el mínimo, y lista todas las cifras debajo.
+ const dibujar=({clase,width,height,left,right,resumen,paso})=>{
  const max=Math.max(1,...visibles.flatMap(item=>item.values));
  const xAt=index=>labels.length===1?(left+right)/2:left+(right-left)*index/(labels.length-1);
  const yAt=value=>bottom-(bottom-top)*value/max;
  const yTicks=[max,max/2,0];
  const grids=yTicks.map(value=>{
   const y=yAt(value);
-  return `<line class="data-line-grid" x1="${left}" y1="${y}" x2="${right}" y2="${y}"/><text class="data-line-y" x="${left-10}" y="${y+4}" text-anchor="end">${htmlSeguro(fmtData(value))}</text>`;
+  return `<line class="data-line-grid" x1="${left}" y1="${y}" x2="${right}" y2="${y}"/><text class="data-line-y" x="${left-8}" y="${y+4}" text-anchor="end">${htmlSeguro(fmtData(value))}</text>`;
  }).join("");
  const xLabels=labels.map((label,index)=>`<text class="data-line-x" x="${xAt(index)}" y="${bottom+23}" text-anchor="middle">${htmlSeguro(label)}</text>`).join("");
  const groups=visibles.map((item,seriesIndex)=>{
@@ -110,22 +175,27 @@ function graficaLineas(series,labels,title){
   const points=item.values.map((value,index)=>`${index?"L":"M"}${xAt(index).toFixed(2)},${yAt(value).toFixed(2)}`).join(" ");
   const color=seriesIndex%2?"var(--oro-d)":"var(--azul)";
   const circles=item.values.map((value,index)=>`<circle class="data-line-point${topPoints.has(index)?" is-top":""}" cx="${xAt(index)}" cy="${yAt(value)}" r="${topPoints.has(index)?5:4}" style="--line-color:${color}"><title>${htmlSeguro(item.name)} · ${htmlSeguro(labels[index])}: ${htmlSeguro(fmtData(value))}</title></circle>`).join("");
-  const dataLabels=item.values.map((value,index)=>`<text class="data-line-value-label" x="${xAt(index)}" y="${Math.max(14,yAt(value)-10-seriesIndex*12)}" text-anchor="middle">${htmlSeguro(fmtData(value))}</text>`).join("");
+  const maximo=item.values.indexOf(Math.max(...item.values)),minimo=item.values.indexOf(Math.min(...item.values));
+  const dataLabels=item.values.map((value,index)=>{
+   if(resumen&&index!==maximo&&index!==minimo)return "";
+   // la primera y la última cifra se alinean hacia dentro para no chocar con el eje ni salirse del gráfico
+   const ancla=index===0&&labels.length>1?"start":index===labels.length-1&&labels.length>1?"end":"middle";
+   const x=xAt(index)+(ancla==="start"?-5:ancla==="end"?5:0);
+   const debajo=resumen&&index===minimo&&index!==maximo&&yAt(value)+20<bottom-4;
+   const y=debajo?yAt(value)+20+seriesIndex*12:Math.max(14,yAt(value)-11-seriesIndex*12);
+   return `<text class="data-line-value-label" x="${x}" y="${y}" text-anchor="${ancla}">${htmlSeguro(fmtData(value))}</text>`;
+  }).join("");
   return `<g class="data-line-series" data-graph-line style="--line-color:${color}"><path class="data-line-path" pathLength="1" d="${points}"/>${circles}${dataLabels}</g>`;
  }).join("");
- const legend=visibles.length>1?`<g class="data-line-legend">${visibles.map((item,index)=>`<g transform="translate(${left+index*220},${height-16})"><circle r="4" cy="-4" style="fill:${index%2?"var(--oro-d)":"var(--azul)"}"/><text x="10">${htmlSeguro(item.name)}</text></g>`).join("")}</g>`:"";
- return `<div class="data-line-wrap"><svg class="data-line-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="${htmlSeguro(title)}">${grids}<line class="data-line-axis" x1="${left}" y1="${bottom}" x2="${right}" y2="${bottom}"/>${groups}${xLabels}${legend}</svg><p class="data-line-hint">Desliza horizontalmente para ver todos los datos.</p></div>`;
+ const legend=visibles.length>1?`<g class="data-line-legend">${visibles.map((item,index)=>`<g transform="translate(${left+index*paso},${height-16})"><circle r="4" cy="-4" style="fill:${index%2?"var(--oro-d)":"var(--azul)"}"/><text x="10">${htmlSeguro(item.name)}</text></g>`).join("")}</g>`:"";
+ return `<svg class="data-line-chart ${clase}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${htmlSeguro(title)}">${grids}<line class="data-line-axis" x1="${left}" y1="${bottom}" x2="${right}" y2="${bottom}"/>${groups}${xLabels}${legend}</svg>`;
+ };
+ const cifras=labels.map((label,index)=>`<div><span>${htmlSeguro(label)}</span>${visibles.map(item=>`<b>${htmlSeguro(fmtData(item.values[index]))}</b>`).join("")}</div>`).join("");
+ return `<div class="data-line-wrap">${dibujar({clase:"data-line-wide",width:760,height:300,left:64,right:728,resumen:false,paso:220})}${dibujar({clase:"data-line-narrow",width:320,height:visibles.length>1?276:256,left:60,right:304,resumen:true,paso:130})}<div class="data-line-values">${cifras}</div></div>`;
 }
 const movimientoReducido=matchMedia("(prefers-reduced-motion: reduce)");
 const animacionesNumero=new WeakMap();
-// Un único observador para todos los gráficos del sitio: cada bloque se anima cuando entra en pantalla.
-const observadorAnalisis="IntersectionObserver"in window?new IntersectionObserver(entradas=>{
- entradas.forEach(entrada=>{
-  if(!entrada.isIntersecting)return;
-  observadorAnalisis.unobserve(entrada.target);
-  revelarAnalisis(entrada.target);
- });
-},{threshold:.12}):null;
+// Cada barra, línea, anillo o cifra se anima al entrar en pantalla y se reinicia al salir por abajo.
 const enSiguienteCuadro=fn=>requestAnimationFrame(()=>requestAnimationFrame(fn));
 function animarNumero(elemento){
  const objetivo=Number(elemento.dataset.countValue);
@@ -143,55 +213,143 @@ function animarNumero(elemento){
  }
  requestAnimationFrame(actualizar);
 }
+// querySelectorAll incluyendo el propio elemento
+const consigo=(raiz,selector)=>[...(raiz.matches?.(selector)?[raiz]:[]),...raiz.querySelectorAll(selector)];
 function revelarAnalisis(bloque){
- const yaRevelado=bloque.classList.contains("data-revealed");
  bloque.classList.add("data-revealed");
- bloque.querySelectorAll("[data-count-value]").forEach(numero=>{if(!animacionesNumero.has(numero))animarNumero(numero)});
- bloque.querySelectorAll("[data-bar-target]").forEach(barra=>{
-  enSiguienteCuadro(()=>barra.classList.add("data-bar-revealed"));
+ consigo(bloque,"[data-count-value]").forEach(numero=>{if(!animacionesNumero.has(numero))animarNumero(numero)});
+ // si el bloque ya salió de pantalla antes del siguiente cuadro, no se anima
+ const activar=(selector,clase)=>consigo(bloque,selector).forEach(item=>{
+  enSiguienteCuadro(()=>{if(bloque.classList.contains("data-revealed"))item.classList.add(clase)});
  });
- bloque.querySelectorAll("[data-graph-line]").forEach(linea=>{
-  enSiguienteCuadro(()=>linea.classList.add("data-line-revealed"));
- });
- bloque.querySelectorAll("[data-graph-donut]").forEach(anillo=>{
-  enSiguienteCuadro(()=>anillo.classList.add("data-donut-revealed"));
- });
- if(!yaRevelado)bloque.querySelectorAll(".data-crime").forEach((tarjeta,index)=>{
-  requestAnimationFrame(()=>setTimeout(()=>tarjeta.classList.add("data-card-revealed"),index*45));
- });
+ activar("[data-bar-target]","data-bar-revealed");
+ activar("[data-graph-line]","data-line-revealed");
+ activar("[data-graph-donut]","data-donut-revealed");
 }
 // Devuelve un bloque a su estado inicial para que la animación se repita al volver a la página.
 function reiniciarGrafico(bloque){
- bloque.classList.remove("data-revealed");
- bloque.querySelectorAll(".data-bar-revealed").forEach(item=>item.classList.remove("data-bar-revealed"));
- bloque.querySelectorAll(".data-line-revealed").forEach(item=>item.classList.remove("data-line-revealed"));
- bloque.querySelectorAll(".data-donut-revealed").forEach(item=>item.classList.remove("data-donut-revealed"));
- bloque.querySelectorAll(".data-card-revealed").forEach(item=>item.classList.remove("data-card-revealed"));
- bloque.querySelectorAll("[data-count-value]").forEach(item=>{animacionesNumero.delete(item);item.textContent="0"});
+ consigo(bloque,".data-revealed").forEach(item=>item.classList.remove("data-revealed"));
+ consigo(bloque,".data-bar-revealed").forEach(item=>item.classList.remove("data-bar-revealed"));
+ consigo(bloque,".data-line-revealed").forEach(item=>item.classList.remove("data-line-revealed"));
+ consigo(bloque,".data-donut-revealed").forEach(item=>item.classList.remove("data-donut-revealed"));
+ consigo(bloque,"[data-count-value]").forEach(item=>{animacionesNumero.delete(item);item.textContent="0"});
 }
-function revelarAnalisisVisibles(){
- requestAnimationFrame(()=>{
-  document.querySelectorAll(".pg.active .data-animate:not(.data-revealed)").forEach(bloque=>{
-   const limites=bloque.getBoundingClientRect();
-   if(!limites.height||limites.top>=innerHeight||limites.bottom<=0)return;
-   observadorAnalisis?.unobserve(bloque);
-   revelarAnalisis(bloque);
-  });
- });
+// Las piezas de un bloque que se animan por separado.
+function unidadesGraficas(bloque){
+ return new Set(consigo(bloque,"[data-count-value],[data-bar-target],[data-graph-line],[data-graph-donut]")
+  .map(item=>item.closest(".data-line-wrap,[data-graph-donut],.data-row,.data-bar,li")||item.parentElement));
 }
 function animarAnalisis(raiz,reiniciar=false){
- const bloques=[...raiz.querySelectorAll(".data-animate")];
- if(raiz.classList?.contains("data-animate"))bloques.unshift(raiz);
- bloques.forEach(bloque=>{
-  if(reiniciar){observadorAnalisis?.unobserve(bloque);reiniciarGrafico(bloque)}
-  if(bloque.classList.contains("data-revealed"))return;
-  if(movimientoReducido.matches||!observadorAnalisis){revelarAnalisis(bloque);return}
-  observadorAnalisis.observe(bloque);
+ consigo(raiz,".data-animate").forEach(bloque=>{
+  if(reiniciar)reiniciarGrafico(bloque);
+  unidadesGraficas(bloque).forEach(unidad=>{
+   unidad.dataset.unidad="";
+   if(movimientoReducido.matches&&!unidad.classList.contains("data-revealed"))revelarAnalisis(unidad);
+  });
  });
- revelarAnalisisVisibles();
+ enSiguienteCuadro(revelarAnalisisVisibles);
+}
+// ===== el contenido aparece al bajar y vuelve a ocultarse al subir =====
+const APARECE=[
+ ".hero>.hc>*",".hero-visual",".today>*",".sum>div",".blk>.data-eyebrow",".blk>h2",".blk>p",".mas-proyecto",
+ "#info>.info-card",".info-videos>:not(.info-videos-grid)",".info-video-slot",
+ ".analysis-controls",".analysis-findings>*",".analysis-howto",".analysis-narrative",".analysis-page>.data-note",
+ ".analysis-page>.data-panel:not(.zone-panel)",".data-panel>h3",".data-panel>p",".data-panel>div:not(.department-map-layout)",
+ ".data-panel-heading",".data-panel .chart-reading",".department-compare",".department-compare>h4",".department-compare>div",
+ ".department-map-layout",".map-credit",".map-top-list>li",".department-compare tbody tr",".data-row",
+ ".zone-panel>:not(#zoneResult)","#zoneResult>:not(.zone-charts)",".zone-charts>*",".zone-subpanel>*",
+ ".data-back",".data-hero","#delitos .data-panel",".data-crime","#delitos .data-note",
+ ".team-group>h3",".team-cards>*",".rpubs-card",".hallazgos-titulo",".hallazgos>*",".accesos>a",".dbt",".dbf"
+].join(",");
+// forma de entrada: por defecto suben; algunas piezas crecen o entran desde un lado
+const ENTRADAS=[
+ ["ap-zoom",".accesos>a,.hallazgos>*,.sum>div,#info>.info-card,.analysis-findings>*,.team-cards>*,.info-video-slot,.hero-visual,.department-map-layout,.data-hero,.dbf"],
+ ["ap-izq",".today-copy,.hero>.hc>*,.data-crime"],
+ ["ap-der",".today-stat"],
+ ["ap-fila",".data-row,.map-top-list>li,.department-compare tbody tr"]
+];
+const esperasAparicion=new WeakMap();
+const introAbierta=()=>{const intro=document.getElementById("ix");return Boolean(intro)&&!intro.hidden&&!intro.classList.contains("out")};
+// posición según la maquetación, sin contar los desplazamientos de las propias animaciones
+function posicion(elemento){
+ let nodo=elemento;
+ while(nodo&&!(nodo instanceof HTMLElement))nodo=nodo.parentElement;
+ const alto=nodo?.offsetHeight||0,izquierda=nodo?.offsetLeft||0;
+ let documento=0;
+ for(;nodo;nodo=nodo.offsetParent)documento+=nodo.offsetTop;
+ return{alto,izquierda,documento,pantalla:documento-scrollY};
+}
+// se ve lo que está por encima de la franja inferior; la primera pantalla de cada sección se ve siempre
+function debeVerse({documento,pantalla}){
+ const alFinal=scrollY+innerHeight>=document.documentElement.scrollHeight-2;
+ return documento<innerHeight||pantalla<innerHeight-(alFinal?0:Math.min(90,innerHeight*.1));
+}
+const estaOculto=elemento=>elemento.classList.contains("ap")&&!elemento.classList.contains("ap-ver");
+function ocultar(elemento,animado){
+ clearTimeout(esperasAparicion.get(elemento));
+ elemento.style.removeProperty("--espera");
+ elemento.classList.remove("ap-ver");
+ elemento.classList.toggle("ap-sale",animado);
+ elemento.classList.add("ap",...ENTRADAS.filter(([,selector])=>elemento.matches(selector)).map(([clase])=>clase));
+}
+function aparecer(elemento,espera){
+ elemento.style.setProperty("--espera",`${espera}ms`);
+ elemento.classList.remove("ap-sale");
+ elemento.classList.add("ap-ver");
+ // al terminar se quitan las clases para que cada elemento recupere sus propios efectos
+ esperasAparicion.set(elemento,setTimeout(()=>{
+  elemento.classList.remove("ap","ap-ver",...ENTRADAS.map(([clase])=>clase));
+  elemento.style.removeProperty("--espera");
+ },espera+950));
+}
+function revisarPagina(){
+ const pagina=document.querySelector(".pg.active");
+ if(!pagina||introAbierta())return;
+ // primero se mide todo y después se cambian las clases
+ const entran=[],salen=[],graficos=[];
+ pagina.querySelectorAll("[data-aparece]").forEach(elemento=>{
+  const lugar=posicion(elemento);
+  if(!lugar.alto)return;
+  if(!debeVerse(lugar)){if(!estaOculto(elemento))salen.push(elemento)}
+  else if(estaOculto(elemento))entran.push({elemento,...lugar});
+ });
+ pagina.querySelectorAll("[data-unidad]").forEach(unidad=>{
+  const lugar=posicion(unidad);
+  if(lugar.alto)graficos.push([unidad,debeVerse(lugar)]);
+ });
+ salen.forEach(elemento=>ocultar(elemento,true));
+ // las piezas que entran a la vez aparecen en cascada, de arriba abajo y de izquierda a derecha
+ entran.sort((a,b)=>a.documento-b.documento||a.izquierda-b.izquierda)
+  .forEach(({elemento},orden)=>aparecer(elemento,Math.min(orden,7)*90));
+ graficos.forEach(([unidad,visible])=>{
+  const revelada=unidad.classList.contains("data-revealed");
+  if(visible&&!revelada)revelarAnalisis(unidad);
+  else if(!visible&&revelada&&!movimientoReducido.matches)reiniciarGrafico(unidad);
+ });
+}
+let revisionPendiente=0;
+function revelarAnalisisVisibles(){
+ if(!revisionPendiente)revisionPendiente=requestAnimationFrame(()=>{revisionPendiente=0;revisarPagina()});
 }
 addEventListener("scroll",revelarAnalisisVisibles,{passive:true});
 addEventListener("resize",revelarAnalisisVisibles);
+document.addEventListener("toggle",revelarAnalisisVisibles,true);
+if("ResizeObserver"in window)new ResizeObserver(revelarAnalisisVisibles).observe(document.body);
+function mostrarAlBajar(raiz,reiniciar=false){
+ // mientras la introducción tapa la página no se prepara nada: se hace al cerrarla
+ if(introAbierta())return;
+ raiz.querySelectorAll(APARECE).forEach(elemento=>{
+  if(elemento.hasAttribute("data-aparece")&&!reiniciar)return;
+  elemento.dataset.aparece="";
+  ocultar(elemento,false);
+ });
+ enSiguienteCuadro(revelarAnalisisVisibles);
+}
+// para contenido que se redibuja a la vista (detalle del mapa): participa sin ocultarse primero
+function seguirAlBajar(raiz){
+ raiz.querySelectorAll(APARECE).forEach(elemento=>elemento.dataset.aparece="");
+ revelarAnalisisVisibles();
+}
 function activarCategoria(id,crimeId){
  dvNav.querySelectorAll(".dg").forEach(group=>{
   const selected=group.dataset.cat===id;
@@ -228,7 +386,7 @@ function paginaCategoria(id){
  dvMain.innerHTML=`<article class="data-page">
   <header class="data-hero data-animate">
   <div class="data-hero-copy">
-   <span class="data-eyebrow">${htmlSeguro(category.icon)} Categoría</span>
+   <span class="data-eyebrow">${iconoCategoria(category.id)} Categoría</span>
    <h2>${htmlSeguro(category.name)}</h2>
    <p>En ${period}, esta categoría reúne ${fmtData(categoryCases)} casos según la columna casos de SIEDCO. ${leadingCrime?`${htmlSeguro(leadingCrime.name)} aporta ${leadingShare.toFixed(1).replace(".",",")}% de ellos;`:""} el gráfico resume los casos por año y el listado permite abrir el detalle de cada delito.</p>
   </div>
@@ -250,7 +408,7 @@ function paginaCategoria(id){
    <p>Selecciona un delito para consultar su evolución anual y mensual, además de los municipios con más casos. Cada tarjeta indica el total del delito en el periodo, de modo que puedes comparar de un vistazo cuáles aportan más casos a la categoría.</p>
    ${parrafoLectura(lecturaRanking(category.crimes,{valor:casos,etiqueta:item=>item.name,total:categoryCases,plural:"delitos"}))}
    <div class="data-crimes">${category.crimes.map(crime=>`<a class="data-crime" href="#delitos/${encodeURIComponent(category.id)}/${encodeURIComponent(crime.id)}">
-    <span class="data-crime-image" aria-hidden="true" style="--crime-image:url('${htmlSeguro(rutaImagenDelito(crime))}')"></span><span class="data-crime-info"><b>${htmlSeguro(crime.name)}</b><small><span data-count-value="${casos(crime)}">0</span> casos · ${htmlSeguro(periodo(crime.years))}</small></span><span class="data-arrow" aria-hidden="true">→</span>
+    <span class="data-crime-image" aria-hidden="true" style="--crime-image:url('${htmlSeguro(rutaImagenDelito(crime))}')"></span><span class="data-crime-info"><b>${htmlSeguro(crime.name)}</b><small>${casos(crime)?`<span data-count-value="${casos(crime)}">0</span> casos · ${htmlSeguro(periodo(crime.years))}`:"No se mide en casos"}</small></span><span class="data-arrow" aria-hidden="true">→</span>
    </a>`).join("")}</div>
   </section>
   <p class="data-note">Los indicadores suman la columna casos de SIEDCO. Los años parciales se identifican en las etiquetas.</p>
@@ -265,6 +423,30 @@ function paginaDelito(categoryId,crimeId,selectedYear){
  }
  const category=crime.category;
  activarCategoria(category.id,crime.id);
+ if(!casos(crime)&&crime.records){
+  const enGramos=crime.id.includes("estupefacientes");
+  dvMain.innerHTML=`<article class="data-page">
+  <a class="data-back" href="#delitos/${encodeURIComponent(category.id)}">← Análisis de ${htmlSeguro(category.name)}</a>
+  <header class="data-hero data-animate">
+   <div class="data-hero-copy">
+    <span class="data-eyebrow">${iconoCategoria(category.id)} ${htmlSeguro(category.name)}</span>
+    <h2>${htmlSeguro(crime.name)}</h2>
+    <p>${enGramos?"Esta actuación se mide por la cantidad incautada, no por número de casos.":"La base no reporta casos para este delito."}</p>
+   </div>
+   ${visualDelito(category,crime)}
+   <div class="data-stats">
+    <div><b data-count-value="${crime.records}">0</b><span>Registros en la base</span></div>
+    <div><b data-count-value="${crime.municipalityCount}">0</b><span>Municipios distintos</span></div>
+   </div>
+  </header>
+  <section class="data-panel data-animate">
+   <h3>¿Por qué no hay gráficos?</h3>
+   <p>${enGramos?"En la base final, la columna casos vale 0 en todos los registros de incautación de estupefacientes; la cantidad incautada está en gramos, en una columna aparte.":"En la base final, la columna casos vale 0 en todos sus registros."} Los indicadores de Indecol suman la columna casos, por eso este delito no aparece en las comparaciones.</p>
+  </section>
+ </article>`;
+  animarAnalisis(dvMain);
+  return;
+ }
  const year=crime.years.find(item=>item.year===Number(selectedYear))||crime.years.at(-1);
  const annualSeries=[{
   name:"Casos",
@@ -277,7 +459,7 @@ function paginaDelito(categoryId,crimeId,selectedYear){
   labels:monthItems.map(item=>monthsData[item.month-1]||item.month)
  }];
  const places=crime.municipalities.map(item=>({
-  label:item.department?`${item.name} · ${item.department}`:item.name,
+  label:etiquetaLugar(item.name,item.department),
   value:casos(item)
  }));
  const placesDescription="Municipios con más casos reportados para este delito, con departamento para distinguir nombres repetidos.";
@@ -285,7 +467,7 @@ function paginaDelito(categoryId,crimeId,selectedYear){
   <a class="data-back" href="#delitos/${encodeURIComponent(category.id)}">← Análisis de ${htmlSeguro(category.name)}</a>
   <header class="data-hero data-animate">
    <div class="data-hero-copy">
-    <span class="data-eyebrow">${htmlSeguro(category.icon)} ${htmlSeguro(category.name)}</span>
+    <span class="data-eyebrow">${iconoCategoria(category.id)} ${htmlSeguro(category.name)}</span>
     <h2>${htmlSeguro(crime.name)}</h2>
     <p>En ${htmlSeguro(periodo(crime.years))}, SIEDCO registra ${fmtData(casos(crime))} casos para este delito. Aquí puedes consultar su evolución anual y mensual y los municipios con más casos.</p>
    </div>
@@ -328,8 +510,7 @@ function paginaDelito(categoryId,crimeId,selectedYear){
    "Casos por mes"
   );
   escribirLectura("dataMonthsReading",lecturaMensual(values,selected?.year));
-  months.classList.remove("data-revealed");
-  revelarAnalisis(months);
+  animarAnalisis(months.closest(".data-animate"),true);
  });
 }
 const totalAnual=new Map();
@@ -346,10 +527,17 @@ const MESES_COMPLETOS=["enero","febrero","marzo","abril","mayo","junio","julio",
 const fmtDecimal=value=>value.toFixed(1).replace(".",",");
 const fmtEntero=value=>fmtData(Math.round(value));
 const listaHumana=items=>items.length<2?items.join(""):`${items.slice(0,-1).join(", ")} y ${items.at(-1)}`;
-const parrafoLectura=(texto,id="")=>`<p class="chart-reading"${id?` id="${id}"`:""}><b>Lectura de los datos.</b> ${htmlSeguro(texto)}</p>`;
+// separa en frases sin cortar en "D.C." ni en los puntos de las cifras
+const dividirFrases=texto=>String(texto).trim().split(/(?<=\.)(?<!D\.C\.)\s+(?=[A-ZÁÉÍÓÚÑ¿0-9])|(?<=D\.C\.)\s+(?=(?:Le|Los|Las|La|El|En|Entre|Por|Su|Este|De)\s)/);
+function puntosLectura(texto,titulo="Lectura de los datos."){
+ const frases=dividirFrases(texto),corte=frases.length>3?2:frases.length;
+ const lista=items=>`<ul class="puntos">${items.map(frase=>`<li>${htmlSeguro(frase)}</li>`).join("")}</ul>`;
+ return `<b>${titulo}</b>${lista(frases.slice(0,corte))}${frases.length>corte?`<details class="ver-mas"><summary>Ver más</summary>${lista(frases.slice(corte))}</details>`:""}`;
+}
+const parrafoLectura=(texto,id="")=>`<div class="chart-reading"${id?` id="${id}"`:""}>${puntosLectura(texto)}</div>`;
 function escribirLectura(id,texto){
  const elemento=document.getElementById(id);
- if(elemento)elemento.innerHTML=`<b>Lectura de los datos.</b> ${htmlSeguro(texto)}`;
+ if(elemento)elemento.innerHTML=puntosLectura(texto);
 }
 function lecturaRanking(items,{valor,etiqueta,total,plural,contexto=""}){
  const datos=items.map(item=>({nombre:etiqueta(item),valor:valor(item)}))
@@ -644,12 +832,12 @@ function renderAnalisisNarrativa(){
  if(delitos[0])partes.push(`Por delito, ${delitos[0].name} lidera con ${fmtData(delitos[0].filteredRecords)} casos (${porcentaje(delitos[0].filteredRecords,filteredTotal)}) y los cinco delitos más frecuentes suman ${porcentaje(top5Del,filteredTotal)} del total, de modo que una parte importante de los reportes se concentra en pocos tipos de delito.`);
  if(pico)partes.push(`El año completo con más casos fue ${pico[0]} (${fmtData(pico[1])}) y el promedio de los años completos es de ${fmtEntero(promedio)} casos por año.`);
  if(change!==null)partes.push(`En la comparación más reciente, de ${previousYear[0]} a ${lastCompleteYear[0]}, el volumen ${change>=0?"creció":"se redujo"} ${fmtDecimal(Math.abs(change))}%.`);
- narrative.textContent=partes.join(" ");
+ narrative.innerHTML=puntosLectura(partes.join(" "),"Resumen del periodo.");
  if(mapReading){
   const top5=departamentos.slice(0,5);
   const sumaTop5=top5.reduce((sum,item)=>sum+item.value,0);
   const ultimo=departamentos.at(-1);
-  mapReading.innerHTML=departamentos.length?`<b>Lectura de los datos.</b> ${htmlSeguro(`Entre ${startYear} y ${endYear}, ${departamentos[0].name} es el departamento con más casos: ${fmtData(departamentos[0].value)}, el ${porcentaje(departamentos[0].value,totalTerritorialRecords)} de los casos con departamento identificado. Los cinco primeros (${listaHumana(top5.map(item=>item.name))}) suman ${porcentaje(sumaTop5,totalTerritorialRecords)}, mientras que ${ultimo.name} registra el menor volumen, con ${fmtData(ultimo.value)} casos. Los tonos más oscuros del mapa corresponden a estos territorios de mayor volumen absoluto.`)}`:"";
+  mapReading.innerHTML=departamentos.length?puntosLectura(`Entre ${startYear} y ${endYear}, ${departamentos[0].name} es el departamento con más casos: ${fmtData(departamentos[0].value)}, el ${porcentaje(departamentos[0].value,totalTerritorialRecords)} de los casos con departamento identificado. Los cinco primeros (${listaHumana(top5.map(item=>item.name))}) suman ${porcentaje(sumaTop5,totalTerritorialRecords)}, mientras que ${ultimo.name} registra el menor volumen, con ${fmtData(ultimo.value)} casos. Los tonos más oscuros del mapa corresponden a estos territorios de mayor volumen absoluto.`):"";
  }
 }
 function actualizarAnalisisCompleto(){
@@ -680,7 +868,7 @@ const REGIONES_COLOMBIA=[
  {id:"insular",name:"Insular",departments:["SAN ANDRES"]}
 ];
 const REGION_POR_DEPTO=new Map(REGIONES_COLOMBIA.flatMap(region=>
- region.departments.map(department=>[norm(department),region.id])
+ region.departments.map(department=>[departmentKey(department),region.id])
 ));
 const TODAS_ZONAS="__all__";
 const zonaMunicipios=new Map(),zonaDepartamentos=new Map();
@@ -697,12 +885,12 @@ function sumarAniosEnRango(totals,range){
 DELITOS_DATA.forEach(crime=>(crime.municipalityData||[]).forEach(item=>{
  const department=String(item.department||"").trim()||"Departamento no especificado";
  const name=String(item.name||"").trim();
- const region=item.region||REGION_POR_DEPTO.get(norm(department))||"sin-region";
+ const region=item.region||REGION_POR_DEPTO.get(departmentKey(department))||"sin-region";
  if(["","no reportado","nan","none"].includes(norm(department)))return;
  if(["","no reportado","nan","none"].includes(norm(name))){
   const departmentId=departmentKey(department);
   const departmentValue=zonaDepartamentos.get(departmentId)||{
-   name:departmentId==="guajira"||departmentId==="la guajira"?"LA GUAJIRA":department,
+   name:departmentId==="guajira"||departmentId==="la guajira"?"La Guajira":department,
    region,
    records:0
   };
@@ -725,7 +913,7 @@ DELITOS_DATA.forEach(crime=>(crime.municipalityData||[]).forEach(item=>{
  zonaMunicipios.set(municipalityKey,municipality);
  const departmentId=departmentKey(department);
  const departmentValue=zonaDepartamentos.get(departmentId)||{
-   name:departmentId==="guajira"||departmentId==="la guajira"?"LA GUAJIRA":department,
+   name:departmentId==="guajira"||departmentId==="la guajira"?"La Guajira":department,
    region,
    records:0
  };
@@ -790,7 +978,7 @@ function renderZona(){
    const annualRecords=new Map();
    (crime.municipalityData||[]).forEach(item=>{
    const department=String(item.department||"").trim()||"Departamento no especificado";
-    const region=item.region||REGION_POR_DEPTO.get(norm(department))||"sin-region";
+    const region=item.region||REGION_POR_DEPTO.get(departmentKey(department))||"sin-region";
     const municipalityKey=`${norm(department)}|${norm(String(item.name||"").trim())}`;
     const matches=(selectedRegion===TODAS_ZONAS||region===selectedRegion)
      &&(selectedDepartment===TODAS_ZONAS||departmentKey(department)===selectedDepartment)
@@ -816,7 +1004,7 @@ function renderZona(){
    &&(selectedDepartment===TODAS_ZONAS||departmentKey(item.department)===selectedDepartment)
    &&(selectedMunicipality===TODAS_ZONAS||key===selectedMunicipality))
   .map(([,item])=>({
-   label:`${item.name} · ${item.department}`,
+   label:etiquetaLugar(item.name,item.department),
    records:sumarAniosEnRango(item.annualRecords,range)
   }))
   .filter(item=>item.records>0)
@@ -859,9 +1047,9 @@ function renderZona(){
    ${graficaDatos(localMunicipalities,item=>item.records,item=>item.label,true)}
    ${parrafoLectura(lecturaRanking(localMunicipalities,{valor:item=>item.records,etiqueta:item=>item.label,total,plural:"municipios"}))}
  </section>
- <section class="zone-subpanel data-animate"><h4>Delitos con más casos</h4><p>El gráfico compara los ${fmtData(localCrimes.length)} delitos incluidos en el catálogo para esta selección y ordena primero los de mayor total. La longitud indica el volumen relativo y la cifra final da el número exacto de casos, útil para reconocer qué delitos concentran más reportes en la zona.</p>
-   ${graficaDatos(localCrimes,item=>item.records,item=>item.name,true)}
-   ${parrafoLectura(lecturaRanking(localCrimes,{valor:item=>item.records,etiqueta:item=>item.name,total,plural:"delitos"}))}
+ <section class="zone-subpanel data-animate"><h4>Delitos con más casos</h4><p>El gráfico compara los ${fmtData(localCrimes.filter(item=>item.records>0).length)} delitos con casos en esta selección y ordena primero los de mayor total. La longitud indica el volumen relativo y la cifra final da el número exacto de casos, útil para reconocer qué delitos concentran más reportes en la zona.</p>
+   ${listaCorta(localCrimes.filter(item=>item.records>0))}
+   ${parrafoLectura(lecturaRanking(localCrimes.filter(item=>item.records>0),{valor:item=>item.records,etiqueta:item=>item.name,total,plural:"delitos"}))}
  </section>
  <section class="zone-subpanel data-animate"><h4>Evolución anual</h4><p>La línea resume cómo se distribuyen los casos de ${htmlSeguro(where)} entre los años seleccionados. Cada punto representa la suma anual y ayuda a identificar cambios de volumen; no demuestra por sí mismo qué los causó. Los años parciales cubren menos meses y se comparan con cautela.</p>
    ${graficaLineas([{name:"Casos",values:yearlyFiltered.map(item=>item.value)}],yearlyFiltered.map(item=>item.label),`Evolución anual en ${where}`)}
@@ -869,20 +1057,39 @@ function renderZona(){
  </section></div>
  ${topCrime?`<div class="zone-advice"><b>Una recomendación relacionada</b><p>${htmlSeguro(consejoPrevencion(topCrime.name))}</p></div>`:"<p class=\"data-empty\">No hay casos para esta combinación de filtros.</p>"}`;
  animarAnalisis(result);
+ mostrarAlBajar(result);
 }
+function listaCorta(delitos){
+ const grafico=graficaDatos(delitos,item=>item.records,item=>item.name,true);
+ if(delitos.length<=10)return grafico;
+ return `<div class="lista-corta">${grafico}<button type="button" class="ver-lista" aria-expanded="false" data-total="${delitos.length}">Ver los ${delitos.length} delitos</button></div>`;
+}
+document.getElementById("zoneResult").addEventListener("click",event=>{
+ const boton=event.target.closest(".ver-lista");
+ if(!boton)return;
+ const abierta=boton.parentElement.classList.toggle("abierta");
+ boton.setAttribute("aria-expanded",String(abierta));
+ boton.textContent=abierta?"Ver solo los 10 primeros":`Ver los ${boton.dataset.total} delitos`;
+ if(!abierta)boton.scrollIntoView({block:"center"});
+ revelarAnalisisVisibles();
+});
+document.getElementById("zoneChange").addEventListener("click",()=>{
+ document.querySelector(".zone-controls").scrollIntoView({behavior:"smooth",block:"center"});
+ document.getElementById("zoneRegion").focus({preventScroll:true});
+});
 function filasCSVAnual(year){
  const rows=[["Región","Departamento","Municipio","Categoría","Delito","Año","Casos"]];
  DELITOS_DATA.forEach(crime=>{
   (crime.municipalityData||[]).forEach(item=>{
    const yearData=(item.years||[]).find(entry=>Number(entry.year)===year);
    if(!casos(yearData))return;
-   const department=String(item.department||"").trim()||"Departamento no especificado";
-   const region=item.region||REGION_POR_DEPTO.get(norm(department))||"sin-region";
+   const department=String(item.rawDepartment||"").trim()||"Departamento no especificado";
+   const region=item.region||REGION_POR_DEPTO.get(departmentKey(department))||"sin-region";
    const regionName=REGIONES_COLOMBIA.find(candidate=>candidate.id===region)?.name
     ||(region==="sin-region"?"Sin región asignada":region);
    rows.push([
-    regionName,department,String(item.name||"").trim()||"Municipio no especificado",
-    crime.category.name,crime.name,year,casos(yearData)
+    regionName,department,String(item.rawName||"").trim()||"Municipio no especificado",
+    crime.category.rawName,crime.rawName,year,casos(yearData)
    ]);
   });
  });
@@ -942,7 +1149,13 @@ function registrosDepartamento(selectedKey){
  crimes.sort((a,b)=>b.records-a.records||a.name.localeCompare(b.name,"es"));
  return{total,crimes};
 }
+function registrosNacionales(){
+ const crimes=DELITOS_DATA.map(crime=>({name:crime.name,records:registrosEnRango(crime.years)}))
+  .filter(item=>item.records).sort((a,b)=>b.records-a.records||a.name.localeCompare(b.name,"es"));
+ return{total:crimes.reduce((sum,item)=>sum+item.records,0),crimes};
+}
 const mapaDepartamentos=window.INDECOL_MAPA;
+mapaDepartamentos?.departments?.forEach(item=>item.name=nombreLugar(item.name));
 if(!mapaDepartamentos?.departments?.length){
  throw new Error("No se pudo cargar assets/data/departamentos.js. Regenera el mapa departamental.");
 }
@@ -952,27 +1165,24 @@ const departmentCrimes=document.getElementById("departmentCrimes");
 function renderDepartmentDetails(key){
  const picker=document.getElementById("departmentPicker");
  if(picker)picker.value=key||"";
- const name=mapaDepartamentos.departments.find(item=>item.key===key)?.name;
- if(!name){
-  departmentSelection.textContent="Selecciona un departamento en el mapa.";
-  departmentCrimes.innerHTML='<p class="data-empty">Mueve el cursor sobre un departamento para explorar sus datos.</p>';
-  return;
- }
- const {total,crimes}=registrosDepartamento(key);
+ const departamento=mapaDepartamentos.departments.find(item=>item.key===key)?.name;
+ const name=departamento||"Colombia";
+ const {total,crimes}=departamento?registrosDepartamento(key):registrosNacionales();
  const {startYear,endYear}=rangoAnalisisActual();
- departmentSelection.innerHTML=`<strong>${htmlSeguro(name)}</strong><span>${fmtData(total)} casos · ${startYear}–${endYear} · ${porcentaje(total,totalTerritorialRecords)} del total territorial</span>`;
+ departmentSelection.innerHTML=`<strong>${htmlSeguro(name)}</strong><span>${fmtData(total)} casos · ${startYear}–${endYear} · ${departamento?`${porcentaje(total,totalTerritorialRecords)} del total territorial`:"todo el país"}</span>`;
  if(!total){
   departmentCrimes.innerHTML=`<p class="data-empty">No se encontraron casos SIEDCO asociados a ${htmlSeguro(name)}.</p>`;
   return;
  }
- departmentCrimes.innerHTML=`<h4>Top 10 delitos en ${htmlSeguro(name)}</h4><p>Conteos para ${startYear}–${endYear}. Al seleccionar el departamento, los demás gráficos también se filtran por este territorio.</p>
+ departmentCrimes.innerHTML=`<h4>Top 10 delitos en ${htmlSeguro(name)}</h4><p>Conteos para ${startYear}–${endYear}. ${departamento?"Al seleccionar el departamento, los demás gráficos también se filtran por este territorio.":"Toca o señala un departamento del mapa para ver su detalle."}</p>
  <div class="map-top-header" aria-hidden="true"><span></span><span>Delito</span><span>Casos</span><span>%</span></div>
  <ol class="map-top-list">${crimes.slice(0,10).map((crime,index)=>`<li>
   <span class="map-rank">${String(index+1).padStart(2,"0")}</span>
   <span class="map-crime-name" title="${htmlSeguro(crime.name)}: ${fmtData(crime.records)} casos, ${porcentaje(crime.records,total)}"><span>${htmlSeguro(crime.name)}</span><i><b data-bar-target style="--bar:${(crime.records/total*100).toFixed(2)}%;--i:${index}"></b></i></span>
   <strong>${fmtData(crime.records)}</strong><small>${porcentaje(crime.records,total)}</small>
  </li>`).join("")}</ol>
- ${parrafoLectura(`En ${name}, ${crimes[0].name} es el delito con más casos (${porcentaje(crimes[0].records,total)} del departamento) y los diez primeros de la lista reúnen ${porcentaje(crimes.slice(0,10).reduce((sum,item)=>sum+item.records,0),total)} de sus ${fmtData(total)} casos.`)}`;
+ ${departamento?parrafoLectura(`En ${name}, ${crimes[0].name} es el delito con más casos (${porcentaje(crimes[0].records,total)} ${departamento?"del departamento":"del país"}) y los diez primeros de la lista reúnen ${porcentaje(crimes.slice(0,10).reduce((sum,item)=>sum+item.records,0),total)} de sus ${fmtData(total)} casos.`):""}`;
+ seguirAlBajar(departmentCrimes);
  const barras=departmentCrimes.querySelectorAll("[data-bar-target]");
  if(movimientoReducido.matches)barras.forEach(barra=>barra.classList.add("data-bar-revealed"));
  else enSiguienteCuadro(()=>barras.forEach(barra=>barra.classList.add("data-bar-revealed")));
@@ -998,8 +1208,8 @@ let totalTerritorialRecords=[...departmentTotals.values()].reduce((sum,value)=>s
 let largestDepartment=Math.max(1,...departmentTotals.values());
 function departmentColor(total){
  const intensity=Math.sqrt(total/largestDepartment);
- const colorMix=Math.round(238-intensity*118);
- return `rgb(${colorMix}, ${Math.round(colorMix*.96)}, ${Math.round(colorMix*.88)})`;
+ const desde=[232,218,192],hasta=[24,50,74];
+ return `rgb(${desde.map((canal,i)=>Math.round(canal+(hasta[i]-canal)*intensity)).join(", ")})`;
 }
 const departmentOptions=[...mapaDepartamentos.departments]
  .sort((a,b)=>a.name.localeCompare(b.name,"es"));
@@ -1081,7 +1291,8 @@ function renderDepartmentComparison(){
  <thead><tr><th scope="col">Delito</th><th scope="col">${htmlSeguro(firstName)}</th><th scope="col">${htmlSeguro(secondName)}</th></tr></thead>
  <tbody>${rows.map(item=>`<tr><th scope="row">${htmlSeguro(item.name)}</th><td>${fmtData(item.first)}</td><td>${fmtData(item.second)}</td></tr>`).join("")}</tbody>
  </table></div>`;
- revelarAnalisis(result);
+ animarAnalisis(result.closest(".data-animate"));
+ mostrarAlBajar(result);
 }
 renderDepartmentComparison();
 renderDepartmentMap();
@@ -1121,6 +1332,20 @@ const registrosPortada=document.getElementById("heroRecordCount");
 if(registrosPortada)registrosPortada.textContent=fmtData(CATALOGO.totalCases);
 const rpubsCases=document.getElementById("rpubsCases");
 if(rpubsCases)rpubsCases.textContent=fmtData(CATALOGO.totalCases);
+(function hallazgosInforme(){
+ const destino=document.getElementById("rpubsHallazgos");
+ const completos=[...totalAnual].filter(([year])=>periodosCompletos.has(year)).sort((a,b)=>a[0]-b[0]);
+ if(!destino||completos.length<2)return;
+ const [primero,ultimo]=[completos[0],completos.at(-1)],cambio=(ultimo[1]/primero[1]-1)*100;
+ const [clave,casosDepto]=[...departmentTotals].sort((a,b)=>b[1]-a[1])[0];
+ const depto=mapaDepartamentos.departments.find(item=>item.key===clave)?.name;
+ const categoria=[...CATEGORIAS].sort((a,b)=>casos(b)-casos(a))[0];
+ destino.innerHTML=[
+  [`${cambio>=0?"+":"−"}${fmtDecimal(Math.abs(cambio))}%`,"Evolución",`Los casos pasaron de ${fmtData(primero[1])} en ${primero[0]} a ${fmtData(ultimo[1])} en ${ultimo[0]}, los años completos de los extremos.`],
+  [porcentaje(casosDepto,totalTerritorialRecords),"Territorio",`${depto} concentra la mayor parte de los casos con departamento identificado: ${fmtData(casosDepto)}.`],
+  [porcentaje(casos(categoria),CATALOGO.totalCases),"Categoría",`${categoria.name} es la categoría con más casos: ${fmtData(casos(categoria))}.`]
+ ].map(([cifra,tema,texto])=>`<article><span>${tema}</span><strong>${cifra}</strong><p>${htmlSeguro(texto)}</p></article>`).join("");
+})();
 const periodoPortada=document.getElementById("heroPeriod");
 if(periodoPortada)periodoPortada.textContent=CATALOGO.years.length
  ?`${CATALOGO.years[0]}–${CATALOGO.years.at(-1)}`:"Periodo no disponible";
@@ -1133,8 +1358,8 @@ document.getElementById("dvCnt").textContent=`${CATALOGO.categoryCount} categor�
 dvNav.innerHTML=CATEGORIAS.map(category=>`<div class="dg" data-cat="${htmlSeguro(category.id)}">
  <button type="button" class="dgh" aria-expanded="false"><span>${htmlSeguro(category.name)}</span><em>${category.crimes.length}</em><i></i></button>
  <div class="dgl"><div>
-  <div class="di category-link" data-q="${htmlSeguro(norm(category.name))}"><a class="dil" href="#delitos/${encodeURIComponent(category.id)}"><span>${htmlSeguro(category.icon)}</span>Ver análisis de categoría</a></div>
-  ${category.crimes.map(crime=>`<div class="di" data-crime="${htmlSeguro(crime.id)}" data-q="${htmlSeguro(norm(`${category.name} ${crime.name}`))}"><a class="dil" href="#delitos/${encodeURIComponent(category.id)}/${encodeURIComponent(crime.id)}"><span>${htmlSeguro(category.icon)}</span>${htmlSeguro(crime.name)}</a></div>`).join("")}
+  <div class="di category-link" data-q="${htmlSeguro(norm(category.name))}"><a class="dil" href="#delitos/${encodeURIComponent(category.id)}"><span>${iconoCategoria(category.id)}</span>Ver análisis de categoría</a></div>
+  ${category.crimes.map(crime=>`<div class="di" data-crime="${htmlSeguro(crime.id)}" data-q="${htmlSeguro(norm(`${category.name} ${crime.name}`))}"><a class="dil" href="#delitos/${encodeURIComponent(category.id)}/${encodeURIComponent(crime.id)}"><span>${iconoCategoria(category.id)}</span>${htmlSeguro(crime.name)}</a></div>`).join("")}
  </div></div>
 </div>`).join("")+'<p class="dv-vacio" id="dvNo" hidden>No hay categorías o delitos con ese nombre.</p>';
 const mapaCobertura=`<svg class="info-coverage-map" viewBox="${htmlSeguro(mapaDepartamentos.viewBox)}" role="img" aria-label="Mapa de Colombia dividido por departamentos">${mapaDepartamentos.departments.map(item=>`<path d="${htmlSeguro(item.path)}"></path>`).join("")}</svg>`;
@@ -1183,10 +1408,10 @@ const grupoEquipo=(id,titulo,items,clase="")=>`<section class="team-group" aria-
  <div class="team-cards ${clase}" role="list">${items.map(tarjetaEquipo).join("")}</div>
 </section>`;
 document.getElementById("eq").innerHTML=[
- grupoEquipo("team-backend-title","Backend",integrantes.slice(7),"team-backend"),
- grupoEquipo("team-frontend-title","Frontend",integrantes.slice(2,7),"team-frontend"),
+ grupoEquipo("team-instructors-title","Instructores",instructores,"team-instructors"),
  grupoEquipo("team-leaders-title","Liderazgo",integrantes.slice(0,2),"team-leaders"),
- grupoEquipo("team-instructors-title","Instructores",instructores,"team-instructors")
+ grupoEquipo("team-frontend-title","Frontend",integrantes.slice(2,7),"team-frontend"),
+ grupoEquipo("team-backend-title","Backend",integrantes.slice(7),"team-backend")
 ].join("");
 const teamList=document.getElementById("eq");
 teamList.addEventListener("pointerover",event=>{
@@ -1266,19 +1491,21 @@ const CATEGORY_CAROUSEL={
  }
 };
 const CRIME_IMAGE_FILE_OVERRIDES=new Map([
- ["Capturas","CAPTURAS.jpg"],
+ ["Capturas","CAPTURAS COLOMBIA.jpg"],
+ ["Incautacion Armas de Fuego","INCAUTACION ARMAS COLOMBIA.jpg"],
+ ["Incautacion de Estupefacientes","INCAUTACION DROGAS COLOMBIA.jpg"],
  ["Hurto a Motocicletas","- Hurto a Motocicletas.jpg"],
  ["Hurto a Personas","- Hurto a Personas.jpg"]
 ]);
 function rutaImagenDelito(crime){
- const filename=CRIME_IMAGE_FILE_OVERRIDES.get(crime.name)||`${crime.name}.jpg`;
+ const filename=CRIME_IMAGE_FILE_OVERRIDES.get(crime.rawName)||`${crime.rawName}.jpg`;
  return new URL(`assets/images/categoria y delitos/delitos/${filename}`,document.baseURI).href;
 }
 function visualDelitos(source,description){
  return `<div class="data-hero-visual" role="img" aria-label="${htmlSeguro(description)}" style="--category-image:url('${htmlSeguro(source)}')"></div>`;
 }
 function visualCategoria(category){
- const source=new URL(`assets/images/categoria y delitos/${category.name}.jpg`,document.baseURI).href;
+ const source=new URL(`assets/images/categoria y delitos/${category.rawName}.jpg`,document.baseURI).href;
  return visualDelitos(source,`Imagen de la categoría ${category.name}`);
 }
 function visualDelito(category,crime){
@@ -1363,6 +1590,7 @@ function ruta(forzar){
   pg.querySelectorAll("[data-n]").forEach(contar);
   if(ancla&&pg.contains(ancla))setTimeout(()=>ancla.scrollIntoView({behavior:"smooth"}),50)
  }
+ mostrarAlBajar(pg,!mismo);
  ultimoDestino=raw;
 }
 document.addEventListener("click",e=>{
@@ -1487,63 +1715,10 @@ const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalCases};
  function mostrarErrorCierre(error){if(cierreConError)return;cierreConError=true;console.error("No se pudo reproducir el video de cierre de Indecol.",error);el.classList.remove("video-playing");$("ixFin").classList.add("on");$("ixEnd").classList.add("on")}
  $("ixVideo").addEventListener("ended",()=>$("ixEnd").classList.add("on"));
  $("ixVideo").addEventListener("error",()=>mostrarErrorCierre($("ixVideo").error));
- function reproducirCierre(){const video=$("ixVideo");video.currentTime=0;video.play().then(()=>{if(!el.classList.contains("out")&&!el.hidden)el.classList.add("video-playing")}).catch(error=>{if(!el.hidden&&!el.classList.contains("out"))mostrarErrorCierre(error)})}
- // ---- portada en video: el video trae dibujados logo y botones; los botones reales se colocan encima ----
- const gate=$("ixGate"),gv=$("ixGateVideo"),ambiente=$("ixGateAmbient"),ctxAmbiente=ambiente?.getContext("2d");
- // coordenadas de los elementos dibujados en el video (1280×720), ancho mínimo visible alrededor del logo
- // y ampliación máxima: por encima de 1,2× el video de 720p se ve borroso, así que el resto lo llena el fondo ambiental
- const PORTADA={w:1280,h:720,comenzar:[580,413,703,459],saltar:[1143,19,1267,51],zona:360,maxEscala:1.2};
- let rafAmbiente=0;
- function ubicarSobreVideo(boton,[x1,y1,x2,y2],s,ox,oy){Object.assign(boton.style,{left:ox+x1*s+"px",top:oy+y1*s+"px",width:(x2-x1)*s+"px",height:(y2-y1)*s+"px"})}
- function ajustarPortada(){
-  if(!gv||el.hidden||gate.hidden||!gate.classList.contains("has-video"))return;
-  const W=gate.clientWidth,H=gate.clientHeight;
-  const cubrir=Math.max(W/PORTADA.w,H/PORTADA.h);
-  // en celulares no recorta más allá de la zona del logo; en pantallas grandes no amplía por encima de maxEscala
-  const s=Math.min(cubrir,W/PORTADA.zona,PORTADA.maxEscala);
-  const dw=PORTADA.w*s,dh=PORTADA.h*s,ox=(W-dw)/2,oy=(H-dh)/2;
-  Object.assign(gv.style,{width:dw+"px",height:dh+"px",left:ox+"px",top:oy+"px"});
-  ubicarSobreVideo($("ixCon"),PORTADA.comenzar,s,ox,oy);
-  // el botón "Saltar" real (opaco) se coloca sobre el dibujado en el video para taparlo; si este queda fuera de pantalla, va en su sitio habitual
-  const saltar=$("ixSkip"),[sx1,sy1,sx2,sy2]=PORTADA.saltar;
-  const derecha=ox+sx2*s,centroY=oy+(sy1+sy2)/2*s;
-  if(ox+sx1*s<W&&derecha>0&&oy+sy2*s>0)Object.assign(saltar.style,{right:Math.max(10,W-derecha)+"px",top:Math.max(10+(sy2-sy1)*s/2,centroY)+"px",minHeight:(sy2-sy1)*s+4+"px",transform:"translateY(-50%)"});
-  else saltar.removeAttribute("style");
-  el.classList.add("gate-video");
- }
- // fondo ambiental: copia diminuta del video, ampliada y desenfocada, que se mueve con él
- function pintarAmbiente(){
-  cancelAnimationFrame(rafAmbiente);
-  if(!ctxAmbiente||gate.hidden||el.hidden)return;
-  if(gv.readyState>=2){try{ctxAmbiente.drawImage(gv,0,0,ambiente.width,ambiente.height)}catch(e){}}
-  rafAmbiente=requestAnimationFrame(pintarAmbiente);
- }
- function reproducirPortada(){
-  if(!gv||gate.hidden||el.hidden||!gate.classList.contains("has-video"))return;
-  gv.play().then(pintarAmbiente).catch(()=>{
-   // si el navegador bloquea la reproducción automática, se reintenta con la primera interacción
-   const reintentar=()=>{removeEventListener("pointerdown",reintentar,true);removeEventListener("keydown",reintentar,true);reproducirPortada()};
-   addEventListener("pointerdown",reintentar,{capture:true,once:true});addEventListener("keydown",reintentar,{capture:true,once:true});
-  });
- }
- function limpiarPortada(){
-  el.classList.remove("gate-video");
-  $("ixSkip").removeAttribute("style");
-  cancelAnimationFrame(rafAmbiente);
-  if(gv)gv.pause();
- }
- function iniciarPortada(){
-  if(!gv)return;
-  const listo=()=>{
-   if(gate.classList.contains("video-error"))return;
-   gate.classList.add("has-video");ajustarPortada();reproducirPortada();
-  };
-  gv.querySelector("source")?.addEventListener("error",()=>{gate.classList.add("video-error");gate.classList.remove("has-video");limpiarPortada()},{once:true});
-  if(gv.readyState>=2)listo();else gv.addEventListener("loadeddata",listo,{once:true});
- }
- addEventListener("resize",ajustarPortada);
- document.addEventListener("visibilitychange",()=>{if(document.hidden)gv?.pause();else reproducirPortada()});
- function start(){parar();apagarAudio();limpiarPortada();
+ // en pantallas verticales el video horizontal deja el texto diminuto: se usa el cierre hecho en la página
+ function reproducirCierre(){if(matchMedia("(max-aspect-ratio:3/4)").matches){$("ixFin").classList.add("on");en(T.fin-T.logo,()=>$("ixEnd").classList.add("on"));return}
+  const video=$("ixVideo");video.currentTime=0;video.play().then(()=>{if(!el.classList.contains("out")&&!el.hidden)el.classList.add("video-playing")}).catch(error=>{if(!el.hidden&&!el.classList.contains("out"))mostrarErrorCierre(error)})}
+ function start(){parar();apagarAudio();
   if(el.hidden&&document.activeElement&&!el.contains(document.activeElement))focoAnterior=document.activeElement;
   silen=false;reset();resize();
   el.hidden=false;$("ixGate").hidden=true;document.documentElement.classList.add("nos");fin=false;
@@ -1557,7 +1732,8 @@ const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalCases};
   en(T.pt,()=>{$("ixPt").classList.add("bloom");$("ixFl").classList.remove("go");void $("ixFl").offsetWidth;$("ixFl").classList.add("go")});
   en(T.logo,reproducirCierre);en(T.sub,()=>{if(!el.classList.contains("video-playing"))$("ixFin").classList.add("sub")});
   raf=requestAnimationFrame(loop);$("ixSkip").focus()}
- function cerrar(){parar();apagarAudio();limpiarPortada();el.classList.add("out");document.documentElement.classList.remove("nos");
+ function cerrar(){parar();apagarAudio();el.classList.add("out");document.documentElement.classList.remove("nos");
+  const activa=document.querySelector(".pg.active");mostrarAlBajar(activa,true);animarAnalisis(activa,true);
   const ocultar=()=>{if(el.classList.contains("out")){el.hidden=true;$("ixGate").hidden=false;if(focoAnterior?.isConnected)focoAnterior.focus();focoAnterior=null}};
   if(reduce)ocultar();else setTimeout(ocultar,850);
   try{sessionStorage.setItem("indecol_intro","1")}catch(e){}}
@@ -1575,5 +1751,5 @@ const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalCases};
   else if(!e.shiftKey&&(document.activeElement===last||!el.contains(document.activeElement))){e.preventDefault();first.focus()}
  });
  const h=location.hash.slice(1);let visto=null;try{visto=sessionStorage.getItem("indecol_intro")}catch(e){}
- if((!h||h==="inicio")&&!visto){focoAnterior=$("rpIntro");el.hidden=false;document.documentElement.classList.add("nos");resize();iniciarPortada();$("ixCon").focus()}
+ if((!h||h==="inicio")&&!visto){focoAnterior=$("rpIntro");el.hidden=false;document.documentElement.classList.add("nos");resize();$("ixCon").focus()}
 })();
