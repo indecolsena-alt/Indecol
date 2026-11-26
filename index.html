@@ -64,7 +64,7 @@ try {
 </script>
 <nav>
   <a class="logo" href="#inicio" aria-label="Indecol, inicio"><img src="assets/images/logo-nav.png" alt="Indecol"></a>
-  <div class="links" id="mainLinks"><a class="act" href="#inicio">Inicio</a><a href="#analisis">Análisis</a><a href="#tu-zona">Tu zona</a><a href="#delitos" id="mbtn">Delitos</a><a href="#dashboard">Dashboard</a><a href="#informe-r">Informe R</a><a class="mobile-team" href="#grupo-de-trabajo">Grupo de trabajo</a></div>
+  <div class="links" id="mainLinks"><a class="act" href="#inicio">Inicio</a><a href="#analisis">Análisis</a><a href="#tu-zona">Tu zona</a><a href="#delitos" id="mbtn">Delitos</a><a href="#historia-delictiva">Historia delictiva</a><a href="#dashboard">Dashboard</a><a href="#informe-r">Informe R</a><a class="mobile-team" href="#grupo-de-trabajo">Grupo de trabajo</a></div>
   <a class="cta" href="#grupo-de-trabajo">Grupo de trabajo</a>
   <button type="button" class="nav-toggle" id="navToggle" aria-label="Abrir menú de navegación" aria-controls="mainLinks" aria-expanded="false"><span></span><span></span><span></span></button>
 </nav>
@@ -112,7 +112,7 @@ try {
 </section>
 
 <section class="sum data-animate" id="resumen">
-  <div><h3>Casos totales</h3><strong id="stat-records">0</strong><small>suma de la columna casos</small></div>
+  <div><h3>Casos totales</h3><strong id="stat-records">0</strong><small id="statRecordsNote">suma de la columna casos</small></div>
   <div><h3>Delitos incluidos</h3><strong id="stat-crimes">0</strong><small>según la clasificación SIEDCO</small></div>
   <div><h3>Categorías</h3><strong id="stat-categories">0</strong><small>según la temática reportada</small></div>
   <div><h3>Periodo</h3><strong id="stat-period">—</strong><small>años disponibles en SIEDCO</small></div>
@@ -133,7 +133,7 @@ try {
     <p>Los indicadores y gráficos de esta página se construyen sumando la columna <strong>casos</strong>; las filas marcadas como duplicadas se excluyen al generar el catálogo. Las cifras representan lo consignado en la fuente: no son tasas por población ni una garantía de que cada caso equivalga a un hecho o persona únicos. El último año puede tener cobertura parcial, por lo que debe compararse con cautela frente a años completos.</p>
     <p id="projectOverview">Preparando el resumen estadístico de la base disponible…</p>
     <p id="projectTrend">Calculando la evolución anual de los casos…</p>
-    <p>La página se divide en secciones complementarias. <strong>Análisis</strong> ofrece el panorama nacional con un mapa por departamento, la participación de cada categoría, el ranking de delitos y la evolución anual. <strong>Tu zona</strong> permite bajar hasta el nivel de región, departamento y municipio, y descargar los datos de cada año. <strong>Delitos</strong> reúne una ficha por categoría y por delito con su comportamiento anual, mensual y municipal. Por último, el <strong>Dashboard</strong> de Power BI y el <strong>Informe R</strong> amplían el análisis con herramientas y metodologías adicionales.</p>
+    <p>La página se divide en secciones complementarias. <strong>Análisis</strong> ofrece el panorama nacional con un mapa por departamento, la participación de cada categoría, el ranking de delitos y la evolución anual. <strong>Tu zona</strong> permite bajar hasta el nivel de región, departamento y municipio, y descargar los datos de cada año. <strong>Delitos</strong> reúne una ficha por categoría y por delito con su comportamiento anual, mensual y municipal. <strong>Historia delictiva</strong> explica cómo la lista pasó de 18 delitos a 34 categorías. Por último, el <strong>Dashboard</strong> de Power BI y el <strong>Informe R</strong> amplían el análisis con herramientas y metodologías adicionales.</p>
   </details>
   <div class="gr" id="info"></div>
   <section class="info-videos" aria-labelledby="infoVideosTitle">
@@ -326,6 +326,88 @@ try {
   </div>
 </section>
 
+<section class="pg" id="historia-delictiva">
+  <div class="blk analysis-page hd-page">
+    <span class="data-eyebrow">Origen de las categorías · SIEDCO</span>
+    <h2>Historia delictiva</h2>
+    <p><strong>SIEDCO: de 18 a 34 categorías de delitos.</strong> El SIEDCO de la Policía Nacional pasó de 18 delitos de impacto (2010) a 34 categorías en su portal (2026): 17 se mantienen, 2 salen de dividir el secuestro, 10 son delitos nuevos y 5 son resultados operativos de la Policía, que aquí se cuentan como categorías.</p>
+    <ul class="hd-cifras data-animate">
+      <li><span>Antes · 2010</span><b data-count-value="18">0</b><small>delitos de impacto publicados</small></li>
+      <li><span>Ahora · 2026</span><b data-count-value="34">0</b><small>categorías en el portal SIEDCO</small></li>
+      <li><span>Diferencia</span><b data-count-value="16">0</b><small>categorías que surgieron</small></li>
+      <li><span>Delitos nuevos</span><b data-count-value="10">0</b><small>sin equivalente en la lista de 2010</small></li>
+    </ul>
+    <div class="hd-indice" id="hdIndice" role="group" aria-label="Partes de Historia delictiva">
+      <button type="button" data-ir="hdSecCascada">De 18 a 34</button><button type="button" data-ir="hdSecDiagrama">Diagrama</button><button type="button" data-ir="hdSecMosaico">Mosaico</button><button type="button" data-ir="hdSecFamilias">Familias</button><button type="button" data-ir="hdSecCasos">Casos</button><button type="button" data-ir="hdSecTiempo">Línea de tiempo</button><button type="button" data-ir="hdSecConclusion">Conclusión</button><button type="button" data-ir="hdSecTabla">Tabla</button>
+    </div>
+    <section class="data-panel" id="hdSecCascada">
+      <h3>De 18 a 34, paso a paso</h3>
+      <p>Las barras muestran cómo se llegó de la lista de 2010 a la del portal de 2026. Toca una barra para ver sus delitos y cierra el cuadro con la ×.</p>
+      <ul class="hd-cascada" id="hdCascada"></ul>
+    </section>
+    <section class="data-panel hd-ancla" id="hdSecDiagrama">
+      <h3>Cómo surgieron las 34 categorías a partir de los 18 delitos</h3>
+      <p>Cada línea une un delito de 2010 (izquierda) con las categorías actuales que se desprenden de él (derecha); los abanicos muestran de dónde salió cada categoría nueva. Los delitos que siguen igual y no tienen ramas van juntos en un bloque. Pasa el cursor o toca una categoría para ver su norma, año y casos. Los botones de color filtran el diagrama.</p>
+      <div class="hd-filtro" id="hdFiltro" role="group" aria-label="Filtrar el diagrama por tipo de cambio"></div>
+      <p class="hd-columnas"><span>18 delitos de impacto (2010)</span><span>34 categorías del portal (2026)</span></p>
+      <ul class="hd-mapa" id="hdMapa"></ul>
+      <aside class="hd-detalle" id="hdDetalle" aria-live="polite" hidden></aside>
+    </section>
+    <section class="data-panel hd-ancla" id="hdSecMosaico">
+      <h3>Las 34 categorías de un vistazo</h3>
+      <p>Cada cuadro es una categoría y su color indica el tipo de cambio. Reordénalas para ver cómo se agrupan.</p>
+      <ul class="hd-leyenda" data-hd-leyenda></ul>
+      <div class="hd-orden" id="hdOrden" role="group" aria-label="Ordenar el mosaico"><button type="button" data-orden="tipo" aria-pressed="true">Por tipo de cambio</button><button type="button" data-orden="familia" aria-pressed="false">Por familia</button><button type="button" data-orden="anio" aria-pressed="false">Por año de la norma</button></div>
+      <div class="hd-mosaico" id="hdMosaico"></div>
+    </section>
+    <section class="data-panel" id="hdSecFamilias">
+      <h3>Categorías por familia (bien jurídico)</h3>
+      <p>Agrupa las 34 categorías según lo que protege la ley. El patrimonio económico y la violencia contra las personas concentran la mayor parte del crecimiento.</p>
+      <ul class="hd-leyenda" data-hd-leyenda></ul>
+      <ul class="hd-familias" id="hdFamilias"></ul>
+    </section>
+    <section class="data-panel data-animate" id="hdSecCasos">
+      <h3>Cuánto pesa cada tipo de cambio en los casos</h3>
+      <p id="hdCasosTexto"></p>
+      <div id="hdAnillo"></div>
+      <div class="chart-reading" id="hdAnilloLectura"></div>
+    </section>
+    <section class="data-panel" id="hdSecTiempo">
+      <h3>Línea de tiempo: normas y cambios en el SIEDCO</h3>
+      <p>Cada hito muestra las categorías actuales cuya norma vigente (o su registro en el SIEDCO) es de ese año. En la escala, el tamaño de cada círculo indica cuántas son; toca un año para ir a su detalle.</p>
+      <div class="hd-escala-caja"><div class="hd-escala" id="hdEscala" role="group" aria-label="Línea de tiempo de 1955 a 2026"></div></div>
+      <ol class="hd-tiempo" id="hdTiempo"></ol>
+    </section>
+    <section class="data-panel hd-conclusion" id="hdSecConclusion">
+      <h3>Conclusión</h3>
+      <p>La lista creció de cuatro formas:</p>
+      <ol class="hd-formas">
+        <li><strong>Separando delitos que antes iban juntos:</strong> el secuestro ahora se cuenta como simple y extorsivo.</li>
+        <li><strong>Ampliando los mismos bienes jurídicos a nuevas modalidades:</strong> del hurto a la estafa, los delitos informáticos y los derechos de autor; de la agresión física a la injuria, la calumnia, la violencia contra servidores públicos y el maltrato animal.</li>
+        <li><strong>Agregando bienes jurídicos que no estaban:</strong> la administración pública (corrupción) y el medio ambiente.</li>
+        <li><strong>Sumando la respuesta policial:</strong> capturas, incautaciones de armas y estupefacientes, y vehículos recuperados.</li>
+      </ol>
+      <p>El SIEDCO pasó de mirar solo el delito callejero de alto impacto a cubrir también corrupción, delito digital, crimen organizado y ambiente, y a medir los resultados de la Policía.</p>
+    </section>
+    <section class="data-panel" id="hdSecTabla">
+      <h3>Las 34 categorías</h3>
+      <p>Cada nombre abre la ficha del delito con sus cifras.</p>
+      <div class="hd-buscar">
+        <label for="hdBuscar">Buscar<input type="search" id="hdBuscar" placeholder="Delito, familia, norma o año" autocomplete="off"></label>
+        <label for="hdTipo">Tipo de cambio<select id="hdTipo"></select></label>
+      </div>
+      <p class="data-note" id="hdConteo" aria-live="polite"></p>
+      <table class="hd-tabla">
+        <thead><tr><th scope="col">N.º</th><th scope="col">Categoría</th><th scope="col">Tipo de cambio</th><th scope="col">Familia</th><th scope="col">Surge de</th><th scope="col">Norma</th><th scope="col">Año</th><th scope="col" id="hdColCasos">Casos</th></tr></thead>
+        <tbody id="hdTabla"></tbody>
+      </table>
+      <p class="data-empty" id="hdVacio" hidden>Ninguna categoría coincide con la búsqueda.</p>
+      <button type="button" class="ver-lista" id="hdVerTodas"></button>
+    </section>
+    <p class="data-note hd-corte">Datos con corte al 26 de noviembre de 2026, 10:15 a. m. (hora de Colombia).</p>
+  </div>
+</section>
+
 <section class="pg" id="delitos" aria-label="Delitos">
   <div class="dv">
     <aside class="dv-side" id="dvSide">
@@ -360,6 +442,8 @@ try {
 <script defer src="assets/data/catalogo.js"></script>
 <script defer src="assets/data/departamentos.js"></script>
 <script defer src="assets/data/incautaciones.js"></script>
+<script defer src="assets/data/historia.js"></script>
+<script defer src="js/historia.js"></script>
 <script defer src="js/app.js"></script>
 </body>
 </html>

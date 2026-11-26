@@ -125,24 +125,24 @@ function graficaDatos(items,valueOf,labelOf,horizontal=false){
   </div>`;
  }).join("")}</div>`;
 }
-function graficaAnillo(items,valueOf,labelOf,title){
+function graficaAnillo(items,valueOf,labelOf,title,paleta){
  const entries=items.map(item=>({item,value:Number(valueOf(item))}))
   .filter(entry=>Number.isFinite(entry.value)&&entry.value>0);
  const total=entries.reduce((sum,entry)=>sum+entry.value,0);
  if(!total)return '<p class="data-empty">No hay datos válidos para este gráfico.</p>';
- const colors=["#203D56","#9C7230","#57758C","#C88E3A","#6E597B","#4F7A68","#B2604C","#817A4B","#45677D"];
+ const colors=paleta||["#203D56","#9C7230","#57758C","#C88E3A","#6E597B","#4F7A68","#B2604C","#817A4B","#45677D"];
  const circumference=2*Math.PI*68;
  let offset=0;
  const segments=entries.map((entry,index)=>{
   const length=circumference*entry.value/total;
   const color=colors[index%colors.length];
-  const segment=`<circle class="data-donut-segment" cx="110" cy="110" r="68" stroke="${color}" stroke-dasharray="0 ${circumference.toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" style="--donut-length:${length.toFixed(2)}px;--donut-circumference:${circumference.toFixed(2)}px;--donut-index:${index}" transform="rotate(-90 110 110)"><title>${htmlSeguro(labelOf(entry.item))}: ${fmtData(entry.value)} (${(entry.value/total*100).toFixed(1).replace(".",",")}%)</title></circle>`;
+  const segment=`<circle class="data-donut-segment" cx="110" cy="110" r="68" stroke="${color}" stroke-dasharray="0 ${circumference.toFixed(2)}" stroke-dashoffset="${(-offset).toFixed(2)}" style="--donut-length:${length.toFixed(2)}px;--donut-circumference:${circumference.toFixed(2)}px;--donut-index:${index}" transform="rotate(-90 110 110)"><title>${htmlSeguro(labelOf(entry.item))}: ${fmtData(entry.value)} (${porcentaje(entry.value,total)})</title></circle>`;
   offset+=length;
   return segment;
  }).join("");
  const legend=entries.map((entry,index)=>{
   const color=colors[index%colors.length];
-  const share=`${(entry.value/total*100).toFixed(1).replace(".",",")}%`;
+  const share=porcentaje(entry.value,total);
   return `<li style="--donut-index:${index}"><i aria-hidden="true" style="--donut-color:${color}"></i><span class="data-donut-label">${htmlSeguro(labelOf(entry.item))}</span><strong>${share}<small>${fmtData(entry.value)} casos</small></strong></li>`;
  }).join("");
  return `<div class="data-donut-layout" data-graph-donut>
@@ -259,14 +259,15 @@ const APARECE=[
  ".department-map-layout",".map-credit",".map-top-list>li",".department-compare tbody tr",".data-row",
  ".zone-panel>:not(#zoneResult)","#zoneResult>:not(.zone-charts)",".zone-charts>*",".zone-subpanel>*",
  ".data-back",".data-hero","#delitos .data-panel",".data-crime","#delitos .data-note",
- ".team-group>h3",".team-cards>*",".rpubs-card",".hallazgos-titulo",".hallazgos>*",".accesos>a",".dbt",".dbf"
+ ".team-group>h3",".team-cards>*",".rpubs-card",".hallazgos-titulo",".hallazgos>*",".accesos>a",".dbt",".dbf",
+ ".hd-cifras>li",".hd-cascada>li",".hd-leyenda",".hd-columnas",".hd-origen",".hd-iguales",".hd-familias>li",".hd-tiempo>li",".hd-formas>li",".hd-tabla thead",".hd-tabla tbody tr"
 ].join(",");
 // forma de entrada: por defecto suben; algunas piezas crecen o entran desde un lado
 const ENTRADAS=[
  ["ap-zoom",".accesos>a,.hallazgos>*,.sum>div,#info>.info-card,.analysis-findings>*,.team-cards>*,.info-video-slot,.hero-visual,.department-map-layout,.data-hero,.dbf"],
- ["ap-izq",".today-copy,.hero>.hc>*,.data-crime"],
+ ["ap-izq",".today-copy,.hero>.hc>*,.data-crime,.hd-tiempo>li"],
  ["ap-der",".today-stat"],
- ["ap-fila",".data-row,.map-top-list>li,.department-compare tbody tr"]
+ ["ap-fila",".data-row,.map-top-list>li,.department-compare tbody tr,.hd-familias>li,.hd-cascada>li"]
 ];
 const esperasAparicion=new WeakMap();
 const introAbierta=()=>{const intro=document.getElementById("ix");return Boolean(intro)&&!intro.hidden&&!intro.classList.contains("out")};
@@ -1643,6 +1644,7 @@ function auto(){
 [...pts.children].forEach((b,i)=>b.addEventListener("click",()=>{ver(i);auto()}));
 movimientoReducido.addEventListener("change",auto);
 auto();
+historiaDelictiva();
 const footerTemplate=document.getElementById("siteFooterTemplate");
 document.querySelectorAll(".pg").forEach(section=>section.append(footerTemplate.content.cloneNode(true)));
 const pages=[...document.querySelectorAll(".pg")],links=[...document.querySelectorAll("nav .links a")];
