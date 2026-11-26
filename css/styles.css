@@ -426,7 +426,7 @@ nav .links a#mbtn::after{content:none}
 .rpubs-summary strong{color:var(--azul);font-size:clamp(20px,2.4vw,28px);line-height:1.2}
 .rpubs-summary small{margin-top:8px;color:var(--mute);font-size:11px;line-height:1.5}
 @media(max-width:680px){.rpubs-card{grid-template-columns:1fr;gap:20px}.rpubs-summary{grid-template-columns:1fr 1fr;border-left:0;border-top:3px solid var(--oro)}.rpubs-summary small{grid-column:1/-1}}
-@media(max-width:680px){.data-hero{grid-template-columns:minmax(0,1fr);grid-template-areas:"visual" "copy" "stats";gap:20px}.data-hero-visual{min-height:clamp(170px,52vw,250px)}.data-hero-copy>p{text-align:left}}
+@media(max-width:680px){.data-hero{grid-template-columns:minmax(0,1fr);grid-template-areas:"visual" "copy" "stats";gap:20px}.data-hero-visual{min-height:clamp(170px,52vw,250px)}}
 /* cabecera del delito */
 @keyframes dvIn{from{opacity:0;transform:translateY(14px)}}
 .dv-hero{position:relative;overflow:hidden;border-radius:30px;background:var(--bg);color:var(--fg);padding:clamp(28px,4vw,52px);animation:dvIn .6s ease both}
@@ -1004,7 +1004,6 @@ h1,h2,h3,h4,.data-row>span,.data-donut-label,.data-crime-info b,.dgh span,.dil{
 .analysis-steps b{color:var(--azul)}
 .department-compare-chart{margin-top:14px}
 .department-compare-chart .data-row{grid-template-columns:minmax(90px,200px) minmax(40px,1fr) 90px}
-#projectTrend{text-align:left}
 @media(prefers-reduced-motion:reduce){.map-crime-name i b{transform:none;transition:none}}
 .department-compare-chart .data-row:nth-child(2)>i>b{background:var(--azul)}
 .department-compare-chart .data-row:nth-child(2)>strong{color:var(--azul)}
@@ -1066,10 +1065,7 @@ h1,h2,h3,h4,.data-row>span,.data-donut-label,.data-crime-info b,.dgh span,.dil{
 
 /* textos centrados que no deben justificarse, y columnas angostas sin huecos entre palabras */
 .ix-fin p,.ix-gate p,.dbv p{text-align:center;hyphens:manual}
-.gr>.info-card p,.data-donut-legend li,.zone-charts .chart-reading,.zone-charts .data-panel>p{text-align:left;hyphens:manual}
-@media(max-width:700px){
- .pg :is(p,li,.chart-reading):not(.dbv *,.team-cards *),#projectTrend{text-align:left;hyphens:manual}
-}
+.data-donut-legend li{text-align:left;hyphens:manual}
 
 @media(max-width:680px){
  .rpubs-summary{align-items:center;row-gap:8px}
@@ -1426,3 +1422,8 @@ html .pg li.ap:not(.ap-ver) .hd-via i{scale:0 1}
  .hd-buscar label{flex:1 1 100%}
 }
 @media(max-height:520px){.hd-indice{position:static}}
+
+/* ===== texto corrido justificado en todas las páginas =====
+   js/silabas.js marca los cortes por sílabas para evitar huecos grandes entre palabras. Títulos, botones, tablas,
+   etiquetas y textos centrados conservan su alineación. */
+.pg :is(p,.chart-reading,.analysis-narrative,.analysis-steps li,.puntos li,.hd-formas li,.accesos span,.analysis-controls>span,.zone-annual-note):not(.dbv *,.team-cards *,.zone-barra *,.data-empty){text-align:justify;hyphens:manual}

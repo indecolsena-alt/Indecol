@@ -1528,7 +1528,7 @@ function contar(el){
  const n=+el.dataset.n,s=el.dataset.s||"",t0=performance.now();
  (function f(t1){const p=Math.min((t1-t0)/1500,1);el.textContent=Math.round(n*(1-Math.pow(1-p,3))).toLocaleString("es-CO")+s;if(p<1)requestAnimationFrame(f)})(t0);
 }
-const DASHBOARD_URL="https://app.powerbi.com/view?r=eyJrIjoiNjA2MGE5ZjYtOWNlMC00YzUzLTgyNGYtMzRkNDBlMzM2ZTVlIiwidCI6ImNiZTM5ZThmLTNlODktNDQ4Zi04M2FlLWVlYWI3MWU1ZjNiMSIsImMiOjl9";
+const DASHBOARD_URL="https://app.powerbi.com/view?r=eyJrIjoiNGRhNzYzYTEtODI2Zi00NjUyLTk5MTYtYTc1NjRkMmYzMTMzIiwidCI6ImNiYzJjMzgxLTJmMmUtNGQ5My05MWQxLTUwNmM5MzE2YWNlNyIsImMiOjR9";
 let dashListo=false;
 function cargarInforme({url,frameId,placeholderId,actionsId,title,fullscreenId}){
  const frame=document.getElementById(frameId),placeholder=document.getElementById(placeholderId),actions=document.getElementById(actionsId);
