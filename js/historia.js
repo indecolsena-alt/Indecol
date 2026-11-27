@@ -59,10 +59,10 @@ function historiaDelictiva(){
  const origenDe=item=>`Surge de ${item.origen}`;
  const pasos=[
   {clase:"hd-antes",nombre:"Lista de 2010",desde:0,suma:origenes2010.length,titulo:`Los ${origenes2010.length} delitos de impacto de 2010`,elementos:origenes2010.map(nombre=>({nombre}))},
-  {clase:"hd-divide",nombre:"Dividir el secuestro",suma:divididas.length-1,titulo:"El secuestro se separa en dos",nota:"Un delito pasa a contarse como dos categorías, por eso la lista crece en una.",elementos:divididas.map(item=>({nombre:item.nombre,detalle:origenDe(item)}))},
+  {clase:"hd-divide",nombre:"Dividir el secuestro",suma:divididas.length-1,titulo:"El secuestro se separa en dos",nota:"Un delito pasa a contarse como dos, por eso la lista crece en uno.",elementos:divididas.map(item=>({nombre:item.nombre,detalle:origenDe(item)}))},
   {clase:"hd-nuevo",nombre:"Delitos nuevos",suma:nuevas.length,titulo:`Delitos nuevos (${nuevas.length})`,nota:"No tenían equivalente en la lista de 2010.",elementos:nuevas.map(item=>({nombre:item.nombre,detalle:origenDe(item)}))},
-  {clase:"hd-operativo",nombre:"Resultados operativos",suma:operativas.length,titulo:`Resultados operativos (${operativas.length})`,nota:"Son actuaciones de la Policía que aquí se cuentan como categorías.",elementos:operativas.map(item=>({nombre:item.nombre,detalle:origenDe(item)}))},
-  {clase:"hd-ahora",nombre:"Portal SIEDCO 2026",desde:0,suma:lista.length,titulo:`Las ${lista.length} categorías del portal`,elementos:lista.map(item=>({nombre:item.nombre,detalle:etiqueta(item.tipo)}))}
+  {clase:"hd-operativo",nombre:"Resultados operativos",suma:operativas.length,titulo:`Resultados operativos (${operativas.length})`,nota:"Son actuaciones de la Policía que aquí se cuentan como delitos.",elementos:operativas.map(item=>({nombre:item.nombre,detalle:origenDe(item)}))},
+  {clase:"hd-ahora",nombre:"Portal SIEDCO 2026",desde:0,suma:lista.length,titulo:`Los ${lista.length} delitos del portal`,elementos:lista.map(item=>({nombre:item.nombre,detalle:etiqueta(item.tipo)}))}
  ];
  let acumulado=0;
  pasos.forEach((paso,orden)=>{
@@ -301,9 +301,9 @@ function historiaDelictiva(){
  const porTipo=Object.fromEntries(tipos.map(tipo=>[tipo,delTipo(tipo).reduce((suma,item)=>suma+casos(delitos.get(item.nombre)),0)]));
  const totalCasos=Object.values(porTipo).reduce((suma,valor)=>suma+valor,0);
  const reparto=tipos.map(tipo=>({tipo,nombre:tipo==="divide"?"Se divide (secuestro)":etiqueta(tipo),valor:porTipo[tipo]})).sort((a,b)=>b.valor-a.valor);
- porId("hdCasosTexto").textContent=`Reparte los casos ${periodoCasos} de la base de Indecol según el tipo de cambio de cada categoría.`;
+ porId("hdCasosTexto").textContent=`Reparte los casos ${periodoCasos} de la base de Indecol según el tipo de cambio de cada delito.`;
  porId("hdAnillo").innerHTML=graficaAnillo(reparto,item=>item.valor,item=>item.nombre,`Casos ${periodoCasos} por tipo de cambio`,reparto.map(item=>colores[item.tipo]));
- escribirLectura("hdAnilloLectura",`De los ${fmtData(totalCasos)} casos del periodo, el ${porcentaje(porTipo.mantiene,totalCasos)} corresponde a delitos que se mantienen desde 2010. Los resultados operativos suman ${fmtData(porTipo.operativo)} casos (${porcentaje(porTipo.operativo,totalCasos)}): son actuaciones de la Policía, no delitos. Los delitos nuevos aportan ${fmtData(porTipo.nuevo)} casos (${porcentaje(porTipo.nuevo,totalCasos)}) y las dos categorías de secuestro, ${fmtData(porTipo.divide)}. La incautación de estupefacientes no suma casos porque se mide en toneladas.`);
+ escribirLectura("hdAnilloLectura",`De los ${fmtData(totalCasos)} casos del periodo, el ${porcentaje(porTipo.mantiene,totalCasos)} corresponde a delitos que se mantienen desde 2010. Los resultados operativos suman ${fmtData(porTipo.operativo)} casos (${porcentaje(porTipo.operativo,totalCasos)}): son actuaciones de la Policía, no delitos. Los delitos nuevos aportan ${fmtData(porTipo.nuevo)} casos (${porcentaje(porTipo.nuevo,totalCasos)}) y los dos delitos de secuestro, ${fmtData(porTipo.divide)}. La incautación de estupefacientes no suma casos porque se mide en toneladas.`);
  // la misma aclaración junto al total del inicio
  const nota=porId("statRecordsNote");
  if(nota)nota.textContent=`incluye ${fmtData(porTipo.operativo)} resultados operativos de la Policía`;
@@ -312,7 +312,7 @@ function historiaDelictiva(){
  // entre 1955 y 2000 el eje se acorta; desde 2000 los años van a escala
  const finEje=datos.hitos.at(-1).anio;
  const lugarAnio=anio=>anio<2000?0:.12+(anio-2000)/(finEje-2000)*.88;
- const cuantas=numero=>`${numero} ${numero===1?"categoría":"categorías"}`;
+ const cuantas=numero=>`${numero} ${numero===1?"delito":"delitos"}`;
  const escala=porId("hdEscala");
  escala.innerHTML=`<b class="hd-quiebre" aria-hidden="true">//</b>`+datos.hitos.map((hito,orden)=>{
   const total=hito.categorias.length,diametro=total?Math.round(14+Math.sqrt(total)*6.4):12;
@@ -324,7 +324,7 @@ function historiaDelictiva(){
   const fichas=total?`<ul>${hito.categorias.map(numero=>{const item=categorias.get(numero);return `<li>${enlace(item.nombre,`hd-chip hd-${item.tipo}`)}</li>`}).join("")}</ul>`:"";
   return `<li data-anio="${hito.anio}"><b>${hito.anio}</b>
    <div><h4>${htmlSeguro(hito.titulo)}</h4><p>${htmlSeguro(hito.texto)}</p>
-   ${total>8?`<details class="hd-plegar"><summary>Ver las ${cuantas(total)}</summary>${fichas}</details>`:fichas}</div></li>`;
+   ${total>8?`<details class="hd-plegar"><summary>Ver los ${cuantas(total)}</summary>${fichas}</details>`:fichas}</div></li>`;
  }).join("");
  let destello=0;
  escala.addEventListener("click",evento=>{
@@ -361,10 +361,10 @@ function historiaDelictiva(){
    registro.hidden=!coincide||(!filtrando&&!completa&&coinciden>primeras);
    if(!registro.hidden)visibles++;
   });
-  porId("hdConteo").textContent=`Mostrando ${visibles} de ${lista.length} categorías.`;
+  porId("hdConteo").textContent=`Mostrando ${visibles} de ${lista.length} delitos.`;
   porId("hdVacio").hidden=visibles>0;
   verTodas.hidden=filtrando;
-  verTodas.textContent=completa?`Ver solo ${primeras}`:`Ver las ${lista.length} categorías`;
+  verTodas.textContent=completa?`Ver solo ${primeras}`:`Ver los ${lista.length} delitos`;
   verTodas.setAttribute("aria-expanded",String(completa));
   revelarAnalisisVisibles();
  };

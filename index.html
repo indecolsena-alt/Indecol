@@ -130,10 +130,10 @@ try {
   <p>Indecol es un proyecto formativo que busca promover el uso responsable de los datos abiertos. Las cifras ayudan a identificar dónde se concentran los reportes y cómo cambian con el tiempo, pero no explican por sí solas las causas de esos cambios: factores como la población, la denuncia o los operativos policiales también influyen en lo que queda registrado.</p>
   <details class="mas-proyecto">
     <summary>Leer más sobre los datos y las secciones</summary>
-    <p>Los indicadores y gráficos de esta página se construyen sumando la columna <strong>casos</strong>; las filas marcadas como duplicadas se excluyen al generar el catálogo. Las cifras representan lo consignado en la fuente: no son tasas por población ni una garantía de que cada caso equivalga a un hecho o persona únicos. El último año puede tener cobertura parcial, por lo que debe compararse con cautela frente a años completos.</p>
+    <p>Los indicadores y gráficos de esta página se construyen sumando la columna <strong>casos</strong>; si la fuente marca filas como duplicadas, se excluyen al generar el catálogo (la base actual no trae ninguna marcada). Las cifras representan lo consignado en la fuente: no son tasas por población ni una garantía de que cada caso equivalga a un hecho o persona únicos. El último año puede tener cobertura parcial, por lo que debe compararse con cautela frente a años completos.</p>
     <p id="projectOverview">Preparando el resumen estadístico de la base disponible…</p>
     <p id="projectTrend">Calculando la evolución anual de los casos…</p>
-    <p>La página se divide en secciones complementarias. <strong>Análisis</strong> ofrece el panorama nacional con un mapa por departamento, la participación de cada categoría, el ranking de delitos y la evolución anual. <strong>Tu zona</strong> permite bajar hasta el nivel de región, departamento y municipio, y descargar los datos de cada año. <strong>Delitos</strong> reúne una ficha por categoría y por delito con su comportamiento anual, mensual y municipal. <strong>Historia delictiva</strong> explica cómo la lista pasó de 18 delitos a 34 categorías. Por último, el <strong>Dashboard</strong> de Power BI y el <strong>Informe R</strong> amplían el análisis con herramientas y metodologías adicionales.</p>
+    <p>La página se divide en secciones complementarias. <strong>Análisis</strong> ofrece el panorama nacional con un mapa por departamento, la participación de cada categoría, el ranking de delitos y la evolución anual. <strong>Tu zona</strong> permite bajar hasta el nivel de región, departamento y municipio, y descargar los datos de cada año. <strong>Delitos</strong> reúne una ficha por categoría y por delito con su comportamiento anual, mensual y municipal. <strong>Historia delictiva</strong> explica cómo la lista pasó de 18 a 34 delitos. Por último, el <strong>Dashboard</strong> de Power BI y el <strong>Informe R</strong> amplían el análisis con herramientas y metodologías adicionales.</p>
   </details>
   <div class="gr" id="info"></div>
   <section class="info-videos" aria-labelledby="infoVideosTitle">
@@ -157,7 +157,7 @@ try {
   <div class="blk analysis-page">
     <span class="data-eyebrow">Personas detrás de Indecol</span>
     <h2>Grupo de trabajo</h2>
-    <p>El equipo reúne dos instructores, dos líderes, cinco integrantes de Frontend y quince de Backend. Como aún no se han proporcionado nombres ni fotografías, se muestran identificadores y retratos ilustrados provisionales. La estructura describe funciones, no una valoración del trabajo.</p>
+    <p>El equipo reúne dos instructores, dos líderes, cinco integrantes de Frontend y quince de Backend. Como aún faltan los nombres de los integrantes y las fotografías, se muestran identificadores y retratos ilustrados provisionales. La estructura describe funciones, no una valoración del trabajo.</p>
     <div class="eq" id="eq" aria-label="Equipo de Indecol"></div>
   </div>
 </section>
@@ -274,7 +274,7 @@ try {
           <select id="zoneAnnualCsvYear"></select>
         </label>
         <button type="button" class="zone-export" id="exportAnnualZoneCsv">Descargar CSV del año</button>
-        <span class="zone-annual-note">Incluye todas las regiones, departamentos y municipios, con conteos por categoría y delito. No depende de los filtros anteriores; 2026 contiene datos hasta octubre.</span>
+        <span class="zone-annual-note">Incluye todas las regiones, departamentos y municipios, con conteos por categoría y delito. No depende de los filtros anteriores; 2026 contiene datos hasta octubre (mes incompleto).</span>
         <span class="zone-annual-status" id="zoneAnnualCsvStatus" role="status" aria-live="polite"></span>
       </div>
       <div class="zone-barra">
@@ -317,7 +317,7 @@ try {
       <div class="rpubs-summary" aria-label="Cobertura del informe">
         <span>Periodo</span><strong>2020–2026</strong>
         <span>Casos SIEDCO</span><strong id="rpubsCases">Calculando…</strong>
-        <small>Datos hasta octubre de 2026</small>
+        <small>Datos hasta octubre de 2026 (mes incompleto)</small>
       </div>
     </div>
     <p class="data-note">RPubs no permite incrustar esta publicación en la página; usa el botón para abrirla en una pestaña nueva.</p>
@@ -330,11 +330,11 @@ try {
   <div class="blk analysis-page hd-page">
     <span class="data-eyebrow">Origen de las categorías · SIEDCO</span>
     <h2>Historia delictiva</h2>
-    <p><strong>SIEDCO: de 18 a 34 categorías de delitos.</strong> El SIEDCO de la Policía Nacional pasó de 18 delitos de impacto (2010) a 34 categorías en su portal (2026): 17 se mantienen, 2 salen de dividir el secuestro, 10 son delitos nuevos y 5 son resultados operativos de la Policía, que aquí se cuentan como categorías.</p>
+    <p><strong>SIEDCO: de 18 a 34 delitos.</strong> El SIEDCO de la Policía Nacional pasó de 18 delitos de impacto (2010) a 34 delitos en su portal (2026): 17 se mantienen, 2 salen de dividir el secuestro, 10 son delitos nuevos y 5 son resultados operativos de la Policía, que aquí también se cuentan como delitos.</p>
     <ul class="hd-cifras data-animate">
       <li><span>Antes · 2010</span><b data-count-value="18">0</b><small>delitos de impacto publicados</small></li>
-      <li><span>Ahora · 2026</span><b data-count-value="34">0</b><small>categorías en el portal SIEDCO</small></li>
-      <li><span>Diferencia</span><b data-count-value="16">0</b><small>categorías que surgieron</small></li>
+      <li><span>Ahora · 2026</span><b data-count-value="34">0</b><small>delitos en el portal SIEDCO</small></li>
+      <li><span>Diferencia</span><b data-count-value="16">0</b><small>delitos que se sumaron</small></li>
       <li><span>Delitos nuevos</span><b data-count-value="10">0</b><small>sin equivalente en la lista de 2010</small></li>
     </ul>
     <div class="hd-indice" id="hdIndice" role="group" aria-label="Partes de Historia delictiva">
@@ -346,23 +346,23 @@ try {
       <ul class="hd-cascada" id="hdCascada"></ul>
     </section>
     <section class="data-panel hd-ancla" id="hdSecDiagrama">
-      <h3>Cómo surgieron las 34 categorías a partir de los 18 delitos</h3>
-      <p>Cada línea une un delito de 2010 (izquierda) con las categorías actuales que se desprenden de él (derecha); los abanicos muestran de dónde salió cada categoría nueva. Los delitos que siguen igual y no tienen ramas van juntos en un bloque. Pasa el cursor o toca una categoría para ver su norma, año y casos. Los botones de color filtran el diagrama.</p>
+      <h3>Cómo se pasó de 18 a 34 delitos</h3>
+      <p>Cada línea une un delito de 2010 (izquierda) con los delitos actuales que se desprenden de él (derecha); los abanicos muestran de dónde salió cada delito nuevo. Los delitos que siguen igual y no tienen ramas van juntos en un bloque. Pasa el cursor o toca un delito para ver su norma, año y casos. Los botones de color filtran el diagrama.</p>
       <div class="hd-filtro" id="hdFiltro" role="group" aria-label="Filtrar el diagrama por tipo de cambio"></div>
-      <p class="hd-columnas"><span>18 delitos de impacto (2010)</span><span>34 categorías del portal (2026)</span></p>
+      <p class="hd-columnas"><span>18 delitos de impacto (2010)</span><span>34 delitos del portal (2026)</span></p>
       <ul class="hd-mapa" id="hdMapa"></ul>
       <aside class="hd-detalle" id="hdDetalle" aria-live="polite" hidden></aside>
     </section>
     <section class="data-panel hd-ancla" id="hdSecMosaico">
-      <h3>Las 34 categorías de un vistazo</h3>
-      <p>Cada cuadro es una categoría y su color indica el tipo de cambio. Reordénalas para ver cómo se agrupan.</p>
+      <h3>Los 34 delitos de un vistazo</h3>
+      <p>Cada cuadro es un delito y su color indica el tipo de cambio. Reordénalos para ver cómo se agrupan.</p>
       <ul class="hd-leyenda" data-hd-leyenda></ul>
       <div class="hd-orden" id="hdOrden" role="group" aria-label="Ordenar el mosaico"><button type="button" data-orden="tipo" aria-pressed="true">Por tipo de cambio</button><button type="button" data-orden="familia" aria-pressed="false">Por familia</button><button type="button" data-orden="anio" aria-pressed="false">Por año de la norma</button></div>
       <div class="hd-mosaico" id="hdMosaico"></div>
     </section>
     <section class="data-panel" id="hdSecFamilias">
-      <h3>Categorías por familia (bien jurídico)</h3>
-      <p>Agrupa las 34 categorías según lo que protege la ley. El patrimonio económico y la violencia contra las personas concentran la mayor parte del crecimiento.</p>
+      <h3>Delitos por familia (bien jurídico)</h3>
+      <p>Agrupa los 34 delitos según lo que protege la ley. El patrimonio económico (13) y la violencia contra las personas (10) son las familias más grandes y suman 8 de los 16 delitos agregados.</p>
       <ul class="hd-leyenda" data-hd-leyenda></ul>
       <ul class="hd-familias" id="hdFamilias"></ul>
     </section>
@@ -374,7 +374,7 @@ try {
     </section>
     <section class="data-panel" id="hdSecTiempo">
       <h3>Línea de tiempo: normas y cambios en el SIEDCO</h3>
-      <p>Cada hito muestra las categorías actuales cuya norma vigente (o su registro en el SIEDCO) es de ese año. En la escala, el tamaño de cada círculo indica cuántas son; toca un año para ir a su detalle.</p>
+      <p>Cada hito muestra los delitos actuales cuya norma vigente (o su registro en el SIEDCO) es de ese año. En la escala, el tamaño de cada círculo indica cuántos son; toca un año para ir a su detalle.</p>
       <div class="hd-escala-caja"><div class="hd-escala" id="hdEscala" role="group" aria-label="Línea de tiempo de 1955 a 2026"></div></div>
       <ol class="hd-tiempo" id="hdTiempo"></ol>
     </section>
@@ -390,7 +390,7 @@ try {
       <p>El SIEDCO pasó de mirar solo el delito callejero de alto impacto a cubrir también corrupción, delito digital, crimen organizado y ambiente, y a medir los resultados de la Policía.</p>
     </section>
     <section class="data-panel" id="hdSecTabla">
-      <h3>Las 34 categorías</h3>
+      <h3>Los 34 delitos</h3>
       <p>Cada nombre abre la ficha del delito con sus cifras.</p>
       <div class="hd-buscar">
         <label for="hdBuscar">Buscar<input type="search" id="hdBuscar" placeholder="Delito, familia, norma o año" autocomplete="off"></label>
@@ -398,10 +398,10 @@ try {
       </div>
       <p class="data-note" id="hdConteo" aria-live="polite"></p>
       <table class="hd-tabla">
-        <thead><tr><th scope="col">N.º</th><th scope="col">Categoría</th><th scope="col">Tipo de cambio</th><th scope="col">Familia</th><th scope="col">Surge de</th><th scope="col">Norma</th><th scope="col">Año</th><th scope="col" id="hdColCasos">Casos</th></tr></thead>
+        <thead><tr><th scope="col">N.º</th><th scope="col">Delito</th><th scope="col">Tipo de cambio</th><th scope="col">Familia</th><th scope="col">Surge de</th><th scope="col">Norma</th><th scope="col">Año</th><th scope="col" id="hdColCasos">Casos</th></tr></thead>
         <tbody id="hdTabla"></tbody>
       </table>
-      <p class="data-empty" id="hdVacio" hidden>Ninguna categoría coincide con la búsqueda.</p>
+      <p class="data-empty" id="hdVacio" hidden>Ningún delito coincide con la búsqueda.</p>
       <button type="button" class="ver-lista" id="hdVerTodas"></button>
     </section>
     <p class="data-note hd-corte">Datos con corte al 26 de noviembre de 2026, 10:15 a. m. (hora de Colombia).</p>

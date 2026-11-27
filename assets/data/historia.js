@@ -87,6 +87,6 @@ window.INDECOL_HISTORIA = {
   { anio: 2018, titulo: "Ley 1944 (abigeato) e integración con la Fiscalía", texto: "El abigeato pasa a tener tipo penal propio y las cifras del SIEDCO empiezan a unificarse con el SPOA de la Fiscalía.", categorias: [21] },
   { anio: 2021, titulo: "Ley 2111: delitos ambientales", texto: "Se sustituye el título de delitos contra los recursos naturales y el medio ambiente.", categorias: [29] },
   { anio: 2025, titulo: "Transición a la clasificación ICCS", texto: "La Policía termina el paso al nuevo modelo estadístico con la clasificación internacional de delitos adaptada por el DANE.", categorias: [] },
-  { anio: 2026, titulo: "Portal SIEDCO con 34 categorías", texto: "Consulta del portal público del SIEDCO (noviembre de 2026): 34 categorías entre delitos y resultados operativos.", categorias: [] }
+  { anio: 2026, titulo: "Portal SIEDCO con 34 delitos", texto: "Consulta del portal público del SIEDCO (noviembre de 2026): 34 delitos, incluidos 5 resultados operativos de la Policía.", categorias: [] }
  ]
 };

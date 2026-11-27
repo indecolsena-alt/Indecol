@@ -101,6 +101,9 @@ const periodosCompletos=new Set(
  [...coberturaAnual.values()].filter(item=>item.complete).map(item=>item.year)
 );
 
+// un delito cuenta como reportado si tiene registros, aunque no sume casos (estupefacientes se mide en toneladas)
+const conRegistros=(years,range)=>(years||[]).some(item=>item.year>=range.startYear&&item.year<=range.endYear&&item.records>0);
+const textoDelitos=(reportados,conCasos)=>`${reportados} ${reportados===1?"delito":"delitos"}${reportados>conCasos?` (${conCasos} suman casos; la incautación de estupefacientes se mide en toneladas)`:""}`;
 function graficaDatos(items,valueOf,labelOf,horizontal=false){
  if(!items.length)return '<p class="data-empty">No hay datos válidos para este gráfico.</p>';
  const max=Math.max(1,...items.map(valueOf));
@@ -431,9 +434,11 @@ function graficaIncautacionMensual(item){
   item.months.map(mes=>monthsData[mes.month-1]),`Toneladas incautadas por mes en ${item.year}`);
 }
 function lecturaIncautacionMensual(item){
- const orden=[...item.months].sort((a,b)=>b.grams-a.grams),mayor=orden[0],menor=orden.at(-1);
+ // el último mes de un año incompleto no se compara
+ const parcial=item.months.length<12&&item.months.length>1;
+ const orden=(parcial?item.months.slice(0,-1):[...item.months]).sort((a,b)=>b.grams-a.grams),mayor=orden[0],menor=orden.at(-1);
  const total=item.months.reduce((sum,mes)=>sum+mes.grams,0);
- return `En ${item.year} se incautaron ${fmtData(toneladas(total))} toneladas en ${item.months.length} meses, un promedio de ${fmtData(toneladas(total/item.months.length))} por mes. El mes con más cantidad fue ${MESES_COMPLETOS[mayor.month-1]} (${fmtData(toneladas(mayor.grams))} toneladas) y el de menos, ${MESES_COMPLETOS[menor.month-1]} (${fmtData(toneladas(menor.grams))}).${item.months.length<12?" Este año está incompleto, por lo que su total no es comparable con el de un año entero.":""}`;
+ return `En ${item.year} se incautaron ${fmtData(toneladas(total))} toneladas en ${item.months.length} meses, un promedio de ${fmtData(toneladas(total/item.months.length))} por mes. El mes con más cantidad fue ${MESES_COMPLETOS[mayor.month-1]} (${fmtData(toneladas(mayor.grams))} toneladas) y el de menos, ${MESES_COMPLETOS[menor.month-1]} (${fmtData(toneladas(menor.grams))}).${parcial?` Este año está incompleto, por lo que su total no es comparable con el de un año entero; ${MESES_COMPLETOS[item.months.at(-1).month-1]}, el último mes con datos, puede estar incompleto y no se incluye al buscar el mes más alto y el más bajo.`:""}`;
 }
 function paginaIncautaciones(category,crime){
  const datos=INCAUTACIONES,anios=datos.years,ultimo=anios.at(-1);
@@ -673,7 +678,7 @@ function lecturaAnual(puntos,contexto=""){
  if(parcial){
   const meses=coberturaAnual.get(parcial.year)?.monthsAvailable.length||12;
   const ultimoMes=MESES_COMPLETOS[(coberturaAnual.get(parcial.year)?.monthsAvailable.at(-1)||12)-1];
-  partes.push(`${parcial.year} solo incluye datos hasta ${ultimoMes} (${meses} meses): suma ${fmtData(parcial.value)} casos, unos ${fmtEntero(parcial.value/meses)} por mes${completos.length?`, frente a ${fmtEntero(promedio/12)} por mes en promedio en los años completos`:""}.`);
+  partes.push(`${parcial.year} solo incluye datos hasta ${ultimoMes} (${meses} meses, el último incompleto): suma ${fmtData(parcial.value)} casos y no es comparable con un año completo.`);
  }
  return partes.join(" ");
 }
@@ -681,12 +686,14 @@ function lecturaMensual(meses,year){
  const datos=meses.map(item=>({nombre:MESES_COMPLETOS[item.month-1]||String(item.month),valor:casos(item)}));
  const total=datos.reduce((acc,item)=>acc+item.valor,0);
  if(!total)return`No hay casos mensuales para ${year}.`;
- const maximo=datos.reduce((a,b)=>b.valor>a.valor?b:a);
- const minimo=datos.reduce((a,b)=>b.valor<a.valor?b:a);
+ // el último mes de un año incompleto no se compara
+ const parcial=anioParcial(year)&&datos.length>1,comparables=parcial?datos.slice(0,-1):datos;
+ const maximo=comparables.reduce((a,b)=>b.valor>a.valor?b:a);
+ const minimo=comparables.reduce((a,b)=>b.valor<a.valor?b:a);
  const partes=[`En ${year} se suman ${fmtData(total)} casos en ${datos.length} meses, con un promedio de ${fmtEntero(total/datos.length)} por mes.`,
   `El mes con más casos fue ${maximo.nombre} (${fmtData(maximo.valor)}, ${porcentaje(maximo.valor,total)} del año) y el de menos, ${minimo.nombre} (${fmtData(minimo.valor)}).`];
  if(minimo.valor)partes.push(`La diferencia entre ambos meses es de ${fmtData(maximo.valor-minimo.valor)} casos, es decir, el mes más alto supera al más bajo en ${fmtDecimal((maximo.valor/minimo.valor-1)*100)}%.`);
- if(anioParcial(year))partes.push(`Este año aún está incompleto, por lo que su total no es comparable con el de un año entero.`);
+ if(parcial)partes.push(`Este año aún está incompleto, por lo que su total no es comparable con el de un año entero; ${datos.at(-1).nombre}, el último mes con datos, puede estar incompleto y no se incluye al buscar el mes más alto y el más bajo.`);
  return partes.join(" ");
 }
 function renderHomeInsight(){
@@ -712,7 +719,7 @@ function renderHomeInsight(){
  const top3Categorias=rankingCategorias.slice(0,3);
  const top5Delitos=rankingDelitos.slice(0,5).reduce((acc,item)=>acc+casos(item),0);
  document.getElementById("projectOverview").textContent=
-  `En el periodo ${periodoTotal}, la base reúne ${fmtData(total)} casos distribuidos en ${CATALOGO.crimeCount} delitos y ${CATALOGO.categoryCount} categorías. ${leadingCategory.name} es la categoría más numerosa, con ${fmtData(casos(leadingCategory))} casos (${porcentaje(casos(leadingCategory),total)} del total), y junto con ${listaHumana(top3Categorias.slice(1).map(item=>item.name))} concentra ${porcentaje(top3Categorias.reduce((acc,item)=>acc+casos(item),0),total)} de los registros. En el detalle por delito, ${leadingCrime.name} encabeza la lista con ${fmtData(casos(leadingCrime))} casos (${share}), y los cinco delitos más frecuentes suman ${porcentaje(top5Delitos,total)} de la base. Estas participaciones describen cómo se distribuyen los reportes; no son una probabilidad individual ni una tasa de criminalidad.`;
+  `En el periodo ${periodoTotal}, la base reúne ${fmtData(total)} casos y registra ${CATALOGO.crimeCount} delitos en ${CATALOGO.categoryCount} categorías (la incautación de estupefacientes se mide aparte, en toneladas). ${leadingCategory.name} es la categoría más numerosa, con ${fmtData(casos(leadingCategory))} casos (${porcentaje(casos(leadingCategory),total)} del total), y junto con ${listaHumana(top3Categorias.slice(1).map(item=>item.name))} concentra ${porcentaje(top3Categorias.reduce((acc,item)=>acc+casos(item),0),total)} de los registros. En el detalle por delito, ${leadingCrime.name} encabeza la lista con ${fmtData(casos(leadingCrime))} casos (${share}), y los cinco delitos más frecuentes suman ${porcentaje(top5Delitos,total)} de la base. Estas participaciones describen cómo se distribuyen los reportes; no son una probabilidad individual ni una tasa de criminalidad.`;
  const anuales=[...totalAnual].sort((a,b)=>a[0]-b[0]).map(([year,value])=>({year,value}));
  const departamentos=[...departmentTotals].map(([key,value])=>({
   name:mapaDepartamentos.departments.find(item=>item.key===key)?.name||key,value
@@ -809,6 +816,10 @@ function renderAnalisisGeneral(){
  const filteredTotal=crimeRank.reduce((sum,crime)=>sum+crime.filteredRecords,0);
  const leadingCategory=categoryRank.find(item=>item.filteredRecords>0);
  const leadingCrime=crimeRank.find(item=>item.filteredRecords>0);
+ const reportedCrimes=DELITOS_DATA.filter(crime=>departmentPinnedKey
+  ?(crime.municipalityData||[]).some(item=>departmentKey(item.department)===departmentPinnedKey&&conRegistros(item.years,range))
+  :conRegistros(crime.years,range)).length;
+ const crimesWithCases=crimeRank.filter(item=>item.filteredRecords>0).length;
  const years=[...totalAnual].sort((a,b)=>a[0]-b[0]);
  const selectedYears=years.filter(([year])=>inRange(year));
  const annualFiltered=selectedYears.map(([year,records])=>[
@@ -825,7 +836,7 @@ function renderAnalisisGeneral(){
  const changeText=change===null?"No hay dos años completos para comparar."
   :`En ${area}, entre ${previousYear[0]} y ${lastCompleteYear[0]}, los casos ${change>=0?"aumentaron":"disminuyeron"} ${Math.abs(change).toFixed(1).replace(".",",")}% (${fmtData(previousYear[1])} a ${fmtData(lastCompleteYear[1])}).`;
  document.getElementById("analysisFindings").innerHTML=[
-  {label:"Cobertura filtrada",value:`${crimeRank.filter(crime=>crime.filteredRecords>0).length} delitos`,detail:`${area} · ${startYear}–${endYear} · ${fmtData(filteredTotal)} casos`},
+  {label:"Cobertura filtrada",value:`${reportedCrimes} delitos`,detail:`${area} · ${startYear}–${endYear} · ${fmtData(filteredTotal)} casos${reportedCrimes>crimesWithCases?" · estupefacientes en toneladas":""}`},
   {label:"Mayor volumen por categoría",value:leadingCategory?.name||"—",detail:`${porcentaje(leadingCategory?.filteredRecords||0,filteredTotal)} del total filtrado`},
   {label:"Delito con más casos",value:leadingCrime?.name||"—",detail:`${porcentaje(leadingCrime?.filteredRecords||0,filteredTotal)} del total filtrado`},
   {label:"Cambio anual",value:change===null?"—":`${change>=0?"+":"−"}${Math.abs(change).toFixed(1).replace(".",",")}%`,detail:changeText}
@@ -846,10 +857,9 @@ function renderAnalisisGeneral(){
   `La línea resume la evolución temporal de los casos para el territorio y periodo seleccionados: cada punto corresponde a un año y su etiqueta muestra la suma registrada. La dirección de la línea ayuda a localizar aumentos o descensos, pero no explica sus causas. El año parcial se señala y debe compararse con cautela.`;
  const nationalRangeTotal=selectedYears.reduce((sum,[,records])=>sum+records,0);
  const activeCategories=categoryRank.filter(item=>item.filteredRecords>0).length;
- const activeCrimes=crimeRank.filter(item=>item.filteredRecords>0).length;
  const completeInRange=selectedYears.filter(([year])=>periodosCompletos.has(year)).length;
  document.getElementById("analysisScopeNote").textContent=
-  `La consulta actual abarca ${selectedYears.length} ${selectedYears.length===1?"año":"años"} (${completeInRange} ${completeInRange===1?"completo":"completos"}) y suma ${fmtData(filteredTotal)} casos repartidos en ${activeCrimes} delitos y ${activeCategories} categorías${departmentPinnedKey?`, equivalentes al ${porcentaje(filteredTotal,nationalRangeTotal)} de los ${fmtData(nationalRangeTotal)} casos del país en el mismo periodo`:""}.`;
+  `La consulta actual abarca ${selectedYears.length} ${selectedYears.length===1?"año":"años"} (${completeInRange} ${completeInRange===1?"completo":"completos"}), suma ${fmtData(filteredTotal)} casos en ${activeCategories} categorías y registra ${textoDelitos(reportedCrimes,crimesWithCases)}${departmentPinnedKey?`, equivalentes al ${porcentaje(filteredTotal,nationalRangeTotal)} de los ${fmtData(nationalRangeTotal)} casos del país en el mismo periodo`:""}.`;
  document.getElementById("analysisDataQuality").textContent=
   `Cómo se calculan las cifras: cada valor es la suma de la columna casos de SIEDCO para el territorio y los años elegidos. Los porcentajes se calculan sobre el total de esa misma selección, el cambio anual compara únicamente años de doce meses y ${CATALOGO.yearCoverage?.at(-1)?.complete===false?`${CATALOGO.yearCoverage.at(-1).year} se muestra como año parcial`:"todos los años están completos"}. Son conteos absolutos: un territorio más poblado tiende a acumular más casos, por lo que estas cifras no equivalen a tasas por habitante.`;
  const categoriesFiltered=categoryRank.filter(item=>item.filteredRecords>0);
@@ -857,7 +867,7 @@ function renderAnalisisGeneral(){
  const yearlyFiltered=annualFiltered.map(([year,records])=>({label:String(year),value:records}));
  const latestAvailable=CATALOGO.yearCoverage?.at(-1);
  const incompleteYearNote=latestAvailable&&!latestAvailable.complete&&inRange(latestAvailable.year)
-  ?` ${latestAvailable.year} es parcial: hay datos de ${latestAvailable.monthsAvailable.length} meses, hasta ${monthsData[latestAvailable.monthsAvailable.at(-1)-1]||"el último mes disponible"}.`
+  ?` ${latestAvailable.year} es parcial: hay datos de ${latestAvailable.monthsAvailable.length} meses, hasta ${monthsData[latestAvailable.monthsAvailable.at(-1)-1]||"el último mes disponible"} (ese último mes puede estar incompleto).`
   :"";
  const yearlyPanel=document.getElementById("analysisYears");
  document.getElementById("analysisCategories").innerHTML=graficaAnillo(
@@ -886,7 +896,7 @@ function renderAnalisisGeneral(){
  })+` ${activeCategories<CATALOGO.categoryCount?`${CATALOGO.categoryCount-activeCategories} de las ${CATALOGO.categoryCount} categorías no registran casos en esta selección.`:`Las ${CATALOGO.categoryCount} categorías tienen casos en esta selección.`}`);
  escribirLectura("analysisCrimesReading",lecturaRanking(crimesFiltered.slice(0,10),{
   valor:item=>item.filteredRecords,etiqueta:item=>item.name,total:filteredTotal,plural:"delitos"
- })+(crimesFiltered.length>10?` Los ${crimesFiltered.length-10} delitos restantes aportan ${porcentaje(crimesFiltered.slice(10).reduce((sum,item)=>sum+item.filteredRecords,0),filteredTotal)}.`:""));
+ })+(crimesFiltered.length>10?` Los otros ${crimesFiltered.length-10} delitos con casos aportan ${porcentaje(crimesFiltered.slice(10).reduce((sum,item)=>sum+item.filteredRecords,0),filteredTotal)}.`:"")+(reportedCrimes>crimesWithCases?" La incautación de estupefacientes no entra en este ranking porque se mide en toneladas.":""));
  escribirLectura("analysisYearsReading",lecturaAnual(annualFiltered.map(([year,value])=>({year,value})),`En ${area}, `));
  resumenAnalisis={area,startYear,endYear,filteredTotal,nationalRangeTotal,categoryRank,crimeRank,annualFiltered,change,lastCompleteYear,previousYear};
  ["analysisCategories","analysisCrimes","analysisYears"].forEach(id=>{
@@ -1065,6 +1075,7 @@ function renderZona(){
  const range=rangoZonaActual();
  const localCrimes=[];
  const categoryTotals=new Map();
+ const reportados=new Set();
  let total=0;
  DELITOS_DATA.forEach(crime=>{
    let records=0;
@@ -1078,6 +1089,7 @@ function renderZona(){
      &&(selectedMunicipality===TODAS_ZONAS||municipalityKey===selectedMunicipality);
     if(matches){
      records+=registrosEnRango(item.years,range);
+     if(conRegistros(item.years,range))reportados.add(crime.id);
      acumularAnios(annualRecords,item.years);
     }
    });
@@ -1119,12 +1131,13 @@ function renderZona(){
    whereParts.push(municipality.name);
  }
  const where=whereParts.filter(Boolean).join(" · ")||"todas las regiones";
+ const conCasos=localCrimes.filter(item=>item.records>0).length;
  document.getElementById("zoneFilterSummary").textContent=
   `Mostrando ${where} · ${range.startYear}–${range.endYear}.`;
  const result=document.getElementById("zoneResult");
  const nationalTotal=CATALOGO.years.filter(year=>year>=range.startYear&&year<=range.endYear)
   .reduce((sum,year)=>sum+(totalAnual.get(year)||0),0);
- const lecturaZona=total?`${where==="todas las regiones"?"El país":where} suma ${fmtData(total)} casos entre ${range.startYear} y ${range.endYear}${where==="todas las regiones"?"":`, el ${porcentaje(total,nationalTotal)} del total nacional del mismo periodo`}. ${zoneCategories.length} categorías y ${localCrimes.filter(item=>item.records>0).length} delitos registran al menos un caso en esta selección.`:"";
+ const lecturaZona=total?`${where==="todas las regiones"?"El país":where} suma ${fmtData(total)} casos entre ${range.startYear} y ${range.endYear}${where==="todas las regiones"?"":`, el ${porcentaje(total,nationalTotal)} del total nacional del mismo periodo`}. En esta selección hay casos en ${zoneCategories.length} ${zoneCategories.length===1?"categoría":"categorías"} y se registran ${textoDelitos(reportados.size,conCasos)}.`:"";
  result.innerHTML=`<p class="chart-reading zone-intro-reading data-animate">${lecturaZona?`<b>Resumen de la selección.</b> ${htmlSeguro(lecturaZona)}`:""}</p>
  <div class="zone-summary data-animate">
    <div><span>Casos incluidos</span><strong data-count-value="${total}">0</strong></div>
@@ -1140,7 +1153,7 @@ function renderZona(){
    ${graficaDatos(localMunicipalities,item=>item.records,item=>item.label,true)}
    ${parrafoLectura(lecturaRanking(localMunicipalities,{valor:item=>item.records,etiqueta:item=>item.label,total,plural:"municipios"}))}
  </section>
- <section class="zone-subpanel data-animate"><h4>Delitos con más casos</h4><p>El gráfico compara los ${fmtData(localCrimes.filter(item=>item.records>0).length)} delitos con casos en esta selección y ordena primero los de mayor total. La longitud indica el volumen relativo y la cifra final da el número exacto de casos, útil para reconocer qué delitos concentran más reportes en la zona.</p>
+ <section class="zone-subpanel data-animate"><h4>Delitos con más casos</h4><p>El gráfico compara los ${conCasos} delitos con casos en esta selección y ordena primero los de mayor total.${reportados.size>conCasos?" La incautación de estupefacientes no aparece porque se mide en toneladas.":""} La longitud indica el volumen relativo y la cifra final da el número exacto de casos, útil para reconocer qué delitos concentran más reportes en la zona.</p>
    ${listaCorta(localCrimes.filter(item=>item.records>0))}
    ${parrafoLectura(lecturaRanking(localCrimes.filter(item=>item.records>0),{valor:item=>item.records,etiqueta:item=>item.name,total,plural:"delitos"}))}
  </section>
@@ -1155,14 +1168,14 @@ function renderZona(){
 function listaCorta(delitos){
  const grafico=graficaDatos(delitos,item=>item.records,item=>item.name,true);
  if(delitos.length<=10)return grafico;
- return `<div class="lista-corta">${grafico}<button type="button" class="ver-lista" aria-expanded="false" data-total="${delitos.length}">Ver los ${delitos.length} delitos</button></div>`;
+ return `<div class="lista-corta">${grafico}<button type="button" class="ver-lista" aria-expanded="false" data-total="${delitos.length}">Ver los ${delitos.length} delitos con casos</button></div>`;
 }
 document.getElementById("zoneResult").addEventListener("click",event=>{
  const boton=event.target.closest(".ver-lista");
  if(!boton)return;
  const abierta=boton.parentElement.classList.toggle("abierta");
  boton.setAttribute("aria-expanded",String(abierta));
- boton.textContent=abierta?"Ver solo los 10 primeros":`Ver los ${boton.dataset.total} delitos`;
+ boton.textContent=abierta?"Ver solo los 10 primeros":`Ver los ${boton.dataset.total} delitos con casos`;
  if(!abierta)boton.scrollIntoView({block:"center"});
  revelarAnalisisVisibles();
 });
@@ -1459,8 +1472,8 @@ const mapaCobertura=`<svg class="info-coverage-map" viewBox="${htmlSeguro(mapaDe
 const INFO=[
  {title:"Qué es Indecol",visual:'<img class="info-brand-logo" src="assets/images/logo-principal.png" alt="Logotipo de Indecol">',text:"Indecol significa Indicadores Delictivos en Colombia. Es una página para explorar los casos reportados por delito, año y territorio, pensada para estudiantes, periodistas, autoridades locales y cualquier ciudadano que quiera entender mejor su entorno con datos."},
  {title:"Fuente",visual:'<div class="info-source-mark"><img src="assets/images/escudo-policia-nacional.png" alt="Escudo de la Policía Nacional de Colombia"><span><strong>SIEDCO</strong><small>Policía Nacional de Colombia</small></span></div>',text:`Los datos provienen del Sistema de Información Estadístico, Delincuencial, Contravencional y Operativo (SIEDCO), de la Policía Nacional. Aquí se suma la columna casos de ${CATALOGO.years[0]} a ${CATALOGO.years.at(-1)} para su consulta. SIEDCO consolida las denuncias y actuaciones registradas por la Policía en todo el país.`,link:"https://portalsiedco.policia.gov.co:4443/extensions/PortalPublico/index.html",linkLabel:"Visitar el portal oficial"},
- {title:"Cobertura",visual:mapaCobertura,text:`La base reúne ${fmtData(CATALOGO.totalCases)} casos para ${CATALOGO.crimeCount} delitos, agrupados en ${CATALOGO.categoryCount} categorías, entre ${CATALOGO.years[0]} y ${CATALOGO.years.at(-1)}. Incluye ${mapaDepartamentos.departments.length} departamentos y ${fmtData(zonaMunicipios.size)} municipios; en el mapa de Análisis puedes explorar los casos por departamento.`},
- {title:"Cómo leer los datos",visual:'<svg class="info-reading-icon" viewBox="0 0 120 90" aria-hidden="true"><path d="M12 75h96M22 68V47h17v21M52 68V29h17v39M82 68V15h17v53" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"></path><path d="m18 35 25-15 24 2 28-14" fill="none" stroke="var(--oro-d)" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"></path><circle cx="18" cy="35" r="4" fill="var(--oro-d)"></circle><circle cx="43" cy="20" r="4" fill="var(--oro-d)"></circle><circle cx="67" cy="22" r="4" fill="var(--oro-d)"></circle><circle cx="95" cy="8" r="4" fill="var(--oro-d)"></circle></svg>',text:`Cada cifra suma la columna casos de la base final. Los gráficos comparan los casos por delito y territorio, y bajo cada uno encontrarás una lectura con sus cifras clave. ${CATALOGO.yearCoverage?.at(-1)?.complete===false?`El periodo ${CATALOGO.yearCoverage.at(-1).year} incluye datos hasta ${MESES_COMPLETOS[CATALOGO.yearCoverage.at(-1).monthsAvailable.at(-1)-1]}.`:""}`}
+ {title:"Cobertura",visual:mapaCobertura,text:`La base reúne ${fmtData(CATALOGO.totalCases)} casos entre ${CATALOGO.years[0]} y ${CATALOGO.years.at(-1)} y registra ${CATALOGO.crimeCount} delitos, agrupados en ${CATALOGO.categoryCount} categorías; la incautación de estupefacientes se mide en toneladas, no en casos. Incluye ${mapaDepartamentos.departments.length} departamentos y ${fmtData(zonaMunicipios.size)} municipios; en el mapa de Análisis puedes explorar los casos por departamento.`},
+ {title:"Cómo leer los datos",visual:'<svg class="info-reading-icon" viewBox="0 0 120 90" aria-hidden="true"><path d="M12 75h96M22 68V47h17v21M52 68V29h17v39M82 68V15h17v53" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="7"></path><path d="m18 35 25-15 24 2 28-14" fill="none" stroke="var(--oro-d)" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"></path><circle cx="18" cy="35" r="4" fill="var(--oro-d)"></circle><circle cx="43" cy="20" r="4" fill="var(--oro-d)"></circle><circle cx="67" cy="22" r="4" fill="var(--oro-d)"></circle><circle cx="95" cy="8" r="4" fill="var(--oro-d)"></circle></svg>',text:`Cada cifra suma la columna casos de la base final. Los gráficos comparan los casos por delito y territorio, y bajo cada uno encontrarás una lectura con sus cifras clave. ${CATALOGO.yearCoverage?.at(-1)?.complete===false?`El periodo ${CATALOGO.yearCoverage.at(-1).year} incluye datos hasta ${MESES_COMPLETOS[CATALOGO.yearCoverage.at(-1).monthsAvailable.at(-1)-1]}, mes que puede estar incompleto.`:""}`}
 ];
 const RETRATO_PALETAS=["#d9b8a5","#c99e82","#e4c4a0","#b9856d","#d8aa83","#c8a9a0","#dfb994","#ae806b"];
 const integrantes=Array.from({length:22},(_,index)=>{
@@ -1754,7 +1767,7 @@ const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalCases};
   if(t<T.cards||t<T.cards+1.5)dibujar(f,t);
   if(t>=T.cards)tarjetas(t,dt);
   raf=requestAnimationFrame(loop)}
- function impacto(){fin=true;el.classList.add("fin");$("ixLab").textContent="REGISTROS ACUMULADOS";ys.forEach(y=>y.classList.remove("cur"));
+ function impacto(){fin=true;el.classList.add("fin");$("ixLab").textContent="CASOS ACUMULADOS";ys.forEach(y=>y.classList.remove("cur"));
   $("ixFl").classList.remove("go");void $("ixFl").offsetWidth;$("ixFl").classList.add("go");
   cam.style.transition="transform 1.3s cubic-bezier(.2,.8,.2,1)";cam.style.transform="scale(1)"}
  function en(seg,fn){tm.push(setTimeout(fn,seg*1000))}

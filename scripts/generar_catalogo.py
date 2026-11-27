@@ -206,8 +206,13 @@ def summarize_crime(
         })
 
     municipalities = crime["municipalities"]
+    # "No reportado" no es un municipio: suma casos, pero no entra en conteos ni rankings.
+    reported = {
+        key: bucket for key, bucket in municipalities.items()
+        if not {normalize(part) for part in key} & {"no reportado"}
+    }
     ranked_municipalities = sorted(
-        municipalities.items(),
+        reported.items(),
         key=lambda item: (
             -item[1]["cases"],
             normalize(item[0][1]),
@@ -216,7 +221,7 @@ def summarize_crime(
     )[:10]
     municipality_locations = {
         (normalize(department), normalize(name))
-        for department, name in municipalities
+        for department, name in reported
     }
     return {
         "id": f"{category_id}-{crime_id}",
