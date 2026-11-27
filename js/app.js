@@ -1,6 +1,6 @@
 const DELITOS=[];
 const norm=value=>String(value??"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
-const reduce=matchMedia("(prefers-reduced-motion:reduce)").matches;
+const reduce=false;
 const dvMain=document.getElementById("dvMain"),dvNav=document.getElementById("dvNav"),dvQ=document.getElementById("dvQ"),dvSide=document.getElementById("dvSide"),dvTg=document.getElementById("dvTg");
 dvNav.innerHTML='<p class="dv-vacio" id="dvNo" hidden>No hay resultados para esa búsqueda.</p>';
 dvNav.addEventListener("click",event=>{
@@ -196,7 +196,9 @@ function graficaLineas(series,labels,title){
  const cifras=labels.map((label,index)=>`<div><span>${htmlSeguro(label)}</span>${visibles.map(item=>`<b>${htmlSeguro(fmtData(item.values[index]))}</b>`).join("")}</div>`).join("");
  return `<div class="data-line-wrap">${dibujar({clase:"data-line-wide",width:760,height:300,left:64,right:728,resumen:false,paso:220})}${dibujar({clase:"data-line-narrow",width:320,height:visibles.length>1?276:256,left:60,right:304,resumen:true,paso:130})}<div class="data-line-values">${cifras}</div></div>`;
 }
-const movimientoReducido=matchMedia("(prefers-reduced-motion: reduce)");
+// La página anima siempre, aunque el equipo tenga desactivados los efectos de animación.
+// Para volver a respetar esa opción: matchMedia("(prefers-reduced-motion: reduce)").
+const movimientoReducido={matches:false};
 const animacionesNumero=new WeakMap();
 // Cada barra, línea, anillo o cifra se anima al entrar en pantalla y se reinicia al salir por abajo.
 const enSiguienteCuadro=fn=>requestAnimationFrame(()=>requestAnimationFrame(fn));
@@ -412,7 +414,7 @@ function paginaCategoria(id){
    <p>Selecciona un delito para consultar su evolución anual y mensual, además de los municipios con más casos. Cada tarjeta indica el total del delito en el periodo (la incautación de estupefacientes se mide en toneladas), de modo que puedes comparar de un vistazo cuáles aportan más casos a la categoría.</p>
    ${parrafoLectura(lecturaRanking(category.crimes.filter(casos),{valor:casos,etiqueta:item=>item.name,total:categoryCases,plural:"delitos"}))}
    <div class="data-crimes">${category.crimes.map(crime=>`<a class="data-crime" href="#delitos/${encodeURIComponent(category.id)}/${encodeURIComponent(crime.id)}">
-    <span class="data-crime-image" aria-hidden="true" style="--crime-image:url('${htmlSeguro(rutaImagenDelito(crime))}')"></span><span class="data-crime-info"><b>${htmlSeguro(crime.name)}</b><small>${casos(crime)?`<span data-count-value="${casos(crime)}">0</span> casos · ${htmlSeguro(periodo(crime.years))}`:usaIncautaciones(crime)?`<span data-count-value="${toneladas(INCAUTACIONES.grams)}">0</span> toneladas incautadas`:"No se mide en casos"}</small></span><span class="data-arrow" aria-hidden="true">→</span>
+    <span class="data-crime-image" aria-hidden="true" style="--crime-image:url('${htmlSeguro(rutaImagenDelito(crime,"miniaturas"))}')"></span><span class="data-crime-info"><b>${htmlSeguro(crime.name)}</b><small>${casos(crime)?`<span data-count-value="${casos(crime)}">0</span> casos · ${htmlSeguro(periodo(crime.years))}`:usaIncautaciones(crime)?`<span data-count-value="${toneladas(INCAUTACIONES.grams)}">0</span> toneladas incautadas`:"No se mide en casos"}</small></span><span class="data-arrow" aria-hidden="true">→</span>
    </a>`).join("")}</div>
   </section>
   <p class="data-note">Los indicadores suman la columna casos de SIEDCO. Los años parciales se identifican en las etiquetas.</p>
@@ -1603,15 +1605,16 @@ const CRIME_IMAGE_FILE_OVERRIDES=new Map([
  ["Hurto a Motocicletas","- Hurto a Motocicletas.jpg"],
  ["Hurto a Personas","- Hurto a Personas.jpg"]
 ]);
-function rutaImagenDelito(crime){
+// copias livianas generadas con scripts/optimizar_imagenes.py
+function rutaImagenDelito(crime,carpeta="delitos"){
  const filename=CRIME_IMAGE_FILE_OVERRIDES.get(crime.rawName)||`${crime.rawName}.jpg`;
- return new URL(`assets/images/categoria y delitos/delitos/${filename}`,document.baseURI).href;
+ return new URL(`assets/images/web/${carpeta}/${filename.replace(/\.jpg$/,".webp")}`,document.baseURI).href;
 }
 function visualDelitos(source,description){
  return `<div class="data-hero-visual" role="img" aria-label="${htmlSeguro(description)}" style="--category-image:url('${htmlSeguro(source)}')"></div>`;
 }
 function visualCategoria(category){
- const source=new URL(`assets/images/categoria y delitos/${category.rawName}.jpg`,document.baseURI).href;
+ const source=new URL(`assets/images/web/categorias/${category.rawName}.webp`,document.baseURI).href;
  return visualDelitos(source,`Imagen de la categoría ${category.name}`);
 }
 function visualDelito(category,crime){
@@ -1655,7 +1658,6 @@ function auto(){
  tmr=setInterval(()=>ver((cur+1)%sds.length),5000);
 }
 [...pts.children].forEach((b,i)=>b.addEventListener("click",()=>{ver(i);auto()}));
-movimientoReducido.addEventListener("change",auto);
 auto();
 historiaDelictiva();
 const footerTemplate=document.getElementById("siteFooterTemplate");
@@ -1717,6 +1719,10 @@ const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalCases};
  const fmt=n=>Math.round(n).toLocaleString("es-CO"),cv=$("ixC"),cx=cv.getContext("2d"),cam=$("ixCam"),num=$("ixNum"),cnt=$("ixCnt"),st=$("ixSt");
  const T={ini:.8,cuenta:7.2,imp:8.0,cards:10.0,b:[10.0,10.8,11.6,12.4,13.2],txt:14.8,col:18.6,pt:20.2,logo:20.5,sub:22.3,fin:25.0},NT=140,EXP=2.4,NY=CATALOGO.years.length||1;
  const total=INTRO.total;
+ // celulares, tabletas y equipos modestos usan la misma secuencia con efectos más baratos
+ const LIGERO=matchMedia("(pointer:coarse),(max-width:900px)").matches||(navigator.deviceMemory||8)<=4||(navigator.hardwareConcurrency||8)<=4;
+ const NC=LIGERO?64:104;
+ el.classList.toggle("ix-lite",LIGERO);
  const aniosIntro=CATALOGO.years.length?CATALOGO.years:[INTRO.desde];
  let tm=[],raf=0,t0=0,tp=0,ac=null,mg=null,rv=null,ruido=null,silen=false,fin=false,corre=false,dpr=1,W=0,H=0,cards=[],dim=0,cierreConError=false,focoAnterior=null;
  const ys=[];for(let i=0;i<NY;i++){const d=document.createElement("span");d.className="ix-y";d.textContent=CATALOGO.years[i]??INTRO.desde;$("ixYs").appendChild(d);ys.push(d)}
@@ -1725,34 +1731,37 @@ const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalCases};
  const R=rnd(11);
  // Tarjetas con los delitos del catálogo + tarjetas vacías de fondo.
  const orden=Array.from({length:DELITOS.length},(_,i)=>i).sort(()=>R()-.5);
- for(let i=0;i<Math.max(104,DELITOS.length);i++){const nm=i<DELITOS.length,c=document.createElement("div");c.className="ix-c "+(nm?"":"gh ")+"v"+(i%4);
+ for(let i=0;i<Math.max(NC,DELITOS.length);i++){const nm=i<DELITOS.length,c=document.createElement("div");c.className="ix-c "+(nm?"":"gh ")+"v"+(i%4);
   c.innerHTML=nm?'<small>'+String(i+1).padStart(2,"0")+'</small><b>'+DELITOS[orden[i]].nombre+'</b><s></s><s></s><s></s>':'<s></s><s></s><s></s>';st.appendChild(c);
   cards.push({el:c,nm:nm,born:-1,x:0,y:0,z0:-1300,zt:0,r:R()*60-30,vr:R()*16-8,ry:R()*50-25,rx:R()*30-15,lvl:0,vz:R()*40-20})}
- function resize(){dpr=Math.min(window.devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+"px";cv.style.height=H+"px";
+ function resize(){dpr=Math.min(window.devicePixelRatio||1,LIGERO?1.25:2);W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+"px";cv.style.height=H+"px";
   const rx=W<700?40:39,ry=W<700?27:35;ys.forEach((y,i)=>{const a=-Math.PI/2+i/NY*2*Math.PI;y.style.left=(50+Math.cos(a)*rx)+"%";y.style.top=(50+Math.sin(a)*ry)+"%"})}
  addEventListener("resize",resize);
  function nacer(i,t){const c=cards[i];c.born=t;c.x=(R()*2-1)*W*.46;c.y=(R()*2-1)*H*.4;c.zt=-200+R()*470;c.z0=-1400}
  function ola(k){const c=[1,3,4,8,18][k];let n=0;for(let i=0;i<DELITOS.length&&n<c;i++)if(cards[i].born<0){nacer(i,(performance.now()-t0)/1000);n++}
   $("ixCcN").textContent=[1,4,8,16,DELITOS.length][k];$("ixCcL").textContent=k?"delitos":"delito";
   const w=$("ixWd"),pal=["Hurto.","Homicidio.","Estafa.","Extorsión.","Secuestro."];w.textContent=pal[k];w.style.left=(8+R()*38)+"vw";w.style.top=(18+R()*36)+"%";w.classList.remove("on");void w.offsetWidth;w.classList.add("on");
-  if(k===3)for(let i=DELITOS.length;i<104;i++)cards[i].nac=T.b[3]+(i-DELITOS.length)/(104-DELITOS.length)*(T.txt-T.b[3]+1.2)}
+  if(k===3)for(let i=DELITOS.length;i<cards.length;i++)cards[i].nac=T.b[3]+(i-DELITOS.length)/(cards.length-DELITOS.length)*(T.txt-T.b[3]+1.2)}
  function dibujar(f,tt){cx.setTransform(dpr,0,0,dpr,0,0);cx.clearRect(0,0,W,H);
   const s=Math.min(H*.82/MAPA.h,W*.92/MAPA.w),ox=(W-MAPA.w*s)/2,oy=(H-MAPA.h*s)/2,Rg=MAPA.ring;
   cx.beginPath();for(let i=0;i<Rg.length;i+=2){const x=ox+Rg[i]*s,y=oy+Rg[i+1]*s;i?cx.lineTo(x,y):cx.moveTo(x,y)}cx.closePath();
   cx.fillStyle="rgba(230,191,139,.04)";cx.fill();cx.strokeStyle="rgba(230,191,139,.3)";cx.lineWidth=1.2;cx.stroke();
   const n=Math.floor(f*MAPA.dots.length/2);
-  for(let i=0;i<n;i++){const rec=n-i<30;cx.globalAlpha=rec?1:.6;cx.fillStyle=rec?"#F0E2CF":"#E6BF8B";cx.beginPath();cx.arc(ox+MAPA.dots[2*i]*s,oy+MAPA.dots[2*i+1]*s,rec?3:2.1,0,6.283);cx.fill()}
+  const puntos=(desde,hasta,radio,color,alfa)=>{cx.globalAlpha=alfa;cx.fillStyle=color;cx.beginPath();
+   for(let i=desde;i<hasta;i++){const x=ox+MAPA.dots[2*i]*s,y=oy+MAPA.dots[2*i+1]*s;cx.moveTo(x+radio,y);cx.arc(x,y,radio,0,6.283)}cx.fill()};
+  const recientes=Math.max(0,n-29);puntos(0,recientes,2.1,"#E6BF8B",.6);puntos(recientes,n,3,"#F0E2CF",1);
   cx.globalAlpha=1;cx.fillStyle="rgba(240,226,207,.14)";
   for(let i=0;i<44;i++){const px=(i*97%100)/100*W,py=(((i*53%100)/100*H-tt*(6+i%4*3))%H+H)%H;cx.fillRect(px,py,1.6,1.6)}}
  function tarjetas(t,dt){
   const col=Math.max(0,Math.min((t-T.col)/(T.pt-T.col),1)),e=col*col*(3-2*col);
   if(t>=T.txt&&dim<.85)dim=Math.min(.85,dim+dt*.9);
-  cards.forEach((c,i)=>{if(c.nac!==undefined&&c.born<0&&t>=c.nac)nacer(i,t);if(c.born<0)return;
+  cards.forEach((c,i)=>{if(c.nac!==undefined&&c.born<0&&t>=c.nac)nacer(i,t);if(c.born<0||c.fuera)return;
    const age=t-c.born,k=Math.min(age/1.7,1),ez=1-Math.pow(1-k,3);let z=c.z0+(c.zt-c.z0)*ez+c.vz*Math.max(0,age-1.7);
    c.r+=c.vr*dt;let x=c.x,y=c.y;
    if(col>0){const a=e*2.6,cs=Math.cos(a),sn=Math.sin(a),px=x*(1-e),py=y*(1-e);x=px*cs-py*sn;y=px*sn+py*cs;z-=e*900}
    let op=Math.min(1,age/.5)*(c.nm?1:.55)*(1-dim*(c.nm?.88:.7))*(col>0?(1-e):1);if(col>=1)op=0;
    c.el.style.opacity=op.toFixed(3);
+   if(col>=1){c.fuera=true;return}
    c.el.style.transform="translate3d("+x.toFixed(1)+"px,"+y.toFixed(1)+"px,"+z.toFixed(1)+"px) rotateX("+c.rx.toFixed(1)+"deg) rotateY("+(c.ry+age*6).toFixed(1)+"deg) rotateZ("+c.r.toFixed(1)+"deg)";
    const l=z>220?2:z>40?1:0;if(l!==c.lvl){c.lvl=l;c.el.classList.toggle("b1",l===1);c.el.classList.toggle("b2",l===2)}});
   const pt=$("ixPt");if(col>0&&t<T.pt+.05){pt.style.opacity=Math.min(1,Math.max(0,(e-.55)/.45));pt.style.transform="scale("+(1+e*1.6)+")"}}
@@ -1766,7 +1775,7 @@ const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalCases};
    const sh=Math.pow(p,3)*5;cam.style.transform="translate("+((Math.random()-.5)*sh)+"px,"+((Math.random()-.5)*sh)+"px) scale("+(1+.2*p)+")"}
   if(t<T.cards||t<T.cards+1.5)dibujar(f,t);
   if(t>=T.cards)tarjetas(t,dt);
-  raf=requestAnimationFrame(loop)}
+  if(t<T.pt+.5)raf=requestAnimationFrame(loop)}
  function impacto(){fin=true;el.classList.add("fin");$("ixLab").textContent="CASOS ACUMULADOS";ys.forEach(y=>y.classList.remove("cur"));
   $("ixFl").classList.remove("go");void $("ixFl").offsetWidth;$("ixFl").classList.add("go");
   cam.style.transition="transform 1.3s cubic-bezier(.2,.8,.2,1)";cam.style.transform="scale(1)"}
@@ -1774,7 +1783,7 @@ const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalCases};
  // ---- sonido sintetizado (drone agudo + bajo + pulsos, al estilo del video) ----
  function initAudio(){try{ac=new(window.AudioContext||window.webkitAudioContext)()}catch(e){ac=null;return}
   mg=ac.createGain();mg.gain.value=silen?0:.9;const c=ac.createDynamicsCompressor();mg.connect(c);c.connect(ac.destination);
-  const L=Math.floor(ac.sampleRate*2.8),ir=ac.createBuffer(2,L,ac.sampleRate);for(let k=0;k<2;k++){const d=ir.getChannelData(k);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,2.4)}
+  const canales=LIGERO?1:2,L=Math.floor(ac.sampleRate*(LIGERO?1.2:2.8)),ir=ac.createBuffer(canales,L,ac.sampleRate);for(let k=0;k<canales;k++){const d=ir.getChannelData(k);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,2.4)}
   rv=ac.createConvolver();rv.buffer=ir;const rg=ac.createGain();rg.gain.value=.55;rv.connect(rg);rg.connect(mg);
   const N=ac.sampleRate*2,nb=ac.createBuffer(1,N,ac.sampleRate),d=nb.getChannelData(0);for(let i=0;i<N;i++)d[i]=Math.random()*2-1;ruido=nb}
  function tono(tipo,f,t,d,v,dest,f2){const o=ac.createOscillator(),g=ac.createGain();o.type=tipo;o.frequency.setValueAtTime(f,t);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
@@ -1818,14 +1827,17 @@ const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalCases};
  function reset(){el.classList.remove("fin","out","tl","video-playing");["ixCc","ixEnd"].forEach(i=>$(i).classList.remove("on"));$("ixH").classList.remove("on","off");$("ixFin").classList.remove("on","sub");$("ixPt").classList.remove("bloom");$("ixPt").style.opacity=0;$("ixWd").classList.remove("on");
   $("ixVideo").currentTime=0;cierreConError=false;
   cnt.classList.remove("baja");$("ixLn").classList.remove("off");cam.style.transition="";cam.style.transform="";num.textContent="0";$("ixLab").textContent=INTRO.desde;ys.forEach(y=>y.classList.remove("on","cur"));$("ixLi").style.width="0";
-  dim=0;cards.forEach(c=>{c.born=-1;c.lvl=0;c.el.style.opacity=0;c.el.classList.remove("b1","b2");if(!c.nm)c.nac=undefined})}
+  dim=0;cards.forEach(c=>{c.born=-1;c.lvl=0;c.fuera=false;c.el.style.opacity=0;c.el.classList.remove("b1","b2");if(!c.nm)c.nac=undefined})}
  function mostrarErrorCierre(error){if(cierreConError)return;cierreConError=true;console.error("No se pudo reproducir el video de cierre de Indecol.",error);el.classList.remove("video-playing");$("ixFin").classList.add("on");$("ixEnd").classList.add("on")}
  $("ixVideo").addEventListener("ended",()=>$("ixEnd").classList.add("on"));
  $("ixVideo").addEventListener("error",()=>mostrarErrorCierre($("ixVideo").error));
  // en pantallas verticales el video horizontal deja el texto diminuto: se usa el cierre hecho en la página
- function reproducirCierre(){if(matchMedia("(max-aspect-ratio:3/4)").matches){$("ixFin").classList.add("on");en(T.fin-T.logo,()=>$("ixEnd").classList.add("on"));return}
+ const vertical=()=>matchMedia("(max-aspect-ratio:3/4)").matches;
+ // el video solo se descarga si se va a mostrar
+ function precargarCierre(){const video=$("ixVideo");if(!vertical()&&video.preload!=="auto"){video.preload="auto";video.load()}}
+ function reproducirCierre(){if(vertical()){$("ixFin").classList.add("on");en(T.fin-T.logo,()=>$("ixEnd").classList.add("on"));return}
   const video=$("ixVideo");video.currentTime=0;video.play().then(()=>{if(!el.classList.contains("out")&&!el.hidden)el.classList.add("video-playing")}).catch(error=>{if(!el.hidden&&!el.classList.contains("out"))mostrarErrorCierre(error)})}
- function start(){parar();apagarAudio();
+ function start(){parar();apagarAudio();precargarCierre();
   if(el.hidden&&document.activeElement&&!el.contains(document.activeElement))focoAnterior=document.activeElement;
   silen=false;reset();resize();
   el.hidden=false;$("ixGate").hidden=true;document.documentElement.classList.add("nos");fin=false;
@@ -1858,5 +1870,5 @@ const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalCases};
   else if(!e.shiftKey&&(document.activeElement===last||!el.contains(document.activeElement))){e.preventDefault();first.focus()}
  });
  const h=location.hash.slice(1);let visto=null;try{visto=sessionStorage.getItem("indecol_intro")}catch(e){}
- if((!h||h==="inicio")&&!visto){focoAnterior=$("rpIntro");el.hidden=false;document.documentElement.classList.add("nos");resize();$("ixCon").focus()}
+ if((!h||h==="inicio")&&!visto){focoAnterior=$("rpIntro");el.hidden=false;document.documentElement.classList.add("nos");resize();precargarCierre();$("ixCon").focus()}
 })();
