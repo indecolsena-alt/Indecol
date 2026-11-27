@@ -289,7 +289,7 @@ nav .links a#mbtn::after{content:none}
  nav.open .nav-toggle span:nth-child(2){opacity:0}
  nav.open .nav-toggle span:last-child{transform:translateY(-6px) rotate(-45deg)}
  nav .links{display:none;order:3;flex-basis:100%;flex-direction:column;gap:0;margin:0;overflow:visible}
- nav.open .links{display:flex}
+ nav.open .links{display:flex;max-height:calc(100vh - 100px);max-height:calc(100svh - 100px);overflow-y:auto;overscroll-behavior:contain}
  nav .links a{padding:12px 10px;border-top:1px solid #203D5620;border-bottom:0;font-size:14px}
  nav .links .mobile-team{display:block}
  nav .links a#mbtn{padding:12px 10px;border:0;border-top:1px solid #203D5620;border-radius:0;background:transparent;color:inherit}
@@ -739,9 +739,9 @@ html.nos{overflow:hidden}
 .zone-annual-download label{display:grid;gap:6px;color:var(--mute);font-size:12px;font-weight:600}
 .zone-annual-download select{width:100%;min-width:0;font:500 14px Poppins,system-ui,sans-serif;color:var(--ink);background:#fff;border:1px solid #203D5644;border-radius:10px;padding:10px 12px}
 .zone-annual-download select:focus-visible{outline:2px solid var(--oro-d);outline-offset:2px}
-.zone-annual-download button{font:600 13px Poppins,system-ui,sans-serif;padding:10px 18px;border:1.5px solid var(--azul);border-radius:24px;background:var(--azul);color:var(--crema);cursor:pointer;transition:background .2s,border-color .2s}
-.zone-annual-download button:hover{background:var(--azul-d)}
-.zone-annual-download button:focus-visible{outline:3px solid var(--oro-d);outline-offset:3px}
+.zone-annual-download .zone-export{display:inline-block;text-align:center;text-decoration:none;font:600 13px Poppins,system-ui,sans-serif;padding:10px 18px;border:1.5px solid var(--azul);border-radius:24px;background:var(--azul);color:var(--crema);cursor:pointer;transition:background .2s,border-color .2s}
+.zone-annual-download .zone-export:hover{background:var(--azul-d)}
+.zone-annual-download .zone-export:focus-visible{outline:3px solid var(--oro-d);outline-offset:3px}
 .zone-annual-note,.zone-annual-status{grid-column:1/-1;color:var(--mute);font-size:11px;line-height:1.5}
 .zone-annual-status:empty{display:none}
 .zone-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0 20px}
@@ -781,7 +781,7 @@ html.nos{overflow:hidden}
  .zone-controls select{width:100%;min-width:0}
  .zone-actions button{width:100%}
  .zone-annual-download{grid-template-columns:1fr}
- .zone-annual-download button{width:100%}
+ .zone-annual-download .zone-export{width:100%}
  .dv-tg{padding:11px 16px}
 }
 .eq{grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:14px}
@@ -1110,7 +1110,8 @@ div.analysis-narrative{font-size:15px;line-height:1.7;margin-top:18px}
 .dil>span{display:inline-flex}
 
 /* ===== inicio: accesos y "Sobre el proyecto" ===== */
-.accesos{max-width:1100px;margin:28px auto 0;padding:0 20px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.accesos{max-width:1100px;margin:28px auto 0;padding:0 20px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media(max-width:1000px){.accesos{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .accesos a{display:grid;gap:8px;align-content:start;padding:24px;border-radius:22px;background:var(--azul);color:var(--crema);text-decoration:none;transition:transform .25s,box-shadow .25s}
 .accesos a:hover{transform:translateY(-4px);box-shadow:0 16px 34px #203d5640}
 .accesos a:focus-visible{outline:3px solid var(--oro-d);outline-offset:3px}
@@ -1424,3 +1425,62 @@ html.nos body>nav,html.nos body>.pg{visibility:hidden}
 .ix-lite .ix-pt{width:280px;height:280px;margin:-140px 0 0 -140px;box-shadow:none;background:radial-gradient(circle closest-side,#fff 0 3%,#E6BF8Bcc 9%,#E6BF8B55 30%,#F0E2CF22 60%,transparent)}
 /* hueco visible mientras llega cada imagen de Delitos */
 .data-hero-visual,.data-crime-image{background-color:#1B3550}
+
+/* ===== perfil de cada delito, tasas, comparación de municipios y guía ===== */
+.perfil .data-panel-heading{margin-bottom:12px}
+.perfil-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.perfil-grid>.data-empty{grid-column:1/-1}
+.perfil-caja{min-width:0;padding:18px;background:#fff9;border:1px solid #203D5620;border-radius:14px}
+.perfil-caja.ancha{grid-column:1/-1}
+.perfil-caja h4{font-size:16px;margin-bottom:10px}
+.perfil-caja .data-donut-layout{grid-template-columns:minmax(0,1fr);justify-items:center;gap:14px}
+.perfil-caja .data-donut{width:min(180px,60vw)}
+.perfil-caja .data-donut-legend{width:100%;max-width:360px}
+.perfil-caja .data-bars.horizontal .data-row{grid-template-columns:minmax(120px,300px) minmax(40px,1fr) 76px}
+.zone-summary{grid-template-columns:repeat(4,minmax(0,1fr))}
+.tabla-scroll{overflow-x:auto;margin-top:14px}
+.tabla-datos{width:100%;border-collapse:collapse;font-size:12px}
+.tabla-datos caption{text-align:left;color:var(--mute);padding:8px 0}
+.tabla-datos th,.tabla-datos td{padding:9px 10px;border-bottom:1px solid #203D5620;text-align:right;font-variant-numeric:tabular-nums}
+.tabla-datos th:first-child{text-align:left}
+.tabla-datos thead th{color:var(--mute);font-weight:600}
+.department-compare td small{display:block;color:var(--mute);font-size:10px}
+.department-compare h5{font-size:13px;margin-top:14px}
+.muni-controles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:6px}
+.muni-controles label,.gd-buscar{display:grid;gap:6px;color:var(--mute);font-size:12px;font-weight:600}
+.muni-controles select,.gd-buscar input{width:100%;min-width:0;font:500 14px Poppins,system-ui,sans-serif;color:var(--ink);background:#fff;border:1px solid #203D5644;border-radius:10px;padding:10px 12px}
+.muni-controles select:focus-visible,.gd-buscar input:focus-visible{outline:2px solid var(--oro-d);outline-offset:2px}
+.muni-graficas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin-top:14px}
+.muni-graficas h4{font-size:14px;margin-bottom:10px}
+.muni-graficas .data-row{grid-template-columns:minmax(80px,150px) minmax(30px,1fr) 68px}
+.canales{list-style:none;padding:0;margin:0 0 14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:12px}
+.canales li{display:grid}
+.canales a{display:grid;gap:6px;align-content:start;padding:16px;border-radius:14px;border:1px solid #203D5628;background:#fff9;color:var(--ink);text-decoration:none;transition:transform .2s,border-color .2s}
+.canales a:hover{transform:translateY(-2px);border-color:var(--azul)}
+.canales a:focus-visible{outline:3px solid var(--oro-d);outline-offset:3px}
+.canales b{font-size:22px;color:var(--azul);line-height:1.2}
+.canales strong{font-size:13px;line-height:1.4}
+.canales span{font-size:12px;color:var(--mute);line-height:1.5}
+.denuncia>p a{color:var(--azul);font-weight:600}
+.gd-buscar{max-width:420px;margin-bottom:14px}
+.gd-glosario{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0}
+.gd-glosario>div{padding:14px;border:1px solid #203D5620;border-radius:14px;background:#fff9}
+.gd-glosario>div[hidden]{display:none}
+.gd-glosario dt{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-weight:700;font-size:14px}
+.gd-glosario dt a{color:var(--azul)}
+.gd-glosario dt small{font-weight:600;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--oro-d)}
+.gd-glosario dd{margin:6px 0 0;font-size:13px;line-height:1.6;color:var(--mute)}
+#gdMetodo h4{font-size:15px;margin:18px 0 8px}
+#gdMetodo ul{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14px;line-height:1.6;color:var(--mute)}
+#gdMetodo a{color:var(--azul)}
+@media(max-width:900px){
+ .perfil-grid,.muni-graficas{grid-template-columns:minmax(0,1fr)}
+ .zone-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .gd-glosario{grid-template-columns:minmax(0,1fr)}
+ .muni-controles{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){.accesos{grid-template-columns:minmax(0,1fr)}.muni-controles{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:560px){
+ .zone-summary{grid-template-columns:minmax(0,1fr)} .perfil .data-panel-heading{flex-direction:column;gap:0}
+ .perfil-caja .data-bars.horizontal .data-row,.muni-graficas .data-row{grid-template-columns:minmax(0,1fr) auto}
+}

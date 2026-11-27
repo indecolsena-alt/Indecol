@@ -259,8 +259,8 @@ const APARECE=[
  ".hero>.hc>*",".hero-visual",".today>*",".sum>div",".blk>.data-eyebrow",".blk>h2",".blk>p",".mas-proyecto",
  "#info>.info-card",".info-videos>:not(.info-videos-grid)",".info-video-slot",
  ".analysis-controls",".analysis-findings>*",".analysis-howto",".analysis-narrative",".analysis-page>.data-note",
- ".analysis-page>.data-panel:not(.zone-panel)",".data-panel>h3",".data-panel>p",".data-panel>div:not(.department-map-layout)",
- ".data-panel-heading",".data-panel .chart-reading",".department-compare",".department-compare>h4",".department-compare>div",
+ ".analysis-page>.data-panel:not(.zone-panel)",".data-panel>h3",".data-panel>p",".data-panel>div:not(.department-map-layout,.perfil-grid)",
+ ".data-panel-heading",".data-panel .chart-reading",".department-compare",".department-compare>h4",".department-compare>div",".perfil-caja",".canales>li",
  ".department-map-layout",".map-credit",".map-top-list>li",".department-compare tbody tr",".data-row",
  ".zone-panel>:not(#zoneResult)","#zoneResult>:not(.zone-charts)",".zone-charts>*",".zone-subpanel>*",
  ".data-back",".data-hero","#delitos .data-panel",".data-crime","#delitos .data-note",
@@ -503,6 +503,7 @@ function paginaIncautaciones(category,crime){
    ${graficaDatos(municipios,item=>item.value,item=>item.label,true)}
    ${parrafoLectura(`${municipios[0].label} es el municipio con más cantidad incautada: ${fmtData(municipios[0].value)} toneladas, el ${parte(municipios[0])} del total.`)}
   </section>
+  ${cajaDenuncia(crime)}
   <p class="data-note">Cantidades de la columna cantidad_incautada, en toneladas. No se suman a los casos de Indecol. El mayor registro individual es de ${fmtData(toneladas(record.grams))} toneladas de ${(SUSTANCIAS[record.substance]||record.substance).toLowerCase()} (${htmlSeguro(nombreLugar(record.department))}, ${MESES_COMPLETOS[record.month-1]} de ${record.year}).</p>
  </article>`;
  animarAnalisis(dvMain);
@@ -579,7 +580,7 @@ function paginaDelito(categoryId,crimeId,selectedYear){
   </header>
    <section class="data-panel data-animate">
    <h3>Casos por año</h3>
-    <p>La línea permite observar cómo cambia el total anual de este delito durante el periodo. Cada punto representa la suma de la columna casos para ese año; su etiqueta facilita comparar los valores. Considera que el último año puede estar incompleto y que los cambios describen reportes, no tasas de riesgo.</p>
+    <p>La línea permite observar cómo cambia el total anual de este delito durante el periodo. Cada punto representa la suma de la columna casos para ese año; su etiqueta facilita comparar los valores. Considera que el último año puede estar incompleto y que los cambios describen reportes, no el riesgo de sufrir el delito.</p>
    ${graficaLineas(annualSeries,crime.years.map(item=>String(item.year)),"Evolución anual de casos")}
    ${parrafoLectura(lecturaAnual(crime.years.map(item=>({year:item.year,value:casos(item)}))))}
   </section>
@@ -590,15 +591,20 @@ function paginaDelito(categoryId,crimeId,selectedYear){
    <div id="dataMonths">${graficaLineas(monthlySeries,monthItems.map(item=>monthsData[item.month-1]||item.month),"Casos por mes")}</div>
    ${parrafoLectura(lecturaMensual(monthItems,year?.year),"dataMonthsReading")}
   </section>
+  ${seccionMismoPeriodoDelito(crime)}
+  ${seccionPerfil(crime)}
   <section class="data-panel data-animate">
    <h3>Casos por municipio</h3>
    <p>${placesDescription} Las barras facilitan comparar los municipios incluidos en el catálogo, y los valores a la derecha muestran los casos contabilizados. Revisa también el departamento indicado junto al municipio, pues algunos nombres se repiten en distintas zonas.</p>
    ${graficaDatos(places,item=>item.value,item=>item.label,true)}
    ${parrafoLectura(lecturaRanking(places,{valor:item=>item.value,etiqueta:item=>item.label,total:casos(crime),plural:"municipios"}))}
   </section>
+  ${seccionTasasDelito(crime)}
+  ${cajaDenuncia(crime)}
   <p class="data-note">Este análisis suma la columna casos de SIEDCO. Los años parciales se identifican en las etiquetas.</p>
  </article>`;
  animarAnalisis(dvMain);
+ activarPerfil(crime);
  const yearSelect=document.getElementById("dataYear");
  yearSelect.addEventListener("change",()=>{
   const selected=crime.years.find(item=>item.year===Number(yearSelect.value));
@@ -627,8 +633,8 @@ const MESES_COMPLETOS=["enero","febrero","marzo","abril","mayo","junio","julio",
 const fmtDecimal=value=>value.toFixed(1).replace(".",",");
 const fmtEntero=value=>fmtData(Math.round(value));
 const listaHumana=items=>items.length<2?items.join(""):`${items.slice(0,-1).join(", ")} y ${items.at(-1)}`;
-// separa en frases sin cortar en "D.C." ni en los puntos de las cifras
-const dividirFrases=texto=>String(texto).trim().split(/(?<=\.)(?<!D\.C\.)\s+(?=[A-ZÁÉÍÓÚÑ¿0-9])|(?<=D\.C\.)\s+(?=(?:Le|Los|Las|La|El|En|Entre|Por|Su|Este|De)\s)/);
+// separa en frases sin cortar en "D.C.", "art." ni en los puntos de las cifras
+const dividirFrases=texto=>String(texto).trim().split(/(?<=\.)(?<!D\.C\.)(?<!\bart\.)\s+(?=[A-ZÁÉÍÓÚÑ¿0-9])|(?<=D\.C\.)\s+(?=(?:Le|Los|Las|La|El|En|Entre|Por|Su|Este|De)\s)/);
 function puntosLectura(texto,titulo="Lectura de los datos."){
  const frases=dividirFrases(texto),corte=frases.length>3?2:frases.length;
  const lista=items=>`<ul class="puntos">${items.map(frase=>`<li>${htmlSeguro(frase)}</li>`).join("")}</ul>`;
@@ -731,18 +737,6 @@ function renderHomeInsight(){
   `${lecturaAnual(anuales,"En el total nacional, ")} En el territorio, la información cubre ${fmtData(zonaMunicipios.size)} municipios de ${mapaDepartamentos.departments.length} departamentos: ${departamentos[0]?.name} reúne ${porcentaje(departamentos[0]?.value||0,totalTerritorialRecords)} de los casos con departamento identificado y los cinco departamentos con más casos suman ${porcentaje(top5Deptos,totalTerritorialRecords)}.`;
 }
 let departmentPinnedKey="";
-function descargarCSV(nombre,filas){
- const escapeCsv=value=>`"${String(value??"").replace(/"/g,'""')}"`;
- const contents="\uFEFF"+filas.map(row=>row.map(escapeCsv).join(",")).join("\r\n");
- const file=URL.createObjectURL(new Blob([contents],{type:"text/csv;charset=utf-8"}));
- const link=document.createElement("a");
- link.href=file;
- link.download=nombre;
- document.body.append(link);
- link.click();
- link.remove();
- setTimeout(()=>URL.revokeObjectURL(file),1000);
-}
 function rangoPorSelectores(fromId,toId){
  const firstYear=CATALOGO.years[0],lastYear=CATALOGO.years.at(-1);
  const fromYear=Number(document.getElementById(fromId)?.value||firstYear);
@@ -849,8 +843,6 @@ function renderAnalisisGeneral(){
   :`No hay casos reportados para ${area} en el periodo ${startYear}–${endYear}.`;
  document.getElementById("analysisFilterSummary").textContent=
   `Mostrando ${area} · ${startYear}–${endYear}; la comparación anual usa solo años completos.`;
- document.getElementById("analysisMapDescription").textContent=
-  `El color de cada departamento representa la suma de casos de ${startYear}–${endYear} respecto a los demás territorios visibles. Pasa el cursor o enfoca un departamento para consultar su resumen; selecciónalo para filtrar las tarjetas y los gráficos. El mapa muestra totales absolutos, no tasas ajustadas por población.`;
  document.getElementById("analysisCategoriesDescription").textContent=
   `El anillo reparte los ${fmtData(filteredTotal)} casos del filtro entre las categorías con actividad. El tamaño de cada segmento corresponde a su participación porcentual y la leyenda indica tanto el porcentaje como el total de casos; así puedes identificar qué temas concentran más reportes en ${area}.`;
  document.getElementById("analysisCrimesDescription").textContent=
@@ -863,7 +855,7 @@ function renderAnalisisGeneral(){
  document.getElementById("analysisScopeNote").textContent=
   `La consulta actual abarca ${selectedYears.length} ${selectedYears.length===1?"año":"años"} (${completeInRange} ${completeInRange===1?"completo":"completos"}), suma ${fmtData(filteredTotal)} casos en ${activeCategories} categorías y registra ${textoDelitos(reportedCrimes,crimesWithCases)}${departmentPinnedKey?`, equivalentes al ${porcentaje(filteredTotal,nationalRangeTotal)} de los ${fmtData(nationalRangeTotal)} casos del país en el mismo periodo`:""}.`;
  document.getElementById("analysisDataQuality").textContent=
-  `Cómo se calculan las cifras: cada valor es la suma de la columna casos de SIEDCO para el territorio y los años elegidos. Los porcentajes se calculan sobre el total de esa misma selección, el cambio anual compara únicamente años de doce meses y ${CATALOGO.yearCoverage?.at(-1)?.complete===false?`${CATALOGO.yearCoverage.at(-1).year} se muestra como año parcial`:"todos los años están completos"}. Son conteos absolutos: un territorio más poblado tiende a acumular más casos, por lo que estas cifras no equivalen a tasas por habitante.`;
+  `Cómo se calculan las cifras: cada valor es la suma de la columna casos de SIEDCO para el territorio y los años elegidos. Los porcentajes se calculan sobre el total de esa misma selección, el cambio anual compara únicamente años de doce meses y ${CATALOGO.yearCoverage?.at(-1)?.complete===false?`${CATALOGO.yearCoverage.at(-1).year} se muestra como año parcial`:"todos los años están completos"}. Los totales son conteos absolutos y un territorio más poblado tiende a acumular más casos; para comparar lugares de distinto tamaño usa las tasas por cada 100.000 habitantes.`;
  const categoriesFiltered=categoryRank.filter(item=>item.filteredRecords>0);
  const crimesFiltered=crimeRank.filter(item=>item.filteredRecords>0);
  const yearlyFiltered=annualFiltered.map(([year,records])=>({label:String(year),value:records}));
@@ -942,7 +934,7 @@ function renderAnalisisNarrativa(){
   const top5=departamentos.slice(0,5);
   const sumaTop5=top5.reduce((sum,item)=>sum+item.value,0);
   const ultimo=departamentos.at(-1);
-  mapReading.innerHTML=departamentos.length?puntosLectura(`Entre ${startYear} y ${endYear}, ${departamentos[0].name} es el departamento con más casos: ${fmtData(departamentos[0].value)}, el ${porcentaje(departamentos[0].value,totalTerritorialRecords)} de los casos con departamento identificado. Los cinco primeros (${listaHumana(top5.map(item=>item.name))}) suman ${porcentaje(sumaTop5,totalTerritorialRecords)}, mientras que ${ultimo.name} registra el menor volumen, con ${fmtData(ultimo.value)} casos. Los tonos más oscuros del mapa corresponden a estos territorios de mayor volumen absoluto.`):"";
+  mapReading.innerHTML=departamentos.length?puntosLectura(`Entre ${startYear} y ${endYear}, ${departamentos[0].name} es el departamento con más casos: ${fmtData(departamentos[0].value)}, el ${porcentaje(departamentos[0].value,totalTerritorialRecords)} de los casos con departamento identificado. Los cinco primeros (${listaHumana(top5.map(item=>item.name))}) suman ${porcentaje(sumaTop5,totalTerritorialRecords)}, mientras que ${ultimo.name} registra el menor volumen, con ${fmtData(ultimo.value)} casos. ${mapaPorTasa()?"El mapa está coloreado por tasa: sus tonos más oscuros son los territorios con más casos para su población.":"Los tonos más oscuros del mapa corresponden a estos territorios de mayor volumen absoluto."}`):"";
  }
 }
 function actualizarAnalisisCompleto(){
@@ -950,6 +942,7 @@ function actualizarAnalisisCompleto(){
  renderDepartmentMap();
  renderDepartmentComparison();
  renderAnalisisNarrativa();
+ renderAnalisisMejoras();
 }
 function consejoPrevencion(crimeName){
  const name=norm(crimeName);
@@ -1033,7 +1026,6 @@ const zoneMunicipality=document.getElementById("zoneMunicipality");
 const zoneDepartment=document.getElementById("zoneDepartment");
 const zoneYearFrom=document.getElementById("zoneYearFrom");
 const zoneYearTo=document.getElementById("zoneYearTo");
-const zoneAnnualCsvYear=document.getElementById("zoneAnnualCsvYear");
 function inicializarAniosZona(){
  const firstYear=CATALOGO.years[0],lastYear=CATALOGO.years.at(-1);
  const options=CATALOGO.years.map(year=>
@@ -1041,10 +1033,8 @@ function inicializarAniosZona(){
  ).join("");
  zoneYearFrom.innerHTML=options;
  zoneYearTo.innerHTML=options;
- zoneAnnualCsvYear.innerHTML=options;
  zoneYearFrom.value=String(firstYear);
  zoneYearTo.value=String(lastYear);
- zoneAnnualCsvYear.value=String(lastYear);
 }
 function renderZoneOptions(){
  const selectedRegion=zoneRegion.value||TODAS_ZONAS;
@@ -1139,10 +1129,16 @@ function renderZona(){
  const result=document.getElementById("zoneResult");
  const nationalTotal=CATALOGO.years.filter(year=>year>=range.startYear&&year<=range.endYear)
   .reduce((sum,year)=>sum+(totalAnual.get(year)||0),0);
- const lecturaZona=total?`${where==="todas las regiones"?"El país":where} suma ${fmtData(total)} casos entre ${range.startYear} y ${range.endYear}${where==="todas las regiones"?"":`, el ${porcentaje(total,nationalTotal)} del total nacional del mismo periodo`}. En esta selección hay casos en ${zoneCategories.length} ${zoneCategories.length===1?"categoría":"categorías"} y se registran ${textoDelitos(reportados.size,conCasos)}.`:"";
+ const habitantes=poblacionZona(selectedRegion,selectedDepartment,selectedMunicipality);
+ const tasaZona=tasaAnual(year=>yearlyFiltered.find(item=>Number(item.label)===year)?.value||0,habitantes,range);
+ const lecturaTasaZona=tasaZona===null?"":where==="todas las regiones"
+  ?` Su tasa es de ${fmtTasa(tasaZona)} casos al año por cada 100.000 habitantes (${textoAniosTasa(range)}).`
+  :` Su tasa es de ${fmtTasa(tasaZona)} casos al año por cada 100.000 habitantes (${textoAniosTasa(range)}), frente a ${fmtTasa(tasaNacional(range))} en el país.`;
+ const lecturaZona=total?`${where==="todas las regiones"?"El país":where} suma ${fmtData(total)} casos entre ${range.startYear} y ${range.endYear}${where==="todas las regiones"?"":`, el ${porcentaje(total,nationalTotal)} del total nacional del mismo periodo`}. En esta selección hay casos en ${zoneCategories.length} ${zoneCategories.length===1?"categoría":"categorías"} y se registran ${textoDelitos(reportados.size,conCasos)}.${lecturaTasaZona}`:"";
  result.innerHTML=`<p class="chart-reading zone-intro-reading data-animate">${lecturaZona?`<b>Resumen de la selección.</b> ${htmlSeguro(lecturaZona)}`:""}</p>
  <div class="zone-summary data-animate">
    <div><span>Casos incluidos</span><strong data-count-value="${total}">0</strong></div>
+   <div><span>Casos al año por 100.000 habitantes</span>${tasaZona===null?"<strong>Sin dato</strong><small>incluye un año completo</small>":`<strong data-count-value="${redondearTasa(tasaZona)}">0</strong><small>${textoAniosTasa(range)}</small>`}</div>
    <div><span>Categoría con más casos</span><strong>${htmlSeguro(category?.name||"Sin datos")}</strong><small>${porcentaje(topCategory?.[1]||0,total)} del total seleccionado</small></div>
    <div><span>Delito con más casos</span><strong>${htmlSeguro(topCrime?.name||"Sin datos")}</strong><small>${porcentaje(topCrime?.records||0,total)} del total seleccionado</small></div>
  </div>
@@ -1170,14 +1166,15 @@ function renderZona(){
 function listaCorta(delitos){
  const grafico=graficaDatos(delitos,item=>item.records,item=>item.name,true);
  if(delitos.length<=10)return grafico;
- return `<div class="lista-corta">${grafico}<button type="button" class="ver-lista" aria-expanded="false" data-total="${delitos.length}">Ver los ${delitos.length} delitos con casos</button></div>`;
+ const texto=`Ver los ${delitos.length} delitos con casos`;
+ return `<div class="lista-corta">${grafico}<button type="button" class="ver-lista" aria-expanded="false" data-texto="${texto}">${texto}</button></div>`;
 }
-document.getElementById("zoneResult").addEventListener("click",event=>{
+document.addEventListener("click",event=>{
  const boton=event.target.closest(".ver-lista");
  if(!boton)return;
  const abierta=boton.parentElement.classList.toggle("abierta");
  boton.setAttribute("aria-expanded",String(abierta));
- boton.textContent=abierta?"Ver solo los 10 primeros":`Ver los ${boton.dataset.total} delitos con casos`;
+ boton.textContent=abierta?"Ver solo los 10 primeros":boton.dataset.texto;
  if(!abierta)boton.scrollIntoView({block:"center"});
  revelarAnalisisVisibles();
 });
@@ -1185,24 +1182,6 @@ document.getElementById("zoneChange").addEventListener("click",()=>{
  document.querySelector(".zone-controls").scrollIntoView({behavior:"smooth",block:"center"});
  document.getElementById("zoneRegion").focus({preventScroll:true});
 });
-function filasCSVAnual(year){
- const rows=[["Región","Departamento","Municipio","Categoría","Delito","Año","Casos"]];
- DELITOS_DATA.forEach(crime=>{
-  (crime.municipalityData||[]).forEach(item=>{
-   const yearData=(item.years||[]).find(entry=>Number(entry.year)===year);
-   if(!casos(yearData))return;
-   const department=String(item.rawDepartment||"").trim()||"Departamento no especificado";
-   const region=item.region||REGION_POR_DEPTO.get(departmentKey(department))||"sin-region";
-   const regionName=REGIONES_COLOMBIA.find(candidate=>candidate.id===region)?.name
-    ||(region==="sin-region"?"Sin región asignada":region);
-   rows.push([
-    regionName,department,String(item.rawName||"").trim()||"Municipio no especificado",
-    crime.category.rawName,crime.rawName,year,casos(yearData)
-   ]);
-  });
- });
- return rows;
-}
 zoneRegion.addEventListener("change",()=>{
  zoneDepartment.value=TODAS_ZONAS;
  zoneMunicipality.value=TODAS_ZONAS;
@@ -1223,24 +1202,27 @@ document.getElementById("resetZoneFilters").addEventListener("click",()=>{
  zoneMunicipality.value=TODAS_ZONAS;
  renderZoneOptions();
 });
-const zoneAnnualCsvStatus=document.getElementById("zoneAnnualCsvStatus");
-zoneAnnualCsvYear.addEventListener("change",()=>{zoneAnnualCsvStatus.textContent="";});
-document.getElementById("exportAnnualZoneCsv").addEventListener("click",()=>{
- const year=Number(zoneAnnualCsvYear.value);
- const rows=filasCSVAnual(year);
- const recordRows=rows.length-1;
- zoneAnnualCsvStatus.textContent="";
- if(!recordRows){
-  zoneAnnualCsvStatus.textContent=`No hay casos registrados para ${year}.`;
-  return;
- }
- const recordTotal=rows.slice(1).reduce((sum,row)=>sum+Number(row[6]),0);
- descargarCSV(`indecol-datos-${year}.csv`,rows);
- zoneAnnualCsvStatus.textContent=`CSV ${year} descargado: ${fmtData(recordRows)} combinaciones y ${fmtData(recordTotal)} casos.`;
-});
+// descargas: archivos ya preparados por scripts/generar_descargas.py
+function iniciarDescargas(){
+ const selector=document.getElementById("zoneAnnualCsvYear"),enlace=document.getElementById("exportAnnualZoneCsv");
+ const archivos=window.INDECOL_DESCARGAS;
+ const megas=bytes=>`${(bytes/1e6).toLocaleString("es-CO",{maximumFractionDigits:1})} MB`;
+ selector.innerHTML=`<option value="completo">CSV completo (${CATALOGO.years[0]}–${CATALOGO.years.at(-1)})</option>${CATALOGO.years
+  .filter(year=>archivos[year]).map(year=>`<option value="${year}">${etiquetaAnual(year)}</option>`).join("")}`;
+ const mostrar=()=>{
+  const archivo=archivos[selector.value];
+  enlace.href=archivo.file;
+  document.getElementById("zoneAnnualCsvStatus").textContent=
+   `Archivo comprimido (.zip) de ${megas(archivo.zipBytes)}. Al abrirlo: ${fmtData(archivo.rows)} filas, ${fmtData(archivo.cases)} casos, ${megas(archivo.bytes)}.`;
+ };
+ selector.addEventListener("change",mostrar);
+ mostrar();
+}
+iniciarDescargas();
 renderAnalisisGeneral();
 inicializarAniosZona();
 renderZoneOptions();
+renderComparaMunicipios();
 function registrosDepartamento(selectedKey){
  const crimes=[];
  let total=0;
@@ -1277,7 +1259,10 @@ function renderDepartmentDetails(key){
  const name=departamento||"Colombia";
  const {total,crimes}=departamento?registrosDepartamento(key):registrosNacionales();
  const {startYear,endYear}=rangoAnalisisActual();
- departmentSelection.innerHTML=`<strong>${htmlSeguro(name)}</strong><span>${fmtData(total)} casos · ${startYear}–${endYear} · ${departamento?`${porcentaje(total,totalTerritorialRecords)} del total territorial`:"todo el país"}</span>`;
+ const tasa=departamento
+  ?tasaAnual(year=>casosDepartamentales().get(key)?.get(year)||0,POBLACION.departments[key],{startYear,endYear})
+  :tasaDelPais(casosDepartamentales(),{startYear,endYear});
+ departmentSelection.innerHTML=`<strong>${htmlSeguro(name)}</strong><span>${fmtData(total)} casos · ${startYear}–${endYear} · ${departamento?`${porcentaje(total,totalTerritorialRecords)} del total territorial`:"todo el país"}${tasa===null?"":` · ${fmtTasa(tasa)} al año por cada 100.000 habitantes`}</span>`;
  if(!total){
   departmentCrimes.innerHTML=`<p class="data-empty">No se encontraron casos SIEDCO asociados a ${htmlSeguro(name)}.</p>`;
   return;
@@ -1314,8 +1299,9 @@ let departmentTotals=new Map(mapaDepartamentos.departments.map(item=>[
 ]));
 let totalTerritorialRecords=[...departmentTotals.values()].reduce((sum,value)=>sum+value,0);
 let largestDepartment=Math.max(1,...departmentTotals.values());
-function departmentColor(total){
- const intensity=Math.sqrt(total/largestDepartment);
+const mapaPorTasa=()=>document.getElementById("mapMode").value==="tasa"&&aniosParaTasa(rangoAnalisisActual()).length>0;
+function departmentColor(total,mayor=largestDepartment){
+ const intensity=Math.sqrt(total/mayor);
  const desde=[232,218,192],hasta=[24,50,74];
  return `rgb(${desde.map((canal,i)=>Math.round(canal+(hasta[i]-canal)*intensity)).join(", ")})`;
 }
@@ -1350,13 +1336,24 @@ function renderDepartmentMap(){
  ]));
  totalTerritorialRecords=[...departmentTotals.values()].reduce((sum,value)=>sum+value,0);
  largestDepartment=Math.max(1,...departmentTotals.values());
+ const range={startYear,endYear},porTasa=mapaPorTasa();
+ const tasas=new Map(rankingTasas(casosDepartamentales(),range).map(item=>[item.key,item.tasa]));
+ const mayorTasa=Math.max(1,...tasas.values());
  departmentMap.querySelectorAll("[data-department]").forEach(path=>{
-  const total=departmentTotals.get(path.dataset.department)||0;
-  const name=mapaDepartamentos.departments.find(item=>item.key===path.dataset.department)?.name||path.dataset.department;
-  path.setAttribute("fill",departmentColor(total));
-  path.setAttribute("aria-label",`${name}: ${fmtData(total)} casos entre ${startYear} y ${endYear}`);
-  path.querySelector("title").textContent=`${name} · ${fmtData(total)} casos`;
+  const key=path.dataset.department;
+  const total=departmentTotals.get(key)||0;
+  const name=mapaDepartamentos.departments.find(item=>item.key===key)?.name||key;
+  const tasa=tasas.has(key)?`, ${fmtTasa(tasas.get(key))} al año por cada 100.000 habitantes`:"";
+  path.setAttribute("fill",porTasa?departmentColor(tasas.get(key)||0,mayorTasa):departmentColor(total));
+  path.setAttribute("aria-label",`${name}: ${fmtData(total)} casos entre ${startYear} y ${endYear}${tasa}`);
+  path.querySelector("title").textContent=`${name} · ${fmtData(total)} casos${tasa}`;
  });
+ document.getElementById("mapLegendLow").textContent=porTasa?"Tasa baja":"Menos casos";
+ document.getElementById("mapLegendHigh").textContent=porTasa?"Tasa alta":"Más casos";
+ document.getElementById("analysisMapDescription").textContent=
+  `${porTasa
+   ?`El color de cada departamento representa sus casos al año por cada 100.000 habitantes (${textoAniosTasa(range)}), así que permite comparar territorios de distinto tamaño.`
+   :`El color de cada departamento representa la suma de casos de ${startYear}–${endYear} respecto a los demás territorios visibles. Son totales; en «Colorear el mapa por» puedes cambiar a la tasa según la población.`}${document.getElementById("mapMode").value==="tasa"&&!porTasa?` ${SIN_ANIO_COMPLETO}`:""} Pasa el cursor o enfoca un departamento para consultar su resumen; selecciónalo para filtrar las tarjetas y los gráficos.`;
  setHoveredDepartment(departmentPinnedKey,true);
 }
 function renderDepartmentComparison(){
@@ -1390,14 +1387,26 @@ function renderDepartmentComparison(){
  const brecha=[...rows].sort((a,b)=>Math.abs(b.first-b.second)-Math.abs(a.first-a.second))[0];
  const compartidos=rows.filter(item=>item.first&&item.second).length;
  const lecturaComparacion=`${mayor.name} registra ${fmtData(mayor.data.total)} casos entre ${startYear} y ${endYear}${menor.data.total?`, ${fmtDecimal((mayor.data.total/menor.data.total-1)*100)}% más que ${menor.name} (${fmtData(menor.data.total)})`:`, mientras ${menor.name} no tiene casos en el periodo`}. El delito principal es ${firstData.crimes[0]?.name||"—"} en ${firstName} y ${secondData.crimes[0]?.name||"—"} en ${secondName}.${brecha?` La mayor diferencia aparece en ${brecha.name}: ${fmtData(Math.abs(brecha.first-brecha.second))} casos de distancia.`:""} ${compartidos} de los ${rows.length} delitos de la tabla tienen casos en ambos departamentos.`;
- result.innerHTML=`<p>Compara conteos SIEDCO de ${startYear}–${endYear}, no tasas ajustadas por población. Se muestran los delitos con mayor volumen en cualquiera de los dos departamentos.</p>
+ const range={startYear,endYear};
+ const comparados=rankingTasas(casosDepartamentales(),range).filter(item=>item.key===first||item.key===second);
+ const habitantes=[first,second].map(key=>POBLACION.departments[key]);
+ // tasa de un delito: casos de los años completos entre la población de esos años
+ const tasaDelito=(nombre,i)=>{
+  const clave=[first,second][i];
+  const delito=DELITOS_DATA.find(crime=>crime.name===nombre);
+  const anios=casosPorDepartamento([delito]).get(clave);
+  return tasaAnual(year=>anios?.get(year)||0,habitantes[i],range);
+ };
+ const celda=(valor,nombre,i)=>{const tasa=tasaDelito(nombre,i);return `${fmtData(valor)}${tasa===null?"":`<small>${fmtTasa(tasa)}</small>`}`};
+ result.innerHTML=`<p>Compara los casos SIEDCO de ${startYear}–${endYear} y la tasa según la población de cada departamento. Se muestran los delitos con mayor volumen en cualquiera de los dos.</p>
  <div class="department-compare-chart">${graficaDatos(
   [{label:firstName,value:firstData.total},{label:secondName,value:secondData.total}],
   item=>item.value,item=>item.label,true)}</div>
- ${parrafoLectura(lecturaComparacion)}
- <div class="department-compare-table-wrap"><table><caption>Diez delitos con mayor conteo combinado · ${startYear}–${endYear}</caption>
+ ${comparados.length===2?`<h5>Casos al año por cada 100.000 habitantes (${textoAniosTasa(range)})</h5><div class="department-compare-chart">${graficaDatos(comparados,item=>redondearTasa(item.tasa),item=>item.label,true)}</div>`:""}
+ ${parrafoLectura(`${lecturaComparacion}${comparados.length===2?` Teniendo en cuenta la población, la tasa más alta es la de ${comparados[0].label}: ${fmtTasa(comparados[0].tasa)} frente a ${fmtTasa(comparados[1].tasa)} de ${comparados[1].label}.`:""}`)}
+ <div class="department-compare-table-wrap"><table><caption>Diez delitos con mayor conteo combinado · ${startYear}–${endYear}${comparados.length===2?"; debajo de cada cifra, la tasa anual por cada 100.000 habitantes":""}</caption>
  <thead><tr><th scope="col">Delito</th><th scope="col">${htmlSeguro(firstName)}</th><th scope="col">${htmlSeguro(secondName)}</th></tr></thead>
- <tbody>${rows.map(item=>`<tr><th scope="row">${htmlSeguro(item.name)}</th><td>${fmtData(item.first)}</td><td>${fmtData(item.second)}</td></tr>`).join("")}</tbody>
+ <tbody>${rows.map(item=>`<tr><th scope="row">${htmlSeguro(item.name)}</th><td>${celda(item.first,item.name,0)}</td><td>${celda(item.second,item.name,1)}</td></tr>`).join("")}</tbody>
  </table></div>`;
  animarAnalisis(result.closest(".data-animate"));
  mostrarAlBajar(result);
@@ -1405,7 +1414,12 @@ function renderDepartmentComparison(){
 renderDepartmentComparison();
 renderDepartmentMap();
 renderAnalisisNarrativa();
+renderAnalisisMejoras();
 renderHomeInsight();
+document.getElementById("mapMode").addEventListener("change",()=>{
+ renderDepartmentMap();
+ renderAnalisisNarrativa();
+});
 departmentMap.addEventListener("pointerover",event=>{
  const path=event.target.closest("[data-department]");
  if(path&&!departmentPinnedKey)setHoveredDepartment(path.dataset.department);
@@ -1660,6 +1674,7 @@ function auto(){
 [...pts.children].forEach((b,i)=>b.addEventListener("click",()=>{ver(i);auto()}));
 auto();
 historiaDelictiva();
+renderGuia();
 const footerTemplate=document.getElementById("siteFooterTemplate");
 document.querySelectorAll(".pg").forEach(section=>section.append(footerTemplate.content.cloneNode(true)));
 const pages=[...document.querySelectorAll(".pg")],links=[...document.querySelectorAll("nav .links a")];
@@ -1780,9 +1795,11 @@ const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalCases};
   $("ixFl").classList.remove("go");void $("ixFl").offsetWidth;$("ixFl").classList.add("go");
   cam.style.transition="transform 1.3s cubic-bezier(.2,.8,.2,1)";cam.style.transform="scale(1)"}
  function en(seg,fn){tm.push(setTimeout(fn,seg*1000))}
- // ---- sonido sintetizado (drone agudo + bajo + pulsos, al estilo del video) ----
+ // ---- sonido sintetizado (fondo + bajo + pulsos, al estilo del video) ----
+ // volumen general y corte de agudos: bajos a propósito para que no moleste con audífonos
+ const VOLUMEN=.34,CORTE_AGUDOS=3800;
  function initAudio(){try{ac=new(window.AudioContext||window.webkitAudioContext)()}catch(e){ac=null;return}
-  mg=ac.createGain();mg.gain.value=silen?0:.9;const c=ac.createDynamicsCompressor();mg.connect(c);c.connect(ac.destination);
+  mg=ac.createGain();mg.gain.value=silen?0:VOLUMEN;const sv=ac.createBiquadFilter(),c=ac.createDynamicsCompressor();sv.type="lowpass";sv.frequency.value=CORTE_AGUDOS;sv.Q.value=.5;mg.connect(sv);sv.connect(c);c.connect(ac.destination);
   const canales=LIGERO?1:2,L=Math.floor(ac.sampleRate*(LIGERO?1.2:2.8)),ir=ac.createBuffer(canales,L,ac.sampleRate);for(let k=0;k<canales;k++){const d=ir.getChannelData(k);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,2.4)}
   rv=ac.createConvolver();rv.buffer=ir;const rg=ac.createGain();rg.gain.value=.55;rv.connect(rg);rg.connect(mg);
   const N=ac.sampleRate*2,nb=ac.createBuffer(1,N,ac.sampleRate),d=nb.getChannelData(0);for(let i=0;i<N;i++)d[i]=Math.random()*2-1;ruido=nb}
@@ -1794,31 +1811,31 @@ const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalCases};
  function boom(t,v){tono("sine",140,t,1.6,v,mg,34);const s=nz(t,1.6),lq=ac.createBiquadFilter(),g=ac.createGain();lq.type="lowpass";lq.frequency.setValueAtTime(3200,t);lq.frequency.exponentialRampToValueAtTime(160,t+1.5);
   g.gain.setValueAtTime(v*.55,t);g.gain.exponentialRampToValueAtTime(.0001,t+1.5);s.connect(lq);lq.connect(g);g.connect(mg);g.connect(rv)}
  function sonar(){const b=ac.currentTime+.12,fin2=b+T.fin+5;
-  // drone agudo constante (≈554 Hz) con leve coro
-  [554.37,556.4,277.2].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain(),lp=ac.createBiquadFilter();o.type=i===2?"sine":"triangle";o.frequency.value=f;lp.type="lowpass";lp.frequency.value=1800;
-   g.gain.setValueAtTime(.0001,b);g.gain.linearRampToValueAtTime(i===2?.04:.045,b+2.5);g.gain.setValueAtTime(i===2?.04:.045,b+T.pt-.05);g.gain.linearRampToValueAtTime(.0001,b+T.pt);g.gain.linearRampToValueAtTime(i===2?.05:.05,b+T.pt+1.2);g.gain.setTargetAtTime(.0001,b+T.fin+1.5,1);
+  // tono de fondo constante (≈554 Hz) con leve coro
+  [554.37,556.4,277.2].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain(),lp=ac.createBiquadFilter();o.type=i===2?"sine":"triangle";o.frequency.value=f;lp.type="lowpass";lp.frequency.value=900;
+   g.gain.setValueAtTime(.0001,b);g.gain.linearRampToValueAtTime(i===2?.03:.022,b+3.5);g.gain.setValueAtTime(i===2?.03:.022,b+T.pt-.05);g.gain.linearRampToValueAtTime(.0001,b+T.pt);g.gain.linearRampToValueAtTime(i===2?.035:.026,b+T.pt+1.2);g.gain.setTargetAtTime(.0001,b+T.fin+1.5,1);
    o.connect(lp);lp.connect(g);g.connect(mg);g.connect(rv);o.start(b);o.stop(fin2)});
   // bajo que crece
   const lb=ac.createBiquadFilter(),bg=ac.createGain();lb.type="lowpass";lb.frequency.setValueAtTime(160,b);lb.frequency.exponentialRampToValueAtTime(420,b+T.imp);
-  bg.gain.setValueAtTime(.0001,b);bg.gain.exponentialRampToValueAtTime(.2,b+T.imp-.3);bg.gain.setValueAtTime(.2,b+T.imp);bg.gain.setTargetAtTime(.11,b+T.imp+.5,1.2);bg.gain.setValueAtTime(.11,b+T.col);bg.gain.linearRampToValueAtTime(.0001,b+T.pt);bg.gain.linearRampToValueAtTime(.14,b+T.pt+.3);bg.gain.setTargetAtTime(.0001,b+T.fin+1.5,1);
+  bg.gain.setValueAtTime(.0001,b);bg.gain.exponentialRampToValueAtTime(.13,b+T.imp-.3);bg.gain.setValueAtTime(.13,b+T.imp);bg.gain.setTargetAtTime(.075,b+T.imp+.5,1.2);bg.gain.setValueAtTime(.075,b+T.col);bg.gain.linearRampToValueAtTime(.0001,b+T.pt);bg.gain.linearRampToValueAtTime(.09,b+T.pt+.3);bg.gain.setTargetAtTime(.0001,b+T.fin+1.5,1);
   [69.3,103.8].forEach(f=>{const o=ac.createOscillator();o.type="sawtooth";o.frequency.value=f;o.connect(lb);o.start(b);o.stop(fin2)});lb.connect(bg);bg.connect(mg);
   // subida y tics acelerados con glissando
-  const rs=nz(b+T.ini,T.imp-T.ini),hp=ac.createBiquadFilter(),rg=ac.createGain();hp.type="highpass";hp.frequency.setValueAtTime(300,b+T.ini);hp.frequency.exponentialRampToValueAtTime(7000,b+T.imp);
-  rg.gain.setValueAtTime(.0001,b+T.ini);rg.gain.exponentialRampToValueAtTime(.18,b+T.imp-.05);rg.gain.setValueAtTime(.0001,b+T.imp);rs.connect(hp);hp.connect(rg);rg.connect(mg);
-  for(let k=1;k<=NT;k++){const p=Math.pow(k/NT,1/EXP),f=700+1500*k/NT;tono("triangle",f,b+T.ini+T.cuenta*p,.06,.11,mg,f*1.5)}
+  const rs=nz(b+T.ini,T.imp-T.ini),hp=ac.createBiquadFilter(),rg=ac.createGain();hp.type="highpass";hp.frequency.setValueAtTime(300,b+T.ini);hp.frequency.exponentialRampToValueAtTime(2800,b+T.imp);
+  rg.gain.setValueAtTime(.0001,b+T.ini);rg.gain.exponentialRampToValueAtTime(.05,b+T.imp-.05);rg.gain.setValueAtTime(.0001,b+T.imp);rs.connect(hp);hp.connect(rg);rg.connect(mg);
+  for(let k=1;k<=NT;k++){const p=Math.pow(k/NT,1/EXP),f=440+620*k/NT;tono("sine",f,b+T.ini+T.cuenta*p,.06,.055,mg,f*1.25)}
   // impacto en el total
-  const ti=b+T.imp;boom(ti,.95);
+  const ti=b+T.imp;boom(ti,.55);
   [277.2,329.63,415.3,554.37].forEach(f=>{const o=ac.createOscillator(),g=ac.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(.0001,ti+.1);g.gain.linearRampToValueAtTime(.045,ti+1.4);g.gain.setTargetAtTime(.0001,b+T.cards,.6);o.connect(g);g.connect(mg);g.connect(rv);o.start(ti+.1);o.stop(b+T.cards+4)});
   // pulso de arpegio a 117 bpm cuando salen los delitos
   const e8=60/117/2,nts=[554.37,659.26,830.61,659.26];
   for(let t=b+T.cards,i=0;t<b+T.col;t+=e8,i++){tono("triangle",nts[i%4]*(i%16>11?1.5:1),t,.22,.05,rv);if(i%2===0)tono("sine",nts[i%4]*(i%16>11?1.5:1),t,.2,.04,mg)}
-  T.b.forEach((tb,k)=>{barrido(b+tb,.5,500,4200,.16+k*.03);tono("sine",90,b+tb,.5,.3+k*.06,mg,48)});
-  barrido(b+T.txt-.2,1.8,300,1800,.1);
+  T.b.forEach((tb,k)=>{barrido(b+tb,.5,350,2000,.06+k*.01);tono("sine",90,b+tb,.5,.18+k*.03,mg,48)});
+  barrido(b+T.txt-.2,1.8,300,1200,.045);
   // colapso hacia el punto de luz y entrada del logo
-  const cs=nz(b+T.col,T.pt-T.col),ch=ac.createBiquadFilter(),cg=ac.createGain();ch.type="highpass";ch.frequency.setValueAtTime(400,b+T.col);ch.frequency.exponentialRampToValueAtTime(8000,b+T.pt);
-  cg.gain.setValueAtTime(.0001,b+T.col);cg.gain.exponentialRampToValueAtTime(.2,b+T.pt-.05);cg.gain.setValueAtTime(.0001,b+T.pt);cs.connect(ch);ch.connect(cg);cg.connect(mg);
-  tono("sine",220,b+T.col,T.pt-T.col,.1,mg,2400);
-  const tl=b+T.pt;boom(tl,1);
+  const cs=nz(b+T.col,T.pt-T.col),ch=ac.createBiquadFilter(),cg=ac.createGain();ch.type="highpass";ch.frequency.setValueAtTime(400,b+T.col);ch.frequency.exponentialRampToValueAtTime(2800,b+T.pt);
+  cg.gain.setValueAtTime(.0001,b+T.col);cg.gain.exponentialRampToValueAtTime(.055,b+T.pt-.05);cg.gain.setValueAtTime(.0001,b+T.pt);cs.connect(ch);ch.connect(cg);cg.connect(mg);
+  tono("sine",220,b+T.col,T.pt-T.col,.05,mg,1100);
+  const tl=b+T.pt;boom(tl,.55);
   [554.37,659.26,830.61,987.77].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(.0001,tl);g.gain.linearRampToValueAtTime(.05,tl+1.6+i*.2);g.gain.setTargetAtTime(.0001,b+T.fin+1,1);o.connect(g);g.connect(mg);g.connect(rv);o.start(tl);o.stop(fin2)});
   [1109,1319,1661,1319,1109].forEach((f,i)=>tono("sine",f,tl+1.4+i*.35,.9,.04,rv))}
  function apagarAudio(){if(!ac)return;try{mg.gain.setTargetAtTime(0,ac.currentTime,.12)}catch(e){}const a=ac;ac=null;setTimeout(()=>{try{a.close()}catch(e){}},700)}
@@ -1857,7 +1874,7 @@ const INTRO={desde:CATALOGO.years[0]||2020,total:CATALOGO.totalCases};
   if(reduce)ocultar();else setTimeout(ocultar,850);
   try{sessionStorage.setItem("indecol_intro","1")}catch(e){}}
  $("ixCon").addEventListener("click",start);$("ixSkip").addEventListener("click",cerrar);$("ixGo").addEventListener("click",cerrar);$("ixRe").addEventListener("click",start);$("rpIntro").addEventListener("click",start);
- $("ixMute").addEventListener("click",()=>{silen=!silen;if(mg&&ac)mg.gain.setTargetAtTime(silen?0:.9,ac.currentTime,.05);$("ixMute").textContent=silen?"Sonido apagado":"Sonido activado"});
+ $("ixMute").addEventListener("click",()=>{silen=!silen;if(mg&&ac)mg.gain.setTargetAtTime(silen?0:VOLUMEN,ac.currentTime,.05);$("ixMute").textContent=silen?"Sonido apagado":"Sonido activado"});
  document.addEventListener("keydown",e=>{
   if(el.hidden)return;
   if(e.key==="Escape"){cerrar();return}
