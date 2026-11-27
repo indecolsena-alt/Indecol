@@ -4,11 +4,11 @@
 const CANALES={
  "123":{marca:"123",nombre:"Línea única de emergencias",texto:"Para un peligro inmediato o un hecho que está ocurriendo.",href:"tel:123"},
  "122":{marca:"122",nombre:"Fiscalía General de la Nación",texto:"Denuncias y orientación las 24 horas desde celular. Desde teléfono fijo: 01 8000 919 748.",href:"tel:122"},
- "155":{marca:"155",nombre:"Orientación a mujeres víctimas de violencia",texto:"Orientación sobre cómo denunciar y a qué entidades acudir.",href:"tel:155"},
+ "155":{marca:"155",nombre:"Línea 155 Salvia · violencias de género",texto:"Orientación gratuita las 24 horas, en especial a mujeres víctimas. No recibe denuncias penales: orienta y acompaña para denunciar.",href:"tel:155"},
  "141":{marca:"141",nombre:"ICBF · niñas, niños y adolescentes",texto:"Protección, emergencia y orientación las 24 horas.",href:"tel:141"},
  "165":{marca:"165",nombre:"Gaula · extorsión y secuestro",texto:"Reporta una extorsión o un secuestro y recibe orientación.",href:"tel:165"},
  trata:{marca:"01 8000 52 20 20",nombre:"Línea nacional contra la trata de personas",texto:"Orientación y denuncia gratuita.",href:"tel:018000522020"},
- adenunciar:{marca:"En línea",nombre:"ADenunciar",texto:"Denuncia virtual de la Policía y la Fiscalía para algunos delitos; la plataforma indica cuáles recibe.",href:"https://adenunciar.policia.gov.co/Adenunciar/"},
+ adenunciar:{marca:"En línea",nombre:"ADenunciar",texto:"Portal de denuncia virtual de la Policía y la Fiscalía. Su botón «Denuncia en línea» abre el formulario de la Fiscalía.",href:"https://adenunciar.policia.gov.co/Adenunciar/"},
  facil:{marca:"En línea",nombre:"Denuncia Fácil de la Fiscalía",texto:"Reporte virtual de hechos delictivos a cualquier hora.",href:"https://sicecon.fiscalia.gov.co/denuncia/ingresoPrincipal"},
  cai:{marca:"En línea",nombre:"CAI Virtual de la Policía",texto:"Orientación y reportes sobre delitos por internet.",href:"https://caivirtual.policia.gov.co/"},
  sedes:{marca:"En persona",nombre:"Sedes de la Fiscalía",texto:"Puntos de recepción de denuncias en todo el país. También puedes acudir a una estación de Policía o a un CAI.",href:"https://www.fiscalia.gov.co/servicios-de-informacion-al-ciudadano/donde-y-como-denunciar/"}
